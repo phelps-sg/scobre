@@ -7,5 +7,7 @@
 	<classpathentry kind="lib" path="lib/jabm-0.8-with-libs.jar"/>
 	<classpathentry kind="lib" path="/usr/share/java/mysql-connector-java.jar"/>
 	<classpathentry kind="lib" path="lib/slick_2.10-1.0.1.jar" sourcepath="/home/sphelps/.m2/repository/com/typesafe/slick/slick_2.10/1.0.1/slick_2.10-1.0.1-sources.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/slf4j-simple.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/slf4j-api.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
