@@ -10,6 +10,8 @@ import scala.slick.driver.MySQLDriver.simple._
 // Use the implicit threadLocalSession
 import Database.threadLocalSession
 
+import java.text.{DateFormat, SimpleDateFormat}
+
 //import collection.JavaConversions._
 
 object Test {
@@ -43,11 +45,15 @@ object Test {
 			def * = orderCode ~ marketSegmentCode ~ tiCode ~ countryOfRegister ~ currencyCode ~ participantCode ~ buySellInd ~ marketMechanismGroup ~ marketMechanismType ~ price ~ aggregateSize ~ singleFillInd ~ broadcastUpdateAction ~ date ~ time ~ messageSequenceNumber
 		}
 		
+		val df = new SimpleDateFormat("ddMMyyyy hh:mm:ss.S")
+
 		Database.forURL("jdbc:mysql://cseesp1/lse?user=sphelps&password=th0rnxtc", driver="com.mysql.jdbc.Driver") withSession {
 			val priceQuery = for(o <- Query(OrderDetails)) yield o.date ~ o.time
-			println(priceQuery)
-// 			for(p <- priceQuery) println(p);
-			println(priceQuery.first)
+			val shortPriceQuery = priceQuery.take(100)
+ 			for(p <- shortPriceQuery) {
+ 			  val timeStamp = df.parse("%s %s".format(p._1, p._2)).getTime();
+ 			  println(timeStamp);
+ 			}
 		}
 	}
 }
