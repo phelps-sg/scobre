@@ -28,9 +28,10 @@ object Test {
 	
 	def main(args : Array[String]) {
 		
-		val OrderDetails = new Table[(String, String, String, String, String, String, String, String, String, Long, Long, String, String, String, String, Long)]("tblOrderDetail") {
+		val orderDetailsRaw = new Table[(String, String, String, String, String, String, String, String, String, String, Long, Long, String, String, String, String, Long)]("order_detail_raw") {
 			def orderCode = column[String]("OrderCode");
 			def marketSegmentCode = column[String]("MarketSegmentCode");
+			def marketSectorCode = column[String]("MarketSectorCode");
 			def tiCode = column[String]("TICode");
 			def countryOfRegister = column[String]("CountryOfRegister");
 			def currencyCode = column[String]("currencyCode");
@@ -41,22 +42,43 @@ object Test {
 			def price = column[Long]("Price");
 			def aggregateSize = column[Long]("AggregateSize");
 			def singleFillInd = column[String]("SingleFillInd");
-			def broadcastUpdateAction = column[String]("SingleFillInd");
+			def broadcastUpdateAction = column[String]("BroadcastUpdateAction");
 			def date = column[String]("Date");
 			def time = column[String]("Time");
 			def messageSequenceNumber = column[Long]("MessageSequenceNumber");
-			def * = orderCode ~ marketSegmentCode ~ tiCode ~ countryOfRegister ~ currencyCode ~ participantCode ~ buySellInd ~ marketMechanismGroup ~ marketMechanismType ~ price ~ aggregateSize ~ singleFillInd ~ broadcastUpdateAction ~ date ~ time ~ messageSequenceNumber
+			def * = orderCode ~ marketSegmentCode ~ marketSectorCode ~ tiCode ~ countryOfRegister ~ currencyCode ~ participantCode ~ buySellInd ~ marketMechanismGroup ~ marketMechanismType ~ price ~ aggregateSize ~ singleFillInd ~ broadcastUpdateAction ~ date ~ time ~ messageSequenceNumber
+		}
+			
+		val orders = new Table[(String, String, String, String, String, String, String, String, String, String, Long, Long, String, String, Long, Long)]("orders") {
+			def orderCode = column[String]("order_code");
+			def marketSegmentCode = column[String]("market_segment_code");
+			def marketSectorCode = column[String]("market_sector_code");
+			def tiCode = column[String]("ti_code");
+			def countryOfRegister = column[String]("country_of_register");
+			def currencyCode = column[String]("currency_code");
+			def participantCode = column[String]("participant_code");
+			def buySellInd = column[String]("is_buy");
+			def marketMechanismGroup = column[String]("market_mechanism_group");
+			def marketMechanismType = column[String]("market_mechanism_type");
+			def price = column[Long]("price");
+			def aggregateSize = column[Long]("aggregate_size");
+			def singleFillInd = column[String]("is_single_fill");
+			def broadcastUpdateAction = column[String]("broadcast_update_action");
+			def timeStamp = column[Long]("time_stamp");
+			def messageSequenceNumber = column[Long]("message_sequence_number");
+			def * = orderCode ~ marketSegmentCode ~ marketSectorCode ~ tiCode ~ countryOfRegister ~ currencyCode ~ participantCode ~ buySellInd ~ marketMechanismGroup ~ marketMechanismType ~ price ~ aggregateSize ~ singleFillInd ~ broadcastUpdateAction ~ timeStamp ~ messageSequenceNumber
 		}
 		
-		val df = new SimpleDateFormat("ddMMyyyy hh:mm:ss.S")
+//		val df = new SimpleDateFormat("ddMMyyyy hh:mm:ss.S")
+		val df = new SimpleDateFormat("ddMMyyyy hh:mm:ss")
 
-		Database.forURL("jdbc:mysql://cseesp1/lse?user=sphelps&password=th0rnxtc", 
+		Database.forURL("jdbc:mysql://cseesp1/lse_tickdata?user=sphelps&password=th0rnxtc", 
 				driver="com.mysql.jdbc.Driver") withSession {
-			val priceQuery = for(o <- Query(OrderDetails)) yield o.date ~ o.time
-			val shortPriceQuery = priceQuery.take(100)
- 			for(p <- shortPriceQuery) {
- 			  val timeStamp = df.parse("%s %s".format(p._1, p._2)).getTime();
- 			  println(timeStamp);
+			val priceQuery = Query(orderDetailsRaw)
+ 			priceQuery foreach {
+			  case (orderCode, marketSegmentCode, marketSectorCode, tiCode, countryOfRegister, currencyCode, participantCode, buySellInd, marketMechanismGroup, marketMechanismType, price, aggregateSize, singleFillInd, broadcastUpdateAction, date, time, messageSequenceNumber) =>
+ 			  	val timeStamp = df.parse("%s %s".format(date, time)).getTime();
+ 			  	orders.insert((orderCode, marketSegmentCode, marketSectorCode, tiCode, countryOfRegister, currencyCode, participantCode, buySellInd, marketMechanismGroup, marketMechanismType, price, aggregateSize, singleFillInd, broadcastUpdateAction, timeStamp, messageSequenceNumber));
  			}
 		}
 	}
