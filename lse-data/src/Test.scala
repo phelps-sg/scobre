@@ -15,15 +15,18 @@ import java.text.{DateFormat, SimpleDateFormat}
 //import collection.JavaConversions._
 
 object Test {
-	
-	def main(args : Array[String]) {
-		val order = new Order()
+  
+	def testBook() {
+	 	val order = new Order()
 		order.setPrice(100.0)
 		order.setQuantity(20)
 		order.setIsBid(true)
 		val book = new FourHeapOrderBook()
 		book.insertUnmatchedBid(order)
-		println(book)
+		println(book) 
+	}
+	
+	def main(args : Array[String]) {
 		
 		val OrderDetails = new Table[(String, String, String, String, String, String, String, String, String, Long, Long, String, String, String, String, Long)]("tblOrderDetail") {
 			def orderCode = column[String]("OrderCode");
@@ -47,7 +50,8 @@ object Test {
 		
 		val df = new SimpleDateFormat("ddMMyyyy hh:mm:ss.S")
 
-		Database.forURL("jdbc:mysql://cseesp1/lse?user=sphelps&password=th0rnxtc", driver="com.mysql.jdbc.Driver") withSession {
+		Database.forURL("jdbc:mysql://cseesp1/lse?user=sphelps&password=th0rnxtc", 
+				driver="com.mysql.jdbc.Driver") withSession {
 			val priceQuery = for(o <- Query(OrderDetails)) yield o.date ~ o.time
 			val shortPriceQuery = priceQuery.take(100)
  			for(p <- shortPriceQuery) {
