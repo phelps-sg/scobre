@@ -27,8 +27,13 @@ object Test {
 	}
 	
 	def main(args : Array[String]) {
+	  
+		type OrderDetail = 
+				(String, String, String, String, String, String, String, String, 
+				    String, String, Long, Long, String, String, String, String, 
+				    	Long)
 		
-		val orderDetailsRaw = new Table[(String, String, String, String, String, String, String, String, String, String, Long, Long, String, String, String, String, Long)]("order_detail_raw") {
+		val orderDetailsRaw = new Table[OrderDetail]("order_detail_raw") {
 			def orderCode = column[String]("OrderCode");
 			def marketSegmentCode = column[String]("MarketSegmentCode");
 			def marketSectorCode = column[String]("MarketSectorCode");
@@ -49,7 +54,10 @@ object Test {
 			def * = orderCode ~ marketSegmentCode ~ marketSectorCode ~ tiCode ~ countryOfRegister ~ currencyCode ~ participantCode ~ buySellInd ~ marketMechanismGroup ~ marketMechanismType ~ price ~ aggregateSize ~ singleFillInd ~ broadcastUpdateAction ~ date ~ time ~ messageSequenceNumber
 		}
 			
-		val orders = new Table[(String, String, String, String, String, String, String, String, String, String, Long, Long, String, String, Long, Long)]("orders") {
+		type OrderTuple = (String, String, String, String, String, String, 
+								String, String, String, String, Long, Long, 
+									String, String, Long, Long)
+		val orders = new Table[OrderTuple]("orders") {
 			def orderCode = column[String]("order_code");
 			def marketSegmentCode = column[String]("market_segment_code");
 			def marketSectorCode = column[String]("market_sector_code");
@@ -57,12 +65,12 @@ object Test {
 			def countryOfRegister = column[String]("country_of_register");
 			def currencyCode = column[String]("currency_code");
 			def participantCode = column[String]("participant_code");
-			def buySellInd = column[String]("is_buy");
+			def buySellInd = column[String]("buy_sell_ind");
 			def marketMechanismGroup = column[String]("market_mechanism_group");
 			def marketMechanismType = column[String]("market_mechanism_type");
 			def price = column[Long]("price");
 			def aggregateSize = column[Long]("aggregate_size");
-			def singleFillInd = column[String]("is_single_fill");
+			def singleFillInd = column[String]("single_fill_ind");
 			def broadcastUpdateAction = column[String]("broadcast_update_action");
 			def timeStamp = column[Long]("time_stamp");
 			def messageSequenceNumber = column[Long]("message_sequence_number");
@@ -74,12 +82,30 @@ object Test {
 
 		Database.forURL("jdbc:mysql://cseesp1/lse_tickdata?user=sphelps&password=th0rnxtc", 
 				driver="com.mysql.jdbc.Driver") withSession {
-			val priceQuery = Query(orderDetailsRaw)
- 			priceQuery foreach {
-			  case (orderCode, marketSegmentCode, marketSectorCode, tiCode, countryOfRegister, currencyCode, participantCode, buySellInd, marketMechanismGroup, marketMechanismType, price, aggregateSize, singleFillInd, broadcastUpdateAction, date, time, messageSequenceNumber) =>
+			val orderDetailQuery = Query(orderDetailsRaw)
+//
+// 			orderDetailQuery foreach {
+//			  case (orderCode, marketSegmentCode, marketSectorCode, tiCode, countryOfRegister, currencyCode, participantCode, buySellInd, marketMechanismGroup, marketMechanismType, price, aggregateSize, singleFillInd, broadcastUpdateAction, date, time, messageSequenceNumber) =>
+// 			  	val timeStamp = df.parse("%s %s".format(date, time)).getTime();
+// 			  	orders.insert((orderCode, marketSegmentCode, marketSectorCode, tiCode, countryOfRegister, currencyCode, participantCode, buySellInd, marketMechanismGroup, marketMechanismType, price, aggregateSize, singleFillInd, broadcastUpdateAction, timeStamp, messageSequenceNumber));
+// 			}
+			
+			val shortQuery = orderDetailQuery.take(100);
+			orders.insertAll(shortQuery.list.map( (x : OrderDetail) => {
+				val (orderCode, marketSegmentCode, marketSectorCode, tiCode, 
+						countryOfRegister, currencyCode, participantCode, 
+							buySellInd, marketMechanismGroup, 
+								marketMechanismType, price, aggregateSize, 
+									singleFillInd, broadcastUpdateAction, 
+										date, time, messageSequenceNumber) = x  
  			  	val timeStamp = df.parse("%s %s".format(date, time)).getTime();
- 			  	orders.insert((orderCode, marketSegmentCode, marketSectorCode, tiCode, countryOfRegister, currencyCode, participantCode, buySellInd, marketMechanismGroup, marketMechanismType, price, aggregateSize, singleFillInd, broadcastUpdateAction, timeStamp, messageSequenceNumber));
- 			}
+				(orderCode, marketSegmentCode, marketSectorCode, tiCode, 
+				    countryOfRegister, currencyCode, participantCode, 
+				    	buySellInd, marketMechanismGroup, marketMechanismType, 
+				    		price, aggregateSize, singleFillInd, 
+				    			broadcastUpdateAction, timeStamp, 
+				    				messageSequenceNumber);
+			}))
 		}
 	}
 }
