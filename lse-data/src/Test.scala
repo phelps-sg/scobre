@@ -43,11 +43,11 @@ object Test {
 			def * = orderCode ~ marketSegmentCode ~ tiCode ~ countryOfRegister ~ currencyCode ~ participantCode ~ buySellInd ~ marketMechanismGroup ~ marketMechanismType ~ price ~ aggregateSize ~ singleFillInd ~ broadcastUpdateAction ~ date ~ time ~ messageSequenceNumber
 		}
 		
-		Database.forURL("jdbc:mysql://cseesp1/lse?user=sphelps&password=th0rnxtc", driver="com.mysql.jdbc.Driver") withSession {
+		Database.forURL("jdbc:mysql://localhost/lse?user=root&password=th0rnxtc", driver="com.mysql.jdbc.Driver") withSession {
 			val priceQuery = for(o <- Query(OrderDetails)) yield o.date ~ o.time
 			println(priceQuery)
-// 			for(p <- priceQuery) println(p);
-			println(priceQuery.first)
+ 			for(p <- priceQuery) println(p);
+//			println(priceQuery.first)
 		}
 	}
 }
