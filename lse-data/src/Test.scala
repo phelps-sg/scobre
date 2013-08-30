@@ -27,12 +27,19 @@ object Test {
 	}
 	
 	def main(args : Array[String]) {
-	  
-		type OrderDetail = 
-				(String, String, String, String, String, String, String, String, 
-				    String, String, Long, Long, String, String, String, String, 
-				    	Long)
-		
+	  	
+		case class OrderDetail(orderCode: String, marketSegmentCode: String, 
+								marketSectorCode: String, tiCode: String, 
+								countryofRegister: String, currencyCode: String, 
+								participantCode: String, buySellInd: String, 
+								marketMechanismGroup: String, 
+								marketMechanismType: String, 
+								price: Long, aggregateSize: Long, 
+								singleFillInd: String, 
+								broadcastUpdateAction: String, 
+								date: String, 
+								time: String,
+								messageSequenceNumber: Long)
 		val orderDetailsRaw = new Table[OrderDetail]("order_detail_raw") {
 			def orderCode = column[String]("OrderCode");
 			def marketSegmentCode = column[String]("MarketSegmentCode");
@@ -51,13 +58,21 @@ object Test {
 			def date = column[String]("Date");
 			def time = column[String]("Time");
 			def messageSequenceNumber = column[Long]("MessageSequenceNumber");
-			def * = orderCode ~ marketSegmentCode ~ marketSectorCode ~ tiCode ~ countryOfRegister ~ currencyCode ~ participantCode ~ buySellInd ~ marketMechanismGroup ~ marketMechanismType ~ price ~ aggregateSize ~ singleFillInd ~ broadcastUpdateAction ~ date ~ time ~ messageSequenceNumber
+			def * = orderCode ~ marketSegmentCode ~ marketSectorCode ~ tiCode ~ countryOfRegister ~ currencyCode ~ participantCode ~ buySellInd ~ marketMechanismGroup ~ marketMechanismType ~ price ~ aggregateSize ~ singleFillInd ~ broadcastUpdateAction ~ date ~ time ~ messageSequenceNumber <> (OrderDetail, OrderDetail.unapply _)
 		}
 			
-		type OrderTuple = (String, String, String, String, String, String, 
-								String, String, String, String, Long, Long, 
-									String, String, Long, Long)
-		val orders = new Table[OrderTuple]("orders") {
+		case class Order(orderCode: String, marketSegmentCode: String, 
+								marketSectorCode: String, tiCode: String, 
+									countryofRegister: String, currencyCode: String, 
+								participantCode: String, buySellInd: String, 
+								marketMechanismGroup: String, 
+								marketMechanismType: String, 
+								price: Long, aggregateSize: Long, 
+								singleFillInd: String, 
+								broadcastUpdateAction: String, 
+								timeStamp: Long, 
+								messageSequenceNumber: Long)
+		val orders = new Table[Order]("orders") {
 			def orderCode = column[String]("order_code");
 			def marketSegmentCode = column[String]("market_segment_code");
 			def marketSectorCode = column[String]("market_sector_code");
@@ -74,7 +89,7 @@ object Test {
 			def broadcastUpdateAction = column[String]("broadcast_update_action");
 			def timeStamp = column[Long]("time_stamp");
 			def messageSequenceNumber = column[Long]("message_sequence_number");
-			def * = orderCode ~ marketSegmentCode ~ marketSectorCode ~ tiCode ~ countryOfRegister ~ currencyCode ~ participantCode ~ buySellInd ~ marketMechanismGroup ~ marketMechanismType ~ price ~ aggregateSize ~ singleFillInd ~ broadcastUpdateAction ~ timeStamp ~ messageSequenceNumber
+			def * = orderCode ~ marketSegmentCode ~ marketSectorCode ~ tiCode ~ countryOfRegister ~ currencyCode ~ participantCode ~ buySellInd ~ marketMechanismGroup ~ marketMechanismType ~ price ~ aggregateSize ~ singleFillInd ~ broadcastUpdateAction ~ timeStamp ~ messageSequenceNumber  <> (Order, Order.unapply _)
 		}
 		
 //		val df = new SimpleDateFormat("ddMMyyyy hh:mm:ss.S")
@@ -91,21 +106,16 @@ object Test {
 // 			}
 			
 			val shortQuery = orderDetailQuery.take(100);
-			orders.insertAll(shortQuery.list.map( (x : OrderDetail) => {
-				val (orderCode, marketSegmentCode, marketSectorCode, tiCode, 
-						countryOfRegister, currencyCode, participantCode, 
-							buySellInd, marketMechanismGroup, 
-								marketMechanismType, price, aggregateSize, 
-									singleFillInd, broadcastUpdateAction, 
-										date, time, messageSequenceNumber) = x  
- 			  	val timeStamp = df.parse("%s %s".format(date, time)).getTime();
-				(orderCode, marketSegmentCode, marketSectorCode, tiCode, 
-				    countryOfRegister, currencyCode, participantCode, 
-				    	buySellInd, marketMechanismGroup, marketMechanismType, 
-				    		price, aggregateSize, singleFillInd, 
-				    			broadcastUpdateAction, timeStamp, 
-				    				messageSequenceNumber);
-			}))
+			val mapped = shortQuery.list.map( (x : OrderDetail) => {
+ 			  	val timeStamp = df.parse("%s %s".format(x.date, x.time)).getTime();
+ 			  	new Order(x.orderCode, x.marketSegmentCode, x.marketSectorCode, x.tiCode, 
+				    x.countryofRegister, x.currencyCode, x.participantCode, 
+				    	x.buySellInd, x.marketMechanismGroup, x.marketMechanismType, 
+				    		x.price, x.aggregateSize, x.singleFillInd, 
+				    			x.broadcastUpdateAction, timeStamp, 
+				    				x.messageSequenceNumber);
+			})
+			orders.insertAll(mapped: _*)
 		}
 	}
 }
