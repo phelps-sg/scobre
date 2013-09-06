@@ -97,7 +97,7 @@ object Test {
 										messageSequenceNumber: Long,
 										date: String, 
 										time: String)
-		val orderDetailHistoryRaw = new Table[OrderHistoryRaw]("order_history_raw") {
+		val orderHistoryRaw = new Table[OrderHistoryRaw]("order_history_raw") {
 			def orderCode = column[String]("order_code")
 			def matchingOrderCode = column[String]("matching_order_code")
 			def orderActionType = column[String]("order_action_type")
@@ -107,14 +107,49 @@ object Test {
 			def tiCode = column[String]("ti_code")
 			def countryOfRegister = column[String]("country_of_register")
 			def currencyCode = column[String]("currency_code")
-			def buySellInd = column[String]("BuySellInd")
-			def marketMechanismGroup = column[String]("MarketMechanismGroup")
-			def marketMechanismType = column[String]("MarketMechanismType")
-			def aggregateSize = column[Long]("AggregateSize")
-			def date = column[String]("Date")
-			def time = column[String]("Time")
-			def messageSequenceNumber = column[Long]("MessageSequenceNumber")
+			def buySellInd = column[String]("buy_sell_ind")
+			def marketMechanismGroup = column[String]("market_mechanism_group")
+			def marketMechanismType = column[String]("market_mechanism_type")
+			def aggregateSize = column[Long]("aggregate_size")
+			def date = column[String]("date")
+			def time = column[String]("time")
+			def messageSequenceNumber = column[Long]("message_sequence_number")
 			def * = orderCode ~ orderActionType ~ matchingOrderCode ~ tradeSize ~ tradeCode ~ tiCode ~ countryOfRegister ~ currencyCode ~ marketSegmentCode ~ aggregateSize ~ buySellInd ~ marketMechanismType ~ messageSequenceNumber ~ date ~ time  <> (OrderHistoryRaw, OrderHistoryRaw.unapply _)
+		}
+
+		case class OrderHistory(eventID: Option[Long],
+										orderCode: String,
+										orderActionType: String,
+										matchingOrderCode: String,
+										tradeSize: Long,
+										tradeCode: String,
+										tiCode: String, 
+										countryofRegister: String, 
+										currencyCode: String, 
+										marketSegmentCode: String,
+										aggregateSize: Long,
+										buySellInd: String, 
+										marketMechanismType: String, 
+										timeStamp: Long,
+										messageSequenceNumber: Long)
+		val orderHistory = new Table[OrderHistory]("order_history") {
+		    def eventID = column[Long]("event_id", O.AutoInc, O.PrimaryKey);
+			def orderCode = column[String]("order_code")
+			def matchingOrderCode = column[String]("matching_order_code")
+			def orderActionType = column[String]("order_action_type")
+			def tradeSize = column[Long]("trade_size")
+			def tradeCode = column[String]("trade_code")
+			def marketSegmentCode = column[String]("market_segment_code")
+			def tiCode = column[String]("ti_code")
+			def countryOfRegister = column[String]("country_of_register")
+			def currencyCode = column[String]("currency_code")
+			def buySellInd = column[String]("buy_sell_ind")
+			def marketMechanismGroup = column[String]("market_mechanism_group")
+			def marketMechanismType = column[String]("market_mechanism_type")
+			def aggregateSize = column[Long]("aggregate_size")
+			def timeStamp = column[Long]("time_stamp")
+			def messageSequenceNumber = column[Long]("message_sequence_number")
+			def * = eventID.? ~ orderCode ~ orderActionType ~ matchingOrderCode ~ tradeSize ~ tradeCode ~ tiCode ~ countryOfRegister ~ currencyCode ~ marketSegmentCode ~ aggregateSize ~ buySellInd ~ marketMechanismType ~ timeStamp ~ messageSequenceNumber  <> (OrderHistory, OrderHistory.unapply _)
 		}
 
 //		val df = new SimpleDateFormat("ddMMyyyy hh:mm:ss.S")
@@ -122,22 +157,20 @@ object Test {
 
 		Database.forURL("jdbc:mysql://cseesp1/lse_tickdata?user=sphelps&password=th0rnxtc", 
 				driver="com.mysql.jdbc.Driver") withSession {
-			val orderDetailQuery = Query(orderDetailsRaw)
-			var finished = false;
+			val batchSize = 1000
+			var finished = false
+			var offset = 0
 			do {
-				val shortQuery = orderDetailQuery.take(1000)
-				finished = shortQuery.list.length < 1000
-				val mapped = shortQuery.list.map( (x : OrderDetail) => {
-				val timeStamp = 
-				  df.parse("%s %s".format(x.date, x.time)).getTime()
-							new Order(x.orderCode, x.marketSegmentCode, x.marketSectorCode, x.tiCode, 
-										x.countryofRegister, x.currencyCode, x.participantCode, 
-											x.buySellInd, x.marketMechanismGroup, x.marketMechanismType, 
-												x.price, x.aggregateSize, x.singleFillInd, 
-													x.broadcastUpdateAction, timeStamp, 
-														x.messageSequenceNumber)
+				val shortQuery = Query(orderHistoryRaw).drop(offset).take(batchSize)
+				finished = shortQuery.list.length < batchSize
+				val mapped = shortQuery.list.map( (x : OrderHistoryRaw) => {
+					val timeStamp = 
+							df.parse("%s %s".format(x.date, x.time)).getTime()
+					new OrderHistory(None, x.orderCode, x.orderActionType, x.matchingOrderCode, x.tradeSize, x.tradeCode, x.tiCode, x.countryofRegister, x.currencyCode, x.marketSegmentCode, x.aggregateSize, x.buySellInd, x.marketMechanismType, timeStamp, x.messageSequenceNumber)
 				})
-				orders.insertAll(mapped: _*)
+				orderHistory.insertAll(mapped: _*) match {
+				  case Some(x: Int) => offset = offset + x 
+				}
 			} while (!finished)
 		}
 	}

@@ -24,7 +24,6 @@ CREATE TABLE order_history (
 	FOREIGN KEY fk_order_code(order_code) REFERENCES orders(order_code),
 	order_action_type CHAR(1) NOT NULL,
 	matching_order_code VARCHAR(50) NULL,
-	FOREIGN KEY fk_matching_order_code(matching_order_code) REFERENCES orders(order_code),
 	trade_size DECIMAL (8, 0) NULL,
 	trade_code VARCHAR(50) NULL,
 	ti_code VARCHAR(12) NOT NULL,
@@ -39,6 +38,7 @@ CREATE TABLE order_history (
 ); 
 
 CREATE INDEX id_order_history_time ON order_history(timestamp, message_sequence_number);
+CREATE INDEX id_order_history_order_code ON order_history(order_code) USING HASH;
 CREATE INDEX id_order_history_trade_size ON order_history(trade_size);
 CREATE INDEX id_order_history_ti_code ON order_history(ti_code) USING HASH;
 
