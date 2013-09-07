@@ -14,6 +14,15 @@ import java.text.{DateFormat, SimpleDateFormat}
 
 //import collection.JavaConversions._
 
+abstract class HasDateTime {
+  val df = new SimpleDateFormat("ddMMyyyy hh:mm:ss")
+  def date: String
+  def time: String
+  def timeStamp: Long = { 
+    df.parse("%s %s".format(date, time)).getTime()
+  }
+}
+
 object Test {
 	
 	def main(args : Array[String]) {
@@ -29,7 +38,7 @@ object Test {
 								broadcastUpdateAction: String, 
 								date: String, 
 								time: String,
-								messageSequenceNumber: Long)
+								messageSequenceNumber: Long) extends HasDateTime
 		val orderDetailsRaw = new Table[OrderDetail]("order_detail_raw") {
 			def orderCode = column[String]("OrderCode")
 			def marketSegmentCode = column[String]("MarketSegmentCode")
@@ -96,7 +105,7 @@ object Test {
 										marketMechanismType: String, 
 										messageSequenceNumber: Long,
 										date: String, 
-										time: String)
+										time: String) extends HasDateTime
 		val orderHistoryRaw = new Table[OrderHistoryRaw]("order_history_raw") {
 			def orderCode = column[String]("order_code")
 			def matchingOrderCode = column[String]("matching_order_code")
@@ -153,7 +162,10 @@ object Test {
 		}
 
 //		val df = new SimpleDateFormat("ddMMyyyy hh:mm:ss.S")
-		val df = new SimpleDateFormat("ddMMyyyy hh:mm:ss")
+		
+		def parse(x : OrderHistoryRaw) = {
+			new OrderHistory(None, x.orderCode, x.orderActionType, x.matchingOrderCode, x.tradeSize, x.tradeCode, x.tiCode, x.countryofRegister, x.currencyCode, x.marketSegmentCode, x.aggregateSize, x.buySellInd, x.marketMechanismType, x.timeStamp, x.messageSequenceNumber)
+		}
 
 		Database.forURL("jdbc:mysql://cseesp1/lse_tickdata?user=sphelps&password=th0rnxtc", 
 				driver="com.mysql.jdbc.Driver") withSession {
@@ -163,11 +175,7 @@ object Test {
 			do {
 				val shortQuery = Query(orderHistoryRaw).drop(offset).take(batchSize)
 				finished = shortQuery.list.length < batchSize
-				val mapped = shortQuery.list.map( (x : OrderHistoryRaw) => {
-					val timeStamp = 
-							df.parse("%s %s".format(x.date, x.time)).getTime()
-					new OrderHistory(None, x.orderCode, x.orderActionType, x.matchingOrderCode, x.tradeSize, x.tradeCode, x.tiCode, x.countryofRegister, x.currencyCode, x.marketSegmentCode, x.aggregateSize, x.buySellInd, x.marketMechanismType, timeStamp, x.messageSequenceNumber)
-				})
+				val mapped = shortQuery.list.map(parse)
 				orderHistory.insertAll(mapped: _*) match {
 				  case Some(x: Int) => offset = offset + x 
 				}
