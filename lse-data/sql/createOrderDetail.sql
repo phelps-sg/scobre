@@ -41,5 +41,5 @@ CREATE TABLE orders (
 
 CREATE INDEX id_orders_time ON orders (timestamp, message_sequence_number);
 CREATE INDEX id_orders_price ON orders (price);
-CREATE INDEX id_orders_ti_code ON orders (ti_code);
+CREATE INDEX id_orders_ti_code ON orders (ti_code) USING HASH;
 
