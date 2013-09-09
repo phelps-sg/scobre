@@ -42,7 +42,7 @@ object Test {
 		val orderDetailsRaw = new Table[OrderDetail]("order_detail_raw") {
 			def orderCode = column[String]("OrderCode")
 			def marketSegmentCode = column[String]("MarketSegmentCode")
-			def marketSectorCode = column[String]("MarketSectorCode")
+			def marketSectorCode = column[String]("MarketSectorCManual_ST_5703_ENode")
 			def tiCode = column[String]("TICode")
 			def countryOfRegister = column[String]("CountryOfRegister")
 			def currencyCode = column[String]("currencyCode")
