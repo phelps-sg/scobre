@@ -23,7 +23,7 @@ abstract class HasDateTime {
   }
 }
 
-object Test {
+object ParseRawData {
 	
 	def main(args : Array[String]) {
 	  	
@@ -173,11 +173,15 @@ object Test {
 			var finished = false
 			var offset = 0
 			do {
-				val shortQuery = Query(orderHistoryRaw).drop(offset).take(batchSize)
+				val shortQuery = 
+				  Query(orderHistoryRaw).drop(offset).take(batchSize)
 				finished = shortQuery.list.length < batchSize
 				val mapped = shortQuery.list.map(parse)
 				orderHistory.insertAll(mapped: _*) match {
 				  case Some(x: Int) => offset = offset + x 
+				  case _ => 
+				    throw 
+				    	new UnsupportedOperationException("Unsupported database")
 				}
 			} while (!finished)
 		}

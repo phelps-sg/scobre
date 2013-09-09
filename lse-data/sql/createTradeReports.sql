@@ -1,9 +1,9 @@
-USE lse;
+USE lse_tickdata;
 
-CREATE TABLE tblTradeReports(
-	MessageSequenceNumber int NOT NULL,
-	TICode varchar(12) NOT NULL,
-	MarketSeqmentCode varchar(4) NOT NULL,
+CREATE TABLE trade_reports_raw (
+	message_sequence_number BIGINT UNSIGNED NOT NULL,
+	ti_code VARCHAR(12) NOT NULL,
+	market_segment_code varchar(4) NOT NULL,
 	CountryOfRegister varchar(2) NOT NULL,
 	CurrencyCode varchar(3) NOT NULL,
 	TradeCode varchar(50) NOT NULL,
