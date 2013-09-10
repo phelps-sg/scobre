@@ -237,28 +237,43 @@ object ParseRawData {
 		}
 		
 		def parseAndInsert(batchSize: Int = 1000, rawQuery: Query[Any,_ <:HasDateTime],
-								parsedTable: Table[_ <:Any]) = {
+								objectInserter: Seq[Any] => Option[Int]) = {
 			var finished = false
 			var offset = 0
 			do {
 				val shortQuery = rawQuery.drop(offset).take(batchSize)
 //				finished = shortQuery.list.length < batchSize
-				val mapped = shortQuery.list.map(parseEvent(_, IdentifierCounter.next))
-				println(mapped.map(x => x._1))
-				val objs = mapped.map(x => x._1)
-//				parsedTable.insertAll(objs[1)) match {
-//				  case Some(x: Int) => offset = offset + x 
-//				  case _ => 
-//				    throw 
-//				    	new UnsupportedOperationException("Unsupported database")
-//				}
+				val parsed = shortQuery.list.map(parseEvent(_, IdentifierCounter.next))
+				println(parsed)
+				val numRows: Int = objectInserter(parsed.map(x => x._1)) match {
+				  case Some(x: Int) => x 
+				  case _ => 
+				    throw 
+				    	new UnsupportedOperationException("Unsupported database")
+				}
+				events.insertAll(parsed.map(x => x._2): _*)
+				offset = offset + numRows
 			} while (!finished)	  
 		}
 
 		Database.forURL("jdbc:mysql://cseesp1/lse_tickdata?user=sphelps&password=th0rnxtc", 
 				driver="com.mysql.jdbc.Driver") withSession {
-			parseAndInsert(rawQuery = Query(orderDetailsRaw), parsedTable=orders)
-			parseAndInsert(rawQuery = Query(orderHistoryRaw), parsedTable=orderHistory)
+
+//			parseAndInsert(rawQuery = Query(orderDetailsRaw), objectInserter =
+//			  (objects: Seq[Any]) =>
+//			    		orders.insertAll(objects.map( (x: Any) => x match {
+//			    		  case x: Order => x
+//			    		}): _*)
+//			)
+			    		
+
+			parseAndInsert(rawQuery = Query(orderHistoryRaw), objectInserter = 
+			  (objects: Seq[Any]) => 
+			    		orderHistory.insertAll(objects.map( (x: Any) => x match {
+			    							case x: OrderHistory => x
+			    							}): _*)
+			)
+
 		}
 	}
 }
