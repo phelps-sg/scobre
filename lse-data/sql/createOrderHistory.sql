@@ -33,7 +33,7 @@ CREATE TABLE order_history (
 	aggregate_size DECIMAL(12, 0) NULL,
 	buy_sell_ind CHAR(1) NOT NULL,
 	market_mechanism_type VARCHAR(2) NOT NULL,
-	message_sequence_number INT NOT NULL,
+	message_sequence_number UNSIGNED INT NOT NULL,
 	time_stamp BIGINT UNSIGNED NOT NULL
 ); 
 
