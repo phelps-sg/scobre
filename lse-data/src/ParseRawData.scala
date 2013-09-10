@@ -152,6 +152,49 @@ object ParseRawData {
 			def * = eventID.? ~ orderCode ~ orderActionType ~ matchingOrderCode ~ tradeSize ~ tradeCode ~  aggregateSize ~ buySellInd ~ marketMechanismType <> (OrderHistory, OrderHistory.unapply _)
 		}
 		
+		case class TradeReportRaw(messageSequenceNumber: Long,
+									tiCode: String,
+									marketSegmentCode: String,
+									countryOfRegister: String,
+									currencyCode: String,
+									tradeCode: String,
+									tradePrice: BigDecimal,
+									tradeSize: Long,
+									date: String,
+									time: String,
+									broadcastUpdateAction: String,
+									tradeTypeInd: String,
+									tradeTimeInd: String,
+									bargainConditions: String,
+									convertedPriceInd: String,
+									publicationDate: String,
+									publicationTime: String) extends HasDateTime
+		val tradeReportsRaw = new Table[TradeReportRaw]("trade_reports_raw") {
+			def messageSequenceNumber = column[Long]("message_sequence_number")
+			def tiCode = column[String]("ti_code")
+			def marketSegmentCode = column[String]("market_segment_code")
+			def countryOfRegister = column[String]("country_of_register")
+			def currencyCode = column[String]("currency_code")
+			def tradeCode = column[String]("tradeCode")
+			def tradePrice = column[BigDecimal]("trade_price")
+			def tradeSize = column[Long]("trade_size")
+			def date = column[String]("trade_date")
+			def time = column[String]("trade_time")
+			def broadcastUpdateAction = column[String]("broadcast_update_action")
+			def tradeTypeInd = column[String]("trade_type_ind")
+			def tradeTimeInd = column[String]("trade_time_imd")
+			def bargainConditions = column[String]("bargain_conditions")
+			def convertedPriceInd = column[String]("converted_price_ind")
+			def publicationDate = column[String]("publication_date")
+			def publicationTime = column[String]("publication_time")
+			def * = messageSequenceNumber ~ tiCode ~ marketSegmentCode ~ 
+						countryOfRegister ~ currencyCode ~ tradeCode ~ tradePrice ~ 
+						tradeSize ~ date ~ time ~ broadcastUpdateAction ~ 
+						tradeTypeInd ~ tradeTimeInd ~ bargainConditions ~ 
+						convertedPriceInd ~ publicationDate ~ publicationTime <>
+					(TradeReportRaw, TradeReportRaw.unapply _)
+		}
+		
 		implicit val eventTypeMapper =
 				MappedTypeMapper.base[EventType.Value, Int] (
 				    {
@@ -187,8 +230,6 @@ object ParseRawData {
 		}
 
 
-//		val df = new SimpleDateFormat("ddMMyyyy hh:mm:ss.S")
-		
 		def parseEvent(event: HasDateTime, eventID: => Long) = {
 
 		  val id: Long = eventID
