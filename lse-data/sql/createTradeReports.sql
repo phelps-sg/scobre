@@ -22,15 +22,9 @@ CREATE TABLE trade_reports_raw (
 
 CREATE TABLE transactions (
 	transaction_id BIGINT UNSIGNED PRIMARY KEY,
---	message_sequence_number BIGINT UNSIGNED NOT NULL,
--- 	ti_code VARCHAR(12) NOT NULL,
--- 	market_segment_code VARCHAR(4) NOT NULL,
--- 	country_of_register VARCHAR(2) NOT NULL,
--- 	currency_code VARCHAR(3) NOT NULL,
 	trade_code VARCHAR(50) NOT NULL,
 	trade_price DECIMAL(18, 8) NOT NULL,
 	trade_size DECIMAL(12, 0) NOT NULL,
---	trade_time_stamp BIGINT UNSIGNED NOT NULL,
 	broadcast_update_action VARCHAR(1) NOT NULL,
 	trade_type_ind VARCHAR(2) NOT NULL,
 	trade_time_ind VARCHAR(1) NOT NULL,

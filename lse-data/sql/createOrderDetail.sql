@@ -22,11 +22,7 @@ CREATE TABLE order_detail_raw (
 
 CREATE TABLE orders (
 	order_code VARCHAR(10) PRIMARY KEY NOT NULL,
--- 	market_segment_code VARCHAR(4) NOT NULL,
 	market_sector_code VARCHAR(4) NOT NULL,
--- 	ti_code VARCHAR(12) NOT NULL,
--- 	country_of_register VARCHAR(2) NOT NULL,
--- 	currency_code VARCHAR(3) NOT NULL,
 	participant_code VARCHAR(11) NULL,
 	buy_sell_ind CHAR(1) NOT NULL,
 	market_mechanism_group VARCHAR(1) NOT NULL,
@@ -35,10 +31,6 @@ CREATE TABLE orders (
 	aggregate_size DECIMAL(12, 0) NOT NULL,
 	single_fill_ind VARCHAR(1) NOT NULL,
 	broadcast_update_action VARCHAR(1) NOT NULL
---	time_stamp BIGINT UNSIGNED NOT NULL,
---	message_sequence_number BIGINT UNSIGNED NOT NULL
 );
 
--- CREATE INDEX id_orders_time ON orders (time_stamp, message_sequence_number);
 CREATE INDEX id_orders_price ON orders (price);
--- CREATE INDEX id_orders_ti_code ON orders (ti_code) USING HASH;

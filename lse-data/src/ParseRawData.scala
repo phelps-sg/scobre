@@ -242,7 +242,7 @@ object ParseRawData {
 			var offset = 0
 			do {
 				val shortQuery = rawQuery.drop(offset).take(batchSize)
-//				finished = shortQuery.list.length < batchSize
+				finished = shortQuery.list.length < batchSize
 				val parsed = shortQuery.list.map(parseEvent(_, IdentifierCounter.next))
 				println(parsed)
 				val numRows: Int = objectInserter(parsed.map(x => x._1)) match {
@@ -256,17 +256,21 @@ object ParseRawData {
 			} while (!finished)	  
 		}
 
-		Database.forURL("jdbc:mysql://cseesp1/lse_tickdata?user=sphelps&password=th0rnxtc", 
-				driver="com.mysql.jdbc.Driver") withSession {
+		val host = args(0)
+		val user = args(1)
+		val password = args(2)
+		val url = 
+		  "jdbc:mysql://%s/lse_tickdata?user=%s&password=%s".format(
+				  										host, user, password)
+		Database.forURL(url, driver="com.mysql.jdbc.Driver") withSession {
 
-//			parseAndInsert(rawQuery = Query(orderDetailsRaw), objectInserter =
-//			  (objects: Seq[Any]) =>
-//			    		orders.insertAll(objects.map( (x: Any) => x match {
-//			    		  case x: Order => x
-//			    		}): _*)
-//			)
+			parseAndInsert(rawQuery = Query(orderDetailsRaw), objectInserter =
+			  (objects: Seq[Any]) =>
+			    		orders.insertAll(objects.map( (x: Any) => x match {
+			    		  case x: Order => x
+			    		}): _*)
+			)
 			    		
-
 			parseAndInsert(rawQuery = Query(orderHistoryRaw), objectInserter = 
 			  (objects: Seq[Any]) => 
 			    		orderHistory.insertAll(objects.map( (x: Any) => x match {
