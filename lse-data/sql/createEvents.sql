@@ -15,4 +15,3 @@ CREATE TABLE events (
 );
 
 CREATE INDEX id_events_time ON events(ti_code, time_stamp, message_sequence_number) USING BTREE;
--- CREATE INDEX id_events_ti_code ON events(ti_code) USING HASH;
