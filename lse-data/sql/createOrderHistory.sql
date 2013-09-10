@@ -32,11 +32,11 @@ CREATE TABLE order_history (
 --		market_segment_code VARCHAR(4) NOT NULL,
 	aggregate_size DECIMAL(12, 0) NULL,
 	buy_sell_ind CHAR(1) NOT NULL,
-	market_mechanism_type VARCHAR(2) NOT NULL,
-	message_sequence_number INT UNSIGNED NOT NULL,
-	time_stamp BIGINT UNSIGNED NOT NULL
+	market_mechanism_type VARCHAR(2) NOT NULL
+--	message_sequence_number INT UNSIGNED NOT NULL,
+--	time_stamp BIGINT UNSIGNED NOT NULL
 ); 
 
-CREATE INDEX id_order_history_time ON order_history(time_stamp, message_sequence_number);
-CREATE INDEX id_order_history_order_code ON order_history(order_code) USING HASH;
-CREATE INDEX id_order_history_trade_size ON order_history(trade_size);
+-- CREATE INDEX id_order_history_time ON order_history(time_stamp, message_sequence_number);
+CREATE INDEX id_order_history_order_code ON order_history(order_code); 
+CREATE INDEX id_order_history_trade_size ON order_history(buy_sell_ind, trade_size);

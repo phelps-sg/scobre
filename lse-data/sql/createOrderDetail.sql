@@ -34,11 +34,11 @@ CREATE TABLE orders (
 	price DECIMAL(18, 8) NOT NULL,
 	aggregate_size DECIMAL(12, 0) NOT NULL,
 	single_fill_ind VARCHAR(1) NOT NULL,
-	broadcast_update_action VARCHAR(1) NOT NULL,
-	time_stamp BIGINT UNSIGNED NOT NULL,
-	message_sequence_number BIGINT UNSIGNED NOT NULL
+	broadcast_update_action VARCHAR(1) NOT NULL
+--	time_stamp BIGINT UNSIGNED NOT NULL,
+--	message_sequence_number BIGINT UNSIGNED NOT NULL
 );
 
-CREATE INDEX id_orders_time ON orders (time_stamp, message_sequence_number);
+-- CREATE INDEX id_orders_time ON orders (time_stamp, message_sequence_number);
 CREATE INDEX id_orders_price ON orders (price);
-CREATE INDEX id_orders_ti_code ON orders (ti_code) USING HASH;
+-- CREATE INDEX id_orders_ti_code ON orders (ti_code) USING HASH;
