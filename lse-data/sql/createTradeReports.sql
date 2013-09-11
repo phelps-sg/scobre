@@ -21,7 +21,7 @@ CREATE TABLE trade_reports_raw (
 );
 
 CREATE TABLE transactions (
-	transaction_id BIGINT UNSIGNED PRIMARY KEY,
+	transaction_id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
 	trade_code VARCHAR(50) NOT NULL,
 	trade_price DECIMAL(18, 8) NOT NULL,
 	trade_size DECIMAL(12, 0) NOT NULL,
