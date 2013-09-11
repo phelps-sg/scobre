@@ -170,14 +170,14 @@ object RawTables {
 			def marketSegmentCode = column[String]("market_segment_code")
 			def countryOfRegister = column[String]("country_of_register")
 			def currencyCode = column[String]("currency_code")
-			def tradeCode = column[String]("tradeCode")
+			def tradeCode = column[String]("trade_code")
 			def tradePrice = column[BigDecimal]("trade_price")
 			def tradeSize = column[Long]("trade_size")
 			def date = column[String]("trade_date")
 			def time = column[String]("trade_time")
 			def broadcastUpdateAction = column[String]("broadcast_update_action")
 			def tradeTypeInd = column[String]("trade_type_ind")
-			def tradeTimeInd = column[String]("trade_time_imd")
+			def tradeTimeInd = column[String]("trade_time_ind")
 			def bargainConditions = column[String]("bargain_conditions")
 			def convertedPriceInd = column[String]("converted_price_ind")
 			def publicationDate = column[String]("publication_date")
@@ -231,7 +231,7 @@ object RelationalTables {
 		  def tradeTypeInd = column[String]("trade_type_ind")
 		  def tradeTimeInd = column[String]("trade_time_ind")
 		  def bargainConditions = column[String]("bargain_conditions")
-		  def convertedPriceInd = column[String]("convertedPriceInd")
+		  def convertedPriceInd = column[String]("converted_price_ind")
 		  def publicationTimeStamp = column[Long]("publication_time_stamp")
 		  def * = transactionID ~ tradeCode ~ tradePrice ~ tradeSize ~ 
 		  			broadcastUpdateAction ~ tradeTypeInd ~ tradeTimeInd ~ 
@@ -335,7 +335,7 @@ object ParseRawData {
 	  
 	}
 
-	def parseAndInsert(batchSize: Int = 1000, rawQuery: Query[Any,_ <:HasDateTime],
+	def parseAndInsert(batchSize: Int = 2000, rawQuery: Query[Any,_ <:HasDateTime],
 							objectInserter: Seq[Any] => Option[Int]) = {
 		var finished = false
 		var offset = 0
