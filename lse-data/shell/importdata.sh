@@ -13,10 +13,12 @@ import_pipe() {
 EOF
 }
 
+# Replace NULL with \N for use with MySql import
 replace_null() {
 	sed s/NULL/\\\\N/g   
 }
 
+# Import the specified CSV file into the specified mysql table
 import() {
 	FILE=$1
 	TABLE=$2
@@ -25,12 +27,17 @@ import() {
 	import_pipe $TABLE
 }
 
+# Remove previous named pipe
 rm -f /tmp/lsedata.txt
+
+# Create a named pipe to the mysql command
 mkfifo /tmp/lsedata.txt
 
 import $FILE $TABLE
+
 #import t_OrderDetail order_detail_raw;
 #import t_OrderHistory tblOrderHistory;
 #import t_TradeReport tblTradeReports;
 
+# Clean up
 rm /tmp/lsedata.txt
