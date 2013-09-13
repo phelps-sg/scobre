@@ -19,9 +19,10 @@ trait HasDateTime {
 case class DateFormatter(date: String, time: String) extends HasDateTime
 
 object EventType extends Enumeration {
-  val OrderSubmitted = Value(1)
-  val OrderRevised = Value(2)
-  val Transaction = Value(3)
+  val None = Value("")
+  val OrderSubmitted = Value("order_submitted")
+  val OrderRevised = Value("order_revised")
+  val Transaction = Value("transaction")
 }
 
 object IdentifierCounter {
@@ -238,14 +239,18 @@ object RelationalTables {
 		  			bargainConditions ~ convertedPriceInd ~ 
 		  			publicationTimeStamp <> (Transaction, Transaction.unapply _)
 		}
-			
+		
 		implicit val eventTypeMapper =
-				MappedTypeMapper.base[EventType.Value, Int] (
+				MappedTypeMapper.base[EventType.Value, String] (
 				    {
-				      ev => ev.id
+				      ev => ev.toString
 				    },
 				    {
-				      id => EventType(id)
+				      id => id match {
+				        case "transaction" 		=> EventType.Transaction
+				        case "order_submitted" 	=> EventType.OrderSubmitted
+				        case "order_revised" 	=> EventType.OrderRevised
+				      }
 				    })
 		val events = new Table[Event]("events") {
 					def eventID = column[Option[Long]]("event_id", O.AutoInc, O.PrimaryKey)

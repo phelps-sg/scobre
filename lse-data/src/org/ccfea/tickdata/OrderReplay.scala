@@ -22,7 +22,7 @@ import Database.threadLocalSession
 
 		Database.forURL(url, driver="com.mysql.jdbc.Driver") withSession {
 		  
-			for(event <- Query(events)) {
+			for(event <- Query(events).sortBy(_.timeStamp) .sortBy(_.messageSequenceNumber)) {
 				println(event)
 			}
 
