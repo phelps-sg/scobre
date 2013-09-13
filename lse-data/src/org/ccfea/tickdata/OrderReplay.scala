@@ -21,11 +21,18 @@ import Database.threadLocalSession
 				  										host, user, password)
 
 		Database.forURL(url, driver="com.mysql.jdbc.Driver") withSession {
-		  
-			for(event <- Query(events).sortBy(_.timeStamp) .sortBy(_.messageSequenceNumber)) {
+	  
+			val eventQuery =
+					Query(events).sortBy(_.timeStamp) .sortBy(_.messageSequenceNumber)
+					
+			val transactionQuery =
+			  		Query(transactions)
+			
+		  	for((event, transaction) <- eventQuery leftJoin transactionQuery on (_.transactionID === _.transactionID))  {
 				println(event)
+				println(transaction)
 			}
-
 		}
+
   }
 }
