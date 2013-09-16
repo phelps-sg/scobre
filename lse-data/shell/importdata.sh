@@ -4,10 +4,11 @@ USER=root
 PASSWORD=$1
 FILE=$2
 TABLE=$3
+SOCKET=$4
 
 import_pipe() {
 	TABLE=$1
-	mysql --local_infile=1 -u$USER -p$PASSWORD <<EOF
+	mysql --local_infile=1 -u$USER -p$PASSWORD --socket=$SOCKET <<EOF
 	    USE lse_tickdata;
 	    LOAD DATA LOCAL INFILE '/tmp/lsedata.txt' INTO TABLE $TABLE FIELDS TERMINATED BY ','
 EOF
@@ -26,6 +27,14 @@ import() {
 	cat $FILE | replace_null > /tmp/lsedata.txt &
 	import_pipe $TABLE
 }
+
+##################
+# Main           #
+##################
+
+if [ -z "$SOCKET" ]; then
+	export SOCKET=/var/run/mysqld/mysqld.sock
+fi
 
 # Remove previous named pipe
 rm -f /tmp/lsedata.txt

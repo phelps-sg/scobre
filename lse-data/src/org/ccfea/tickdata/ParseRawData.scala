@@ -345,13 +345,14 @@ object ParseRawData {
 
 	def parseAndInsert(batchSize: Int = 2000, rawQuery: Query[Any,_ <:HasDateTime],
 							objectInserter: Seq[Any] => Option[Int]) = {
+		println(rawQuery.selectStatement)
 		var finished = false
 		var offset = 0
 		do {
 			val shortQuery = rawQuery.drop(offset).take(batchSize)
 			finished = shortQuery.list.length < batchSize
 			val parsed = shortQuery.list.map(parseEvent(_, IdentifierCounter.next))
-			println(parsed)
+//			println(parsed)
 			val numRows: Int = objectInserter(parsed.map(x => x._1)) match {
 			  case Some(x: Int) => x 
 			  case _ => 
@@ -361,6 +362,7 @@ object ParseRawData {
 			events.insertAll(parsed.map(x => x._2): _*)
 			offset = offset + numRows
 		} while (!finished)	  
+		println("done.")
 	}
 
 	def main(args : Array[String]) {
@@ -368,9 +370,10 @@ object ParseRawData {
 		val host = args(0)
 		val user = args(1)
 		val password = args(2)
+		val port = args(3)
 		val url = 
-		  "jdbc:mysql://%s/lse_tickdata?user=%s&password=%s".format(
-				  										host, user, password)
+		  "jdbc:mysql://%s:%s/lse_tickdata?user=%s&password=%s".format(
+				  										host, port, user, password)
 		Database.forURL(url, driver="com.mysql.jdbc.Driver") withSession {
 
 			parseAndInsert(rawQuery = Query(RawTables.orderDetails), objectInserter =
