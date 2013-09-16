@@ -65,15 +65,15 @@ case class Event(eventID: Option[Long],
 							currencyCode: String)
 							
 case class Transaction(transactionID: Option[Long],
-							tradeCode: String,
-							tradePrice: BigDecimal,
-							tradeSize: Long,
-							broadcastUpdateAction: String,
-							tradeTypeInd: String,
-							tradeTimeInd: String,
-							bargainConditions: String,
-							convertedPriceInd: String,
-							publicationTimeStamp: Long)
+							tradeCode: Option[String],
+							tradePrice: Option[BigDecimal],
+							tradeSize: Option[Long],
+							broadcastUpdateAction: Option[String],
+							tradeTypeInd: Option[String],
+							tradeTimeInd: Option[String],
+							bargainConditions: Option[String],
+							convertedPriceInd: Option[String],
+							publicationTimeStamp: Option[Long])
 
 case class OrderDetail(orderCode: String, marketSegmentCode: String, 
 								marketSectorCode: String, tiCode: String, 
@@ -109,8 +109,8 @@ case class TradeReportRaw(messageSequenceNumber: Long,
 									marketSegmentCode: String,
 									countryOfRegister: String,
 									currencyCode: String,
-									tradeCode: String,
-									tradePrice: BigDecimal,
+									tradeCode: Option[String],
+									tradePrice: Option[BigDecimal],
 									tradeSize: Long,
 									date: String,
 									time: String,
@@ -171,7 +171,7 @@ object RawTables {
 			def marketSegmentCode = column[String]("market_segment_code")
 			def countryOfRegister = column[String]("country_of_register")
 			def currencyCode = column[String]("currency_code")
-			def tradeCode = column[String]("trade_code")
+			def tradeCode = column[Option[String]]("trade_code")
 			def tradePrice = column[BigDecimal]("trade_price")
 			def tradeSize = column[Long]("trade_size")
 			def date = column[String]("trade_date")
@@ -184,7 +184,7 @@ object RawTables {
 			def publicationDate = column[String]("publication_date")
 			def publicationTime = column[String]("publication_time")
 			def * = messageSequenceNumber ~ tiCode ~ marketSegmentCode ~ 
-						countryOfRegister ~ currencyCode ~ tradeCode ~ tradePrice ~ 
+						countryOfRegister ~ currencyCode ~ tradeCode ~ tradePrice.? ~ 
 						tradeSize ~ date ~ time ~ broadcastUpdateAction ~ 
 						tradeTypeInd ~ tradeTimeInd ~ bargainConditions ~ 
 						convertedPriceInd ~ publicationDate ~ publicationTime <>
@@ -234,10 +234,10 @@ object RelationalTables {
 		  def bargainConditions = column[String]("bargain_conditions")
 		  def convertedPriceInd = column[String]("converted_price_ind")
 		  def publicationTimeStamp = column[Long]("publication_time_stamp")
-		  def * = transactionID ~ tradeCode ~ tradePrice ~ tradeSize ~ 
-		  			broadcastUpdateAction ~ tradeTypeInd ~ tradeTimeInd ~ 
-		  			bargainConditions ~ convertedPriceInd ~ 
-		  			publicationTimeStamp <> (Transaction, Transaction.unapply _)
+		  def * = transactionID ~ tradeCode.? ~ tradePrice.? ~ tradeSize.? ~ 
+		  			broadcastUpdateAction.? ~ tradeTypeInd.? ~ tradeTimeInd.? ~ 
+		  			bargainConditions.? ~ convertedPriceInd.? ~ 
+		  			publicationTimeStamp.? <> (Transaction, Transaction.unapply _)
 		}
 		
 		implicit val eventTypeMapper =
@@ -324,10 +324,13 @@ object ParseRawData {
 	    						 publicationDate, publicationTime) =>
 	    						   
 	    	(
-	    			Transaction(Some(id), tradeCode, tradePrice, tradeSize, 
-	    							broadcastUpdateAction, tradeTypeInd, tradeTimeInd,
-	    							bargainConditions, convertedPriceInd, 
-	    							DateFormatter(publicationDate, publicationTime).timeStamp),
+	    			Transaction(Some(id), tradeCode, tradePrice, Some(tradeSize), 
+	    							Some(broadcastUpdateAction), Some(tradeTypeInd),
+	    							Some(tradeTimeInd), Some(bargainConditions),
+	    							Some(convertedPriceInd), 
+	    							Some(
+	    							    DateFormatter(publicationDate, publicationTime).
+	    							    	timeStamp)),
 	    							
 	    			Event(None, EventType.Transaction, None, None, Some(id),
 	    					messageSequenceNumber, event.timeStamp, 

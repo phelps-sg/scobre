@@ -22,12 +22,11 @@ import Database.threadLocalSession
 
 		Database.forURL(url, driver="com.mysql.jdbc.Driver") withSession {
 	  
-			 val joinQuery = 
-			   (events leftJoin transactions on (_.transactionID === _.transactionID)) //.sortBy(_.timeStamp) .sortBy(_.messageSequenceNumber)
-			   
-			println(joinQuery.selectStatement)
-			
-		  	for((event, transaction) <- joinQuery)  {
+			val q = 
+			  events.sortBy(_.timeStamp) leftJoin 
+			  	transactions on (_.transactionID === _.transactionID)
+			println(q.selectStatement)
+		  	for((event, transaction) <- q) {
 				println(event)
 				println(transaction)
 			}
