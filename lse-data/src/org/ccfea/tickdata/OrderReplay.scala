@@ -24,14 +24,23 @@ import Database.threadLocalSession
 
 		Database.forURL(url, driver="com.mysql.jdbc.Driver") withSession {
 	  
-			val q = 
-			  events.sortBy(_.timeStamp) leftJoin 
-			  	transactions on (_.transactionID === _.transactionID)
+			val q = for {
+			  (ev, tr) <- events.sortBy(_.timeStamp) leftJoin 
+			  	transactions on (_.transactionID is _.transactionID)
+			} yield (ev.timeStamp, tr.tradePrice.?)
 			println(q.selectStatement)
-		  	for((event, transaction) <- q) {
-				println(event)
-				println(transaction)
+			
+			val q1 = for {
+				ev <- events sortBy(_.timeStamp)
+			    tr <- transactions if ev.transactionID === tr.transactionID
+			} yield (ev.timeStamp, tr.tradePrice)
+			
+			println(q1.selectStatement)
+			
+			for((t, price) <- q) {
+			  println(new java.util.Date(t) + ": " + price)
 			}
+			
 		}
 
   }

@@ -265,6 +265,7 @@ object RelationalTables {
 					def countryOfRegister = column[String]("country_of_register")
 					def currencyCode = column[String]("currency_code")
 					def * = eventID ~ eventType ~ orderHistoryEventID ~ orderCode ~ transactionID ~ messageSequenceNumber ~ timeStamp ~ tiCode ~ marketSegmentCode ~ countryOfRegister ~ currencyCode <> (Event, Event.unapply _)
+					def transaction = foreignKey("transaction_fk", transactionID, transactions)(_.transactionID)
 		}
 		
 }
