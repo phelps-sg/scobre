@@ -7,6 +7,23 @@ import java.text.SimpleDateFormat
 // Use the implicit threadLocalSession
 import Database.threadLocalSession
 
+object TickDatabase {
+
+	val database = "lse_tickdata"
+
+	def url(args: Array[String]) = {
+
+			val host = args(0)
+			val user = args(1)
+			val password = args(2)
+			val port = if (args.length < 4) "3306" else args(3)
+
+			"jdbc:mysql://%s:%s/%s?user=%s&password=%s".format(
+				  					host, port, database, user, password)
+	}
+
+}
+  
 trait HasDateTime {
   val df = new SimpleDateFormat("ddMMyyyy hh:mm:ss")
   def date: String
@@ -353,7 +370,6 @@ object ParseRawData {
 			val shortQuery = rawQuery.drop(offset).take(batchSize)
 			finished = shortQuery.list.length < batchSize
 			val parsed = shortQuery.list.map(parseEvent(_, IdentifierCounter.next))
-//			println(parsed)
 			val numRows: Int = objectInserter(parsed.map(x => x._1)) match {
 			  case Some(x: Int) => x 
 			  case _ => 
@@ -368,15 +384,9 @@ object ParseRawData {
 
 	def main(args : Array[String]) {
 
-		val host = args(0)
-		val user = args(1)
-		val password = args(2)
-		val port = args(3)
-		val url = 
-		  "jdbc:mysql://%s:%s/lse_tickdata?user=%s&password=%s".format(
-				  										host, port, user, password)
+		val url = TickDatabase.url(args)
 		Database.forURL(url, driver="com.mysql.jdbc.Driver") withSession {
-
+	  
 			parseAndInsert(rawQuery = Query(RawTables.orderDetails), objectInserter =
 			  (objects: Seq[Any]) =>
 			    		orders.insertAll(objects.map( (x: Any) => x match {

@@ -12,16 +12,8 @@ import Database.threadLocalSession
 
 
   def main(args: Array[String]) {
-    
-		val host = args(0)
-		val user = args(1)
-		val password = args(2)
-		val port = if (args.length < 4) "3306" else args(3)
 
-		val url = 
-		  "jdbc:mysql://%s:%s/lse_tickdata?user=%s&password=%s".format(
-				  										host, port, user, password)
-
+		val url = TickDatabase.url(args)
 		Database.forURL(url, driver="com.mysql.jdbc.Driver") withSession {
 	  
 			val q = for {
