@@ -50,7 +50,7 @@ object IdentifierCounter {
   }
 }
 			
-case class Order(orderCode: String, 
+case class Order(orderCode: Option[String], 
 					marketSectorCode: String, 
 					participantCode: Option[String], buySellInd: String, 
 					marketMechanismGroup: String, 
@@ -213,7 +213,7 @@ object RawTables {
 object RelationalTables {
   
 		val orders = new Table[Order]("orders") {
-			def orderCode = column[String]("order_code")
+			def orderCode = column[Option[String]]("order_code", O.AutoInc, O.PrimaryKey)
 			def marketSectorCode = column[String]("market_sector_code")
 			def participantCode = column[Option[String]]("participant_code")
 			def buySellInd = column[String]("buy_sell_ind")
@@ -323,7 +323,7 @@ object ParseRawData {
 	    					messageSequenceNumber) =>
 	    					 
 	    	(
-	    			Order(orderCode, marketSectorCode, participantCode, 
+	    			Order(Some(orderCode), marketSectorCode, participantCode, 
 	    					buySellInd, marketMechanismGroup, 
 	    					marketMechanismType, price, aggregateSize, 
 	    					singleFillInd, broadcastUpdateAction),
