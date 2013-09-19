@@ -226,7 +226,7 @@ object RelationalTables {
 			def * = orderCode ~ marketSectorCode ~ participantCode ~ buySellInd ~ marketMechanismGroup ~ marketMechanismType ~ price ~ aggregateSize ~ singleFillInd ~ broadcastUpdateAction <> (Order, Order.unapply _)
 		}
 
-		val orderHistory = new Table[OrderHistory]("order_history") {
+		val orderHistories = new Table[OrderHistory]("order_history") {
 		    def eventID = column[Long]("event_id", O.AutoInc, O.PrimaryKey);
 			def orderCode = column[String]("order_code")
 			def matchingOrderCode = column[Option[String]]("matching_order_code", O.Nullable)
@@ -283,6 +283,9 @@ object RelationalTables {
 					def currencyCode = column[String]("currency_code")
 					def * = eventID ~ eventType ~ orderHistoryEventID ~ orderCode ~ transactionID ~ messageSequenceNumber ~ timeStamp ~ tiCode ~ marketSegmentCode ~ countryOfRegister ~ currencyCode <> (Event, Event.unapply _)
 					def transaction = foreignKey("transaction_fk", transactionID, transactions)(_.transactionID)
+					def order = foreignKey("order_fk", orderCode, orders)(_.orderCode)
+					def orderHistory = foreignKey("order_fk", orderHistoryEventID, orderHistories)(_.eventID)
+
 		}
 		
 }
@@ -396,7 +399,7 @@ object ParseRawData {
 			    		
 			parseAndInsert(rawQuery = Query(RawTables.orderHistory), objectInserter = 
 			  (objects: Seq[Any]) => 
-			    		orderHistory.insertAll(objects.map( (x: Any) => x match {
+			    		orderHistories.insertAll(objects.map( (x: Any) => x match {
 			    							case x: OrderHistory => x
 			    							}): _*)
 			)

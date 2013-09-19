@@ -17,24 +17,25 @@ import Database.threadLocalSession
 		Database.forURL(url, driver="com.mysql.jdbc.Driver") withSession {
 	  
 			val allTransactionsQuery = for {
-				ev <- events //sortBy(_.timeStamp)
-			    tr <- transactions if ev.transactionID === tr.transactionID
-			} yield (ev.timeStamp, tr.tradePrice, ev.eventType)
+				event <- events
+			    transaction <- event.transaction
+			} yield (event.timeStamp, transaction.tradePrice, event.eventType)
 			
 			val allOrdersQuery = for {
-			  ev <- events //sortBy(_.timeStamp)
-			  order <- orders if ev.orderCode === orders.orderCode
-			} yield (ev.timeStamp, order.price, ev.eventType)
+			  event <- events 
+			  order <- event.order
+			} yield (event.timeStamp, order.price, event.eventType)
 			
 			val allRevisionsQuery = for {
-			  ev <- events 
-			  orderHistory <- orderHistory if ev.orderHistoryEventID === orderHistory.eventID
-			} yield (ev.timeStamp, BigDecimal(0), ev.eventType)
+			  event <- events 
+			  orderHistory <- event.orderHistory 
+			} yield (event.timeStamp, BigDecimal(0), event.eventType)
 			
-			val allEventsQuery = (allTransactionsQuery union allRevisionsQuery).sortBy(_._1)
+			val allEventsQuery = 
+			  (allTransactionsQuery union allOrdersQuery union 
+			      allRevisionsQuery).sortBy(_._1)
 			
-			//println(allEventsQuery.selectStatement)
-			
+			println(allEventsQuery.selectStatement)
 			for((t, price, eventType) <- allEventsQuery) {
 			  println(new java.util.Date(t) + ": " + price + " (" + eventType + ")")
 			}
