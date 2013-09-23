@@ -9,5 +9,6 @@
 	<classpathentry kind="lib" path="/usr/share/java/slf4j-simple.jar"/>
 	<classpathentry kind="lib" path="/usr/share/java/slf4j-api.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jasa"/>
+	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_COMPILER_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

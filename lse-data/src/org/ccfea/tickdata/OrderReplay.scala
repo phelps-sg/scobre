@@ -14,6 +14,8 @@ import javax.swing.SwingUtilities
 
 import collection.JavaConversions._
 
+//import scala.tools.nsc._
+
 class MarketState {
 
 	val book = new FourHeapOrderBook()
@@ -120,11 +122,14 @@ class OrderFlow(val orders: Seq[(Order, Long, Long)], val market: MarketState) {
 	  })
 	}
 	
+	
 }
 
-
 object OrderReplay {
-
+//
+//  def series[B](f: MarketState => B): Seq[B] = {
+//		  
+//  }
 
   def main(args: Array[String]) {
 
