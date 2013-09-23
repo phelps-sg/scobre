@@ -11,21 +11,23 @@ import Database.threadLocalSession
 import net.sourceforge.jasa.agent.SimpleTradingAgent
 
 class OrderBook {
-  
+
+	val book = new FourHeapOrderBook()
+	var lastChanged: Option[SimulationTime] = None
+   
 	implicit def orderToJasa(o: Order) = {
 		val result = new net.sourceforge.jasa.market.Order()
 		result.setPrice(o.price.toDouble)
 		result.setQuantity(o.aggregateSize.toInt)
 		result.setAgent(new SimpleTradingAgent())
 		result.setIsBid(o.buySellInd equals "B")
+		result.setTimeStamp(lastChanged.get)
 		result
 	}
-
-	val book = new FourHeapOrderBook()
-  
+ 
 	def insert(o: Order, timeStamp: Long) = {
+		lastChanged = Some(new SimulationTime(timeStamp))
 		val order = orderToJasa(o)
-		order.setTimeStamp(new SimulationTime(timeStamp))
 		if (order.isAsk()) {
 			book.insertUnmatchedAsk(order)
 		} else {
@@ -33,9 +35,30 @@ class OrderBook {
 		}
 		book.matchOrders()
 	}
-	
+
 	def printState = {
 	  book.printState()
+	}
+	
+	def midPrice: Option[Double] = {
+		  val bid = book.getHighestUnmatchedBid() 
+		  val ask = book.getLowestUnmatchedAsk()
+		  if (bid == null || ask == null) {
+			  None
+		  } else {
+			  Some((bid.getPrice() + ask.getPrice()) / 2.0)
+		  }
+	}
+	
+}
+
+class OrderFlow(val orders: Seq[(Order, Long, Long)], val book: OrderBook) {
+	
+	def map[B](f: OrderBook => B): Seq[B] = {
+	  orders.map(ev => {
+	    book.insert(ev._1, ev._2); 
+	    f(book) 
+	  })
 	}
 	
 }
@@ -59,10 +82,11 @@ object OrderReplay {
 			  order <- event.order
 			} yield (event.timeStamp, order.price, event.eventType)
 				
-			val allOrdersQueryOO = for {
+			val allLimitOrders = for {
 			  event <- events 
 			  order <- event.order
-			} yield (order, event.timeStamp)
+			  if (order.marketMechanismType is "LO")
+			} yield (order, event.timeStamp, event.messageSequenceNumber)
 
 			val allRevisionsQuery = for {
 			  event <- events 
@@ -74,12 +98,21 @@ object OrderReplay {
 			      allRevisionsQuery).sortBy(_._1)
 			
 			val orderBook = new OrderBook()
-			for((order, timeStamp) <- allOrdersQueryOO) {
-				val result = orderBook.insert(order, timeStamp)
-				println(result)
+			val timeSeries = 
+				for {
+					orderBookState <- 
+						new OrderFlow(
+						    allLimitOrders.sortBy(_._2).sortBy(_._3).list, 
+						    orderBook)
+				} yield (orderBookState.lastChanged, orderBookState.midPrice)
+				
+			for( (t, price) <- timeSeries) {
+			  println(t.get.getTicks() + "\t" + (price match {
+			    case Some(p) => p.toString()
+			    case None => "NA"
+			  }))
 			}
 			
-			orderBook.printState
 		}
 
   }

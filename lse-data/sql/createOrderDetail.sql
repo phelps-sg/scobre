@@ -34,3 +34,5 @@ CREATE TABLE orders (
 );
 
 CREATE INDEX id_orders_price ON orders (price);
+CREATE INDEX id_market_mechanism_type ON orders(market_mechanism_type);
+CREATE INDEX id_buy_sell_ind ON orders(buy_sell_ind);
