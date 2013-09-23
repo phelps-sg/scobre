@@ -285,7 +285,6 @@ object RelationalTables {
 					def transaction = foreignKey("transaction_fk", transactionID, transactions)(_.transactionID)
 					def order = foreignKey("order_fk", orderCode, orders)(_.orderCode)
 					def orderHistory = foreignKey("order_fk", orderHistoryEventID, orderHistories)(_.eventID)
-
 		}
 		
 }
