@@ -73,21 +73,7 @@ object OrderReplay {
 			  (allTransactionsQuery union allOrdersQuery union 
 			      allRevisionsQuery).sortBy(_._1)
 			
-//			println(allEventsQuery.selectStatement)
-//			for(ev <- allEventsQuery) {
-//				ev match {
-//				  case (t, price, EventType.OrderSubmitted) =>
-//				    println(new java.util.Date(t) + " " + price)
-//				  case (t, price, EventType.Transaction) =>
-//				    println(new java.util.Date(t) + " " + price)
-//				  case _ =>
-//				}
-//			println(allEventsQuery.selectStatement)
-//			for((t, price, eventType) <- allEventsQuery) {
-//			  println(new java.util.Date(t) + ": " + price + " (" + eventType + ")")
-//			}
-			      
-			val orderBook = new OrderBook()
+//				val orderBook = new OrderBook()
 			for((order, timeStamp) <- allOrdersQueryOO) {
 				val result = orderBook.insert(order, timeStamp)
 				println(result)
