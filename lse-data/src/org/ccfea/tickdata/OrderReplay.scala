@@ -73,7 +73,7 @@ object OrderReplay {
 			  (allTransactionsQuery union allOrdersQuery union 
 			      allRevisionsQuery).sortBy(_._1)
 			
-//				val orderBook = new OrderBook()
+			val orderBook = new OrderBook()
 			for((order, timeStamp) <- allOrdersQueryOO) {
 				val result = orderBook.insert(order, timeStamp)
 				println(result)
