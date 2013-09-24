@@ -113,7 +113,7 @@ class OrderBookView(val market: MarketState) {
 	}
 }
 
-class OrderFlow(val orders: Seq[(Order, Long, Long)], val market: MarketState) {
+class OrderFlow(val orders: Seq[(Order, Long, Long)], val market: MarketState = new MarketState()) {
 
 	def map[B](f: MarketState => B): Seq[B] = {
 	  orders.map(ev => {
@@ -145,13 +145,11 @@ object OrderReplay {
 			  event <- events 
 			  order <- event.order
 			} yield (order, event.timeStamp, event.messageSequenceNumber)
+			val allOrdersByTime= allOrders.sortBy(_._2).sortBy(_._3)
 
 			val timeSeries = 
 				for {
-					market <- 
-						new OrderFlow(
-						    allOrders.sortBy(_._2).sortBy(_._3).list, 
-						    new MarketState())
+					market <- new OrderFlow(allOrdersByTime.list)
 				} yield (market.lastChanged, market.midPrice)
 				
 			for( (t, price) <- timeSeries) {
