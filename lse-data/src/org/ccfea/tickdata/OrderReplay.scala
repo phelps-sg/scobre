@@ -31,6 +31,7 @@ class MarketState {
 		result.setAgent(new SimpleTradingAgent())
 		result.setIsBid(o.buySellInd equals "B")
 		result.setTimeStamp(lastChanged.get)
+		//TODO hold reference to JASA order from slick case class
 		result
 	}
 
@@ -144,8 +145,8 @@ object OrderReplay {
 			} yield (event.timeStamp, transaction.tradePrice, event.eventType)
 				
 			val allOrders = for {
-			event <- events 
-			order <- event.order
+				event <- events 
+				order <- event.order
 			} yield (order, event.timeStamp, event.messageSequenceNumber)
 
 			val allOrdersByTime= allOrders.sortBy(_._2).sortBy(_._3)
