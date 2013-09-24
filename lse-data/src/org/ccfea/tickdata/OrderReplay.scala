@@ -145,6 +145,7 @@ object OrderReplay {
 			  event <- events 
 			  order <- event.order
 			} yield (order, event.timeStamp, event.messageSequenceNumber)
+
 			val allOrdersByTime= allOrders.sortBy(_._2).sortBy(_._3)
 
 			val timeSeries = 
