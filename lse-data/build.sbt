@@ -1,6 +1,6 @@
-seq(com.github.retronym.SbtOneJar.oneJarSettings: _*)
+import AssemblyKeys._
 
-resolvers += "retronym-releases" at "http://retronym.github.com/repo/releases"
+assemblySettings
 
 name := "lse-data"
 
@@ -26,5 +26,11 @@ libraryDependencies ++= List(
 */
 )
 
-
-mainClass in oneJar := Some("org.ccfea.tickdata.OrderReplay")
+mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
+  {
+    case PathList("javax", "servlet", xs @ _*)         => MergeStrategy.first
+    case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
+    case "log4j.xml" => MergeStrategy.concat
+    case x => old(x)
+  }
+}
