@@ -151,7 +151,7 @@ object OrderReplay {
 					market <- 
 						new OrderFlow(
 						    allOrders.sortBy(_._2).sortBy(_._3).list, 
-						    new MarketState())
+						    new MarketStateWithGUI())
 				} yield (market.lastChanged, market.midPrice)
 				
 			for( (t, price) <- timeSeries) {
