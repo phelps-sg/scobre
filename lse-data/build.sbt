@@ -6,7 +6,7 @@ name := "lse-data"
 
 version := "0.1"
 
-scalaVersion := "2.10.1"
+scalaVersion := "2.10.2"
 
 scalaSource in Compile := file("src/")
 
