@@ -220,6 +220,7 @@ object OrderReplay {
 
     val url = args(0)
     val maxNumEvents: Option[Int] = if (args.length > 1) Some(args(1).toInt) else None
+    val withGui: Boolean = args.contains("--with-gui")
 
     Database.forURL(url, driver = "com.mysql.jdbc.Driver") withSession {
 
@@ -233,7 +234,7 @@ object OrderReplay {
 
       val timeSeries =
         for {
-          market <- new OrderFlow(selectedEvents.list)
+          market <- new OrderFlow(selectedEvents.list, if (withGui) new MarketStateWithGUI() else new MarketState())
         } yield (market.time, market.midPrice)
 
       for ((t, price) <- timeSeries) {
