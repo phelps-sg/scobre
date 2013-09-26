@@ -218,19 +218,25 @@ object OrderReplay {
 
   def main(args: Array[String]) {
 
-    val url = TickDatabase.url(args)
+    val url = args(0)
+    val maxNumEvents: Option[Int] = if (args.length > 1) Some(args(1).toInt) else None
+
     Database.forURL(url, driver = "com.mysql.jdbc.Driver") withSession {
 
       val allEventsByTime =
         Query(events).sortBy(_.messageSequenceNumber).sortBy(_.timeStamp)
 
+      val selectedEvents = maxNumEvents match {
+        case Some(n) => allEventsByTime.take(n)
+        case None    => allEventsByTime
+      }
+
       val timeSeries =
         for {
-          market <- new OrderFlow(allEventsByTime.list)
+          market <- new OrderFlow(selectedEvents.list)
         } yield (market.time, market.midPrice)
 
       for ((t, price) <- timeSeries) {
-//          println(t.get.getTicks + "\t" + price)
         println(t.get.getTicks + "\t" + (price match {
           case Some(p) => p.toString()
           case None => "NaN"
