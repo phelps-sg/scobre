@@ -79,7 +79,7 @@ class MarketState {
 
           }
 
-          case Event(id, EventType.OrderMatched,
+          case Event(id, EventType.OrderFilled,
                   messageSequenceNumber, timeStamp,
                   tiCode, marketSegmentCode,
                   marketMechanismType, aggregateSize, buySellInd,
@@ -92,6 +92,7 @@ class MarketState {
             if (orderMap.contains(orderCode)) {
               val order = orderMap(orderCode)
               println("Found order " + order)
+              book.remove(order)
             } else {
               println("Unable to find order " + orderCode)
             }
@@ -107,7 +108,7 @@ class MarketState {
     } else {
       book.insertUnmatchedBid(order)
     }
-    book.matchOrders()
+//    book.matchOrders()
   }
 
   def processMarketOrder(order: Order) = {
