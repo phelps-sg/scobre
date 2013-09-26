@@ -195,7 +195,7 @@ class OrderBookView(val market: MarketState) {
   def update = {
     SwingUtilities.invokeAndWait(new Runnable() {
       def run() = {
-        orderBookView.update();
+        orderBookView.update()
         orderBookView.notifyTableChanged()
         timeLabel.setText(df.format(new java.util.Date(market.time.get.getTicks)))
       }
