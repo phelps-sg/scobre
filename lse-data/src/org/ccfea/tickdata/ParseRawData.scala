@@ -44,60 +44,84 @@ object EventType extends Enumeration {
   val OrderSubmitted = Value("order_submitted")
   val OrderRevised = Value("order_revised")
   val Transaction = Value("transaction")
+  val OrderDeleted = Value("order_deleted")
+  val OrderExpired = Value("order_expired")
+  val OrderMatched = Value("order_matched")
+  val OrderFilled = Value("order_filled")
+  val TransactionLimit = Value("transaction_limit")
 }
 
-object IdentifierCounter {
-  var counter: Long = 0
-
-  def next = {
-    counter = counter + 1
-    counter
-  }
-}
-
-case class Order(orderCode: Option[String],
-                 marketSectorCode: String,
-                 participantCode: Option[String], buySellInd: String,
-                 marketMechanismGroup: String,
-                 marketMechanismType: String,
-                 price: BigDecimal, aggregateSize: Long,
-                 singleFillInd: String,
-                 broadcastUpdateAction: String)
-
-case class OrderHistory(eventID: Option[Long],
-                        orderCode: String,
-                        orderActionType: String,
-                        matchingOrderCode: Option[String],
-                        tradeSize: Long,
-                        tradeCode: Option[String],
-                        aggregateSize: Long,
-                        buySellInd: String,
-                        marketMechanismType: String)
+//
+//case class Order(orderCode: Option[String],
+//                 marketSectorCode: String,
+//                 participantCode: Option[String], buySellInd: String,
+//                 marketMechanismGroup: String,
+//                 marketMechanismType: String,
+//                 price: BigDecimal, aggregateSize: Long,
+//                 singleFillInd: String,
+//                 broadcastUpdateAction: String)
+//
+//case class OrderHistory(eventID: Option[Long],
+//                        orderCode: String,
+//                        orderActionType: String,
+//                        matchingOrderCode: Option[String],
+//                        tradeSize: Long,
+//                        tradeCode: Option[String],
+//                        aggregateSize: Long,
+//                        buySellInd: String,
+//                        marketMechanismType: String)
 
 case class Event(eventID: Option[Long],
+
                  eventType: EventType.Value,
-                 orderHistoryEventID: Option[Long],
-                 orderCode: Option[String],
-                 transactionID: Option[Long],
+
                  messageSequenceNumber: Long,
                  timeStamp: Long,
                  tiCode: String,
                  marketSegmentCode: String,
-                 countryOfRegister: String,
-                 currencyCode: String)
+//                 countryOfRegister: String,
+//                 currencyCode: String,
 
-case class Transaction(transactionID: Option[Long],
-                       tradeCode: Option[String],
-                       tradePrice: Option[BigDecimal],
-                       tradeSize: Option[Long],
-                       broadcastUpdateAction: Option[String],
-                       tradeTypeInd: Option[String],
-                       tradeTimeInd: Option[String],
-                       bargainConditions: Option[String],
-                       convertedPriceInd: Option[String],
-                       publicationTimeStamp: Option[Long])
+                 marketMechanismType: Option[String],
+                 aggregateSize: Option[Long],
+                 buySellInd: Option[String],
+                 orderCode: Option[String],
 
-case class OrderDetail(orderCode: String, marketSegmentCode: String,
+                 tradeSize: Option[Long],
+                 broadcastUpdateAction: Option[String],
+
+                 marketSectorCode: Option[String],
+//                 participantCode: Option[String],
+                 marketMechanismGroup: Option[String],
+                 price: Option[BigDecimal],
+                 singleFillInd: Option[String],
+
+//                 orderActionType: Option[String],
+                 matchingOrderCode: Option[String],
+                 resultingTradeCode: Option[String],
+
+                 tradeCode: Option[String],
+//                 tradePrice: Option[BigDecimal],
+//                 tradeTypeInd: Option[String],
+                 tradeTimeInd: Option[String],
+//                 bargainConditions: Option[String],
+                 convertedPriceInd: Option[String]
+//                 publicationTimeStamp: Option[Long]
+)
+
+//
+//case class Transaction(transactionID: Option[Long],
+//                       tradeCode: Option[String],
+//                       tradePrice: Option[BigDecimal],
+//                       tradeSize: Option[Long],
+//                       broadcastUpdateAction: Option[String],
+//                       tradeTypeInd: Option[String],
+//                       tradeTimeInd: Option[String],
+//                       bargainConditions: Option[String],
+//                       convertedPriceInd: Option[String],
+//                       publicationTimeStamp: Option[Long])
+//
+case class OrderDetailRaw(orderCode: String, marketSegmentCode: String,
                        marketSectorCode: String, tiCode: String,
                        countryofRegister: String, currencyCode: String,
                        participantCode: Option[String], buySellInd: String,
@@ -146,7 +170,7 @@ case class TradeReportRaw(messageSequenceNumber: Long,
 
 object RawTables {
 
-  val orderDetails = new Table[OrderDetail]("order_detail_raw") {
+  val orderDetails = new Table[OrderDetailRaw]("order_detail_raw") {
 
     def orderCode = column[String]("order_code")
     def marketSegmentCode = column[String]("market_segment_code")
@@ -166,7 +190,7 @@ object RawTables {
     def time = column[String]("time")
     def messageSequenceNumber = column[Long]("message_sequence_number")
 
-    def * = orderCode ~ marketSegmentCode ~ marketSectorCode ~ tiCode ~ countryOfRegister ~ currencyCode ~ participantCode ~ buySellInd ~ marketMechanismGroup ~ marketMechanismType ~ price ~ aggregateSize ~ singleFillInd ~ broadcastUpdateAction ~ date ~ time ~ messageSequenceNumber <>(OrderDetail, OrderDetail.unapply _)
+    def * = orderCode ~ marketSegmentCode ~ marketSectorCode ~ tiCode ~ countryOfRegister ~ currencyCode ~ participantCode ~ buySellInd ~ marketMechanismGroup ~ marketMechanismType ~ price ~ aggregateSize ~ singleFillInd ~ broadcastUpdateAction ~ date ~ time ~ messageSequenceNumber <>(OrderDetailRaw, OrderDetailRaw.unapply _)
   }
 
   val orderHistory = new Table[OrderHistoryRaw]("order_history_raw") {
@@ -223,55 +247,6 @@ object RawTables {
 
 object RelationalTables {
 
-  val orders = new Table[Order]("orders") {
-    def orderCode = column[Option[String]]("order_code", O.AutoInc, O.PrimaryKey)
-    def marketSectorCode = column[String]("market_sector_code")
-    def participantCode = column[Option[String]]("participant_code")
-    def buySellInd = column[String]("buy_sell_ind")
-    def marketMechanismGroup = column[String]("market_mechanism_group")
-    def marketMechanismType = column[String]("market_mechanism_type")
-    def price = column[BigDecimal]("price")
-    def aggregateSize = column[Long]("aggregate_size")
-    def singleFillInd = column[String]("single_fill_ind")
-    def broadcastUpdateAction = column[String]("broadcast_update_action")
-
-    def * = orderCode ~ marketSectorCode ~ participantCode ~ buySellInd ~ marketMechanismGroup ~ marketMechanismType ~ price ~ aggregateSize ~ singleFillInd ~ broadcastUpdateAction <>(Order, Order.unapply _)
-  }
-
-  val orderHistories = new Table[OrderHistory]("order_history") {
-
-    def eventID = column[Long]("event_id", O.AutoInc, O.PrimaryKey);
-    def orderCode = column[String]("order_code")
-    def matchingOrderCode = column[Option[String]]("matching_order_code", O.Nullable)
-    def orderActionType = column[String]("order_action_type")
-    def tradeSize = column[Long]("trade_size")
-    def tradeCode = column[Option[String]]("trade_code", O.Nullable)
-    def buySellInd = column[String]("buy_sell_ind")
-    def marketMechanismGroup = column[String]("market_mechanism_group")
-    def marketMechanismType = column[String]("market_mechanism_type")
-    def aggregateSize = column[Long]("aggregate_size")
-
-    def * = eventID.? ~ orderCode ~ orderActionType ~ matchingOrderCode ~ tradeSize ~ tradeCode ~ aggregateSize ~ buySellInd ~ marketMechanismType <>(OrderHistory, OrderHistory.unapply _)
-  }
-
-  val transactions = new Table[Transaction]("transactions") {
-
-    def transactionID = column[Option[Long]]("transaction_id", O.AutoInc, O.PrimaryKey)
-    def tradeCode = column[String]("trade_code")
-    def tradePrice = column[BigDecimal]("trade_price")
-    def tradeSize = column[Long]("trade_size")
-    def broadcastUpdateAction = column[String]("broadcast_update_action")
-    def tradeTypeInd = column[String]("trade_type_ind")
-    def tradeTimeInd = column[String]("trade_time_ind")
-    def bargainConditions = column[String]("bargain_conditions")
-    def convertedPriceInd = column[String]("converted_price_ind")
-    def publicationTimeStamp = column[Long]("publication_time_stamp")
-
-    def * = transactionID ~ tradeCode.? ~ tradePrice.? ~ tradeSize.? ~
-      broadcastUpdateAction.? ~ tradeTypeInd.? ~ tradeTimeInd.? ~
-      bargainConditions.? ~ convertedPriceInd.? ~
-      publicationTimeStamp.? <>(Transaction, Transaction.unapply _)
-  }
 
   implicit val eventTypeMapper =
     MappedTypeMapper.base[EventType.Value, String](
@@ -279,31 +254,52 @@ object RelationalTables {
       ev => ev.toString
     }, {
       id => id match {
-        case "transaction" => EventType.Transaction
-        case "order_submitted" => EventType.OrderSubmitted
-        case "order_revised" => EventType.OrderRevised
+        case "transaction"       => EventType.Transaction
+        case "order_submitted"   => EventType.OrderSubmitted
+        case "order_revised"     => EventType.OrderRevised
+        case "order_deleted"     => EventType.OrderDeleted
+        case "order_expired"     => EventType.OrderExpired
+        case "order_matched"     => EventType.OrderMatched
+        case "order_filled"      => EventType.OrderFilled
+        case "transaction_limit" => EventType.TransactionLimit
       }
     })
-  val events = new Table[Event]("events") {
 
-    def eventID = column[Option[Long]]("event_id", O.AutoInc, O.PrimaryKey)
-    def eventType = column[EventType.Value]("event_type")
-    def orderHistoryEventID = column[Option[Long]]("order_history_event_id")
-    def orderCode = column[Option[String]]("order_code")
-    def transactionID = column[Option[Long]]("transaction_id")
-    def messageSequenceNumber = column[Long]("message_sequence_number")
-    def timeStamp = column[Long]("time_stamp")
-    def tiCode = column[String]("ti_code")
-    def marketSegmentCode = column[String]("market_segment_code")
-    def countryOfRegister = column[String]("country_of_register")
-    def currencyCode = column[String]("currency_code")
+    val events = new Table[Event]("events") {
 
-    def * = eventID ~ eventType ~ orderHistoryEventID ~ orderCode ~ transactionID ~ messageSequenceNumber ~ timeStamp ~ tiCode ~ marketSegmentCode ~ countryOfRegister ~ currencyCode <>(Event, Event.unapply _)
+      def eventID = column[Option[Long]]("event_id", O.AutoInc, O.PrimaryKey)
 
-    def transaction = foreignKey("transaction_fk", transactionID, transactions)(_.transactionID)
-    def order = foreignKey("order_fk", orderCode, orders)(_.orderCode)
-    def orderHistory = foreignKey("order_fk", orderHistoryEventID, orderHistories)(_.eventID)
-  }
+      def eventType = column[EventType.Value]("event_type")
+      def orderCode = column[Option[String]]("order_code")
+      def messageSequenceNumber = column[Long]("message_sequence_number")
+      def timeStamp = column[Long]("time_stamp")
+      def tiCode = column[String]("ti_code")
+      def marketSegmentCode = column[String]("market_segment_code")
+      def countryOfRegister = column[String]("country_of_register")
+      def currencyCode = column[String]("currency_code")
+      def marketSectorCode = column[Option[String]]("market_sector_code")
+      def participantCode = column[Option[String]]("participant_code")
+      def buySellInd = column[Option[String]]("buy_sell_ind")
+      def marketMechanismGroup = column[Option[String]]("market_mechanism_group")
+      def marketMechanismType = column[Option[String]]("market_mechanism_type")
+      def price = column[Option[BigDecimal]]("price")
+      def aggregateSize = column[Option[Long]]("aggregate_size")
+      def singleFillInd = column[Option[String]]("single_fill_ind")
+      def broadcastUpdateAction = column[Option[String]]("broadcast_update_action")
+      def matchingOrderCode = column[Option[String]]("matching_order_code", O.Nullable)
+      def orderActionType = column[Option[String]]("order_action_type")
+      def tradeSize = column[Option[Long]]("trade_size")
+      def resultingTradeCode = column[Option[String]]("resulting_trade_code", O.Nullable)
+      def tradeCode = column[Option[String]]("trade_code")
+//      def tradePrice = column[Option[BigDecimal]]("trade_price")
+      def tradeTypeInd = column[Option[String]]("trade_type_ind")
+      def tradeTimeInd = column[Option[String]]("trade_time_ind")
+      def bargainConditions = column[Option[String]]("bargain_conditions")
+      def convertedPriceInd = column[Option[String]]("converted_price_ind")
+//      def publicationTimeStamp = column[Option[Long]]("publication_time_stamp")
+
+      def * = eventID ~ eventType ~ messageSequenceNumber ~ timeStamp ~ tiCode ~ marketSegmentCode ~ marketMechanismType ~ aggregateSize ~ buySellInd ~ orderCode ~ tradeSize ~ broadcastUpdateAction ~ marketSectorCode ~ marketMechanismGroup ~ price ~ singleFillInd ~ matchingOrderCode ~ resultingTradeCode ~ tradeCode ~ tradeTimeInd ~ convertedPriceInd <> (Event, Event.unapply _)
+    }
 
 }
 
@@ -311,11 +307,18 @@ import RelationalTables._
 
 object ParseRawData {
 
-  def parseEvent(event: HasDateTime, eventID: => Long) = {
+  def parseEvent(rawEvent: HasDateTime): Event = {
 
-    val id: Long = eventID
-
-    event match {
+    implicit def orderActionTypeToEventType(orderActionType: String): EventType.Value = {
+      orderActionType match {
+        case "D" => EventType.OrderDeleted
+        case "E" => EventType.OrderExpired
+        case "P" => EventType.OrderMatched
+        case "M" => EventType.OrderFilled
+        case "T" => EventType.TransactionLimit
+      }
+    }
+    rawEvent match {
 
       case OrderHistoryRaw(orderCode, orderActionType, matchingOrderCode,
                           tradeSize, tradeCode, tiCode, countryOfRegister,
@@ -324,36 +327,29 @@ object ParseRawData {
                           marketMechanismType,
                           messageSequenceNumber, date, time) =>
 
-              (
+                Event(None, orderActionType, messageSequenceNumber,
+                        rawEvent.timeStamp, tiCode, marketSegmentCode,
+                        Some(marketMechanismType), Some(aggregateSize), Some(buySellInd),
+                        Some(orderCode), Some(tradeSize), None, None, None, None, None,
+                        matchingOrderCode, tradeCode,
+                        None, None, None)
 
-                OrderHistory(Some(id), orderCode, orderActionType,
-                  matchingOrderCode, tradeSize, tradeCode,
-                  aggregateSize, buySellInd, marketMechanismType),
 
-                Event(None, EventType.OrderRevised, Some(id), Some(orderCode),
-                  None, messageSequenceNumber, event.timeStamp,
-                  tiCode, marketSegmentCode, countryOfRegister, currencyCode)
-
-                )
-
-      case OrderDetail(orderCode, marketSegmentCode, marketSectorCode,
+      case OrderDetailRaw(orderCode, marketSegmentCode, marketSectorCode,
                         tiCode, countryOfRegister, currencyCode,
                         participantCode, buySellInd, marketMechanismGroup,
                         marketMechanismType, price, aggregateSize,
                         singleFillInd, broadcastUpdateAction, date, time,
                         messageSequenceNumber) =>
 
-              (
-                Order(Some(orderCode), marketSectorCode, participantCode,
-                  buySellInd, marketMechanismGroup,
-                  marketMechanismType, price, aggregateSize,
-                  singleFillInd, broadcastUpdateAction),
 
-                Event(None, EventType.OrderSubmitted, None, Some(orderCode),
-                  None, messageSequenceNumber, event.timeStamp,
-                  tiCode, marketSegmentCode, countryOfRegister, currencyCode)
-                )
-
+                Event(None, EventType.OrderSubmitted, messageSequenceNumber,
+                      rawEvent.timeStamp, tiCode, marketSegmentCode,
+                      Some(marketMechanismType), Some(aggregateSize), Some(buySellInd),
+                      Some(orderCode), None, Some(broadcastUpdateAction),
+                      Some(marketSectorCode), Some(marketMechanismGroup), Some(price), Some(singleFillInd),
+                      None, None,
+                      None, None, None)
 
       case TradeReportRaw(messageSequenceNumber, tiCode, marketSegmentCode,
                           countryOfRegister, currencyCode, tradeCode,
@@ -362,42 +358,36 @@ object ParseRawData {
                           tradeTimeInd, bargainConditions, convertedPriceInd,
                           publicationDate, publicationTime) =>
 
-              (
-                Transaction(Some(id), tradeCode, tradePrice, Some(tradeSize),
-                  Some(broadcastUpdateAction), Some(tradeTypeInd),
-                  Some(tradeTimeInd), Some(bargainConditions),
-                  Some(convertedPriceInd),
-                  Some(
-                    DateFormatter(publicationDate, publicationTime).
-                      timeStamp)),
-
-                Event(None, EventType.Transaction, None, None, Some(id),
-                  messageSequenceNumber, event.timeStamp,
-                  tiCode, marketSegmentCode, countryOfRegister,
-                  currencyCode)
-                )
+                Event(None, EventType.Transaction,
+                  messageSequenceNumber, rawEvent.timeStamp,
+                  tiCode, marketSegmentCode,
+                  None, None, None, None,
+                  Some(tradeSize), Some(broadcastUpdateAction),
+                  None, None, tradePrice, None,
+                  None, None,
+                  tradeCode, Some(tradeTimeInd), Some(convertedPriceInd))
 
     }
 
 
   }
 
-  def parseAndInsert(batchSize: Int = 2000, rawQuery: Query[Any, _ <: HasDateTime],
-                     objectInserter: Seq[Any] => Option[Int]) = {
+  def parseAndInsert(rawQuery: Query[Any, _ <: HasDateTime], batchSize: Int = 2000) {
+
     println(rawQuery.selectStatement)
     var finished = false
     var offset = 0
     do {
       val shortQuery = rawQuery.drop(offset).take(batchSize)
       finished = shortQuery.list.length < batchSize
-      val parsed = shortQuery.list.map(parseEvent(_, IdentifierCounter.next))
-      val numRows: Int = objectInserter(parsed.map(x => x._1)) match {
+      val parsed = shortQuery.list.map(parseEvent(_))
+      val numRows: Int =  events.insertAll(parsed: _*) match {
         case Some(x: Int) => x
         case _ =>
           throw
             new UnsupportedOperationException("Unsupported database")
       }
-      events.insertAll(parsed.map(x => x._2): _*)
+
       offset = offset + numRows
     } while (!finished)
     println("done.")
@@ -408,26 +398,9 @@ object ParseRawData {
     val url = TickDatabase.url(args)
     Database.forURL(url, driver = "com.mysql.jdbc.Driver") withSession {
 
-      parseAndInsert(rawQuery = Query(RawTables.orderDetails), objectInserter =
-        (objects: Seq[Any]) =>
-          orders.insertAll(objects.map((x: Any) => x match {
-            case x: Order => x
-          }): _*)
-      )
-
-      parseAndInsert(rawQuery = Query(RawTables.orderHistory), objectInserter =
-        (objects: Seq[Any]) =>
-          orderHistories.insertAll(objects.map((x: Any) => x match {
-            case x: OrderHistory => x
-          }): _*)
-      )
-
-      parseAndInsert(rawQuery = Query(RawTables.tradeReports), objectInserter =
-        (objects: Seq[Any]) =>
-          transactions.insertAll(objects.map((x: Any) => x match {
-            case x: Transaction => x
-          }): _*)
-      )
+      parseAndInsert(Query(RawTables.orderDetails))
+      parseAndInsert(Query(RawTables.orderHistory))
+      parseAndInsert(Query(RawTables.tradeReports))
 
     }
   }

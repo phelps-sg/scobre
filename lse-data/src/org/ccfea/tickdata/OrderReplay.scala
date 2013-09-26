@@ -24,31 +24,59 @@ class MarketState {
   val book = new FourHeapOrderBook()
   var lastChanged: Option[SimulationTime] = None
 
-  implicit def orderToJasa(o: Order) = {
-    val result = new net.sourceforge.jasa.market.Order()
-    result.setPrice(o.price.toDouble)
-    result.setQuantity(o.aggregateSize.toInt)
-    result.setAgent(new SimpleTradingAgent())
-    result.setIsBid(o.buySellInd equals "B")
-    result.setTimeStamp(lastChanged.get)
-    //TODO hold reference to JASA order from slick case class
-    result
-  }
-
-  def processOrder(o: Order, timeStamp: Long) = {
-    if (o.marketMechanismType equals "LO") {
-      processLimitOrder(o, timeStamp)
-    } else if (o.marketMechanismType equals "MO") {
-      processMarketOrder(o, timeStamp)
-    } else {
-      throw new RuntimeException("Unknown market mechanism type " + o)
+  implicit def toJasaOrder(ev: Event) = {
+    ev match {
+      case Event(id, EventType.OrderSubmitted,
+        messageSequenceNumber, timeStamp,
+        tiCode, marketSegmentCode,
+        Some(marketMechanismType), Some(aggregateSize), Some(buySellInd),
+        Some(orderCode),
+        None, Some(broadcastUpdateAction), Some(marketSectorCode), Some(marketMechanismGroup), Some(price), Some(singleFillInd),
+        None, None, None, None, None) => {
+          val result = new net.sourceforge.jasa.market.Order()
+          result.setPrice(price.toDouble)
+          result.setQuantity(aggregateSize.toInt)
+          result.setAgent(new SimpleTradingAgent())
+          result.setIsBid(buySellInd equals "B")
+          result.setTimeStamp(lastChanged.get)
+          //TODO hold reference to JASA order from slick case class
+          result
+        }
     }
   }
 
-  def processLimitOrder(o: Order, timeStamp: Long) = {
-    lastChanged = Some(new SimulationTime(timeStamp))
-    val order = orderToJasa(o)
-    if (order.isAsk()) {
+  def processEvent(ev: Event) = {
+
+    lastChanged = Some(new SimulationTime(ev.timeStamp))
+
+    ev match {
+          case Event(id, EventType.OrderSubmitted,
+                      messageSequenceNumber, timeStamp,
+                tiCode, marketSegmentCode,
+                Some(marketMechanismType), Some(aggregateSize), Some(buySellInd),
+                Some(orderCode),
+                None, Some(broadcastUpdateAction), Some(marketSectorCode), Some(marketMechanismGroup), Some(price), Some(singleFillInd),
+                None, None, None, None, None)
+          => {
+                  val order = new net.sourceforge.jasa.market.Order()
+                  order.setPrice(price.toDouble)
+                  order.setQuantity(aggregateSize.toInt)
+                  order.setAgent(new SimpleTradingAgent())
+                  order.setIsBid(buySellInd equals "B")
+                  order.setTimeStamp(lastChanged.get)
+                  //TODO hold reference to JASA order from slick case class
+                  if (marketMechanismType equals "LO") {
+                    processLimitOrder(order)
+                  } else {
+                    processMarketOrder(order)
+                  }
+          }
+          case _ => println("Do not know how to process " + ev)
+    }
+  }
+
+  def processLimitOrder(order: Order) = {
+    if (order.isAsk) {
       book.insertUnmatchedAsk(order)
     } else {
       book.insertUnmatchedBid(order)
@@ -56,13 +84,13 @@ class MarketState {
     book.matchOrders()
   }
 
-  def processMarketOrder(o: Order, timeStamp: Long) = {
+  def processMarketOrder(order: Order) = {
     val otherSide =
-      if (o.buySellInd equals "B") book.getUnmatchedAsks()
-      else book.getUnmatchedBids()
-    var qty = o.aggregateSize
-    for (potentialMatch <- otherSide if qty >= potentialMatch.getQuantity()) {
-      val limitOrderQty = potentialMatch.getQuantity()
+      if (order.isBid) book.getUnmatchedAsks
+      else book.getUnmatchedBids
+    var qty = order.getQuantity
+    for (potentialMatch <- otherSide if qty >= potentialMatch.getQuantity) {
+      val limitOrderQty = potentialMatch.getQuantity
       book.remove(potentialMatch)
       qty = qty - limitOrderQty
     }
@@ -73,12 +101,12 @@ class MarketState {
   }
 
   def midPrice: Option[Double] = {
-    val bid = book.getHighestUnmatchedBid()
-    val ask = book.getLowestUnmatchedAsk()
+    val bid = book.getHighestUnmatchedBid
+    val ask = book.getLowestUnmatchedAsk
     if (bid == null || ask == null) {
       None
     } else {
-      Some((bid.getPrice() + ask.getPrice()) / 2.0)
+      Some((bid.getPrice + ask.getPrice) / 2.0)
     }
   }
 
@@ -88,9 +116,9 @@ class MarketStateWithGUI extends MarketState {
 
   val view: OrderBookView = new OrderBookView(this)
 
-  override def processOrder(o: Order, timeStamp: Long) = {
-    val result = super.processOrder(o, timeStamp)
-    println(o)
+  override def processEvent(ev: Event) = {
+    val result = super.processEvent(ev)
+    println(ev)
     view.update
     result
   }
@@ -118,11 +146,11 @@ class OrderBookView(val market: MarketState) {
   }
 }
 
-class OrderFlow(val orders: Seq[(Order, Long, Long)], val market: MarketState = new MarketState()) {
+class OrderFlow(val orders: Seq[Event], val market: MarketState = new MarketState()) {
 
   def map[B](f: MarketState => B): Seq[B] = {
     orders.map(ev => {
-      market.processOrder(ev._1, ev._2);
+      market.processEvent(ev)
       f(market)
     })
   }
@@ -136,21 +164,13 @@ object OrderReplay {
     val url = TickDatabase.url(args)
     Database.forURL(url, driver = "com.mysql.jdbc.Driver") withSession {
 
-      val allTransactionsQuery = for {
-        event <- events
-        transaction <- event.transaction
-      } yield (event.timeStamp, transaction.tradePrice, event.eventType)
-
-      val allOrders = for {
-        event <- events
-        order <- event.order
-      } yield (order, event.timeStamp, event.messageSequenceNumber)
-
-      val allOrdersByTime = allOrders.sortBy(_._2).sortBy(_._3)
+      val allEventsByTime =
+        Query(events).sortBy(_.timeStamp).sortBy(_.messageSequenceNumber)
 
       val timeSeries =
         for {
-          market <- new OrderFlow(allOrdersByTime.list, market = new MarketStateWithGUI())
+          market <- new OrderFlow(allEventsByTime.list,
+                                    market = new MarketStateWithGUI())
         } yield (market.lastChanged, market.midPrice)
 
       for ((t, price) <- timeSeries) {

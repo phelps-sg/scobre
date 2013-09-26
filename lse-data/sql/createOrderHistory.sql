@@ -17,19 +17,19 @@ CREATE TABLE order_history_raw (
 	date VARCHAR(8) NOT NULL,
 	time VARCHAR(15) NOT NULL
 ); 
-
-CREATE TABLE order_history (
-	event_id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-	order_code VARCHAR(10) NOT NULL,
-	FOREIGN KEY fk_order_code(order_code) REFERENCES orders(order_code),
-	order_action_type CHAR(1) NOT NULL,
-	matching_order_code VARCHAR(50) NULL,
-	trade_size DECIMAL (8, 0) NULL,
-	trade_code VARCHAR(50) NULL,
-	aggregate_size DECIMAL(12, 0) NULL,
-	buy_sell_ind CHAR(1) NOT NULL,
-	market_mechanism_type VARCHAR(2) NOT NULL
-); 
-
-CREATE INDEX id_order_history_order_code ON order_history(order_code); 
-CREATE INDEX id_order_history_trade_size ON order_history(buy_sell_ind, trade_size);
+--
+-- CREATE TABLE order_history (
+--	event_id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+--	order_code VARCHAR(10) NOT NULL,
+--	FOREIGN KEY fk_order_code(order_code) REFERENCES orders(order_code),
+--	order_action_type CHAR(1) NOT NULL,
+--	matching_order_code VARCHAR(50) NULL,
+--	trade_size DECIMAL (8, 0) NULL,
+--	trade_code VARCHAR(50) NULL,
+--	aggregate_size DECIMAL(12, 0) NULL,
+--	buy_sell_ind CHAR(1) NOT NULL,
+--	market_mechanism_type VARCHAR(2) NOT NULL
+-- );
+--
+-- CREATE INDEX id_order_history_order_code ON order_history(order_code);
+-- CREATE INDEX id_order_history_trade_size ON order_history(buy_sell_ind, trade_size);
