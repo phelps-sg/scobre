@@ -318,6 +318,7 @@ object ParseRawData {
         case "T" => EventType.TransactionLimit
       }
     }
+
     rawEvent match {
 
       case OrderHistoryRaw(orderCode, orderActionType, matchingOrderCode,
