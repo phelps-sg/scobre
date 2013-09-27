@@ -1,6 +1,6 @@
 package org.ccfea.tickdata
 
-import net.sourceforge.jasa.market._
+import org.rogach.scallop._
 import scala.slick.driver.MySQLDriver.simple._
 import java.text.SimpleDateFormat
 
@@ -381,8 +381,8 @@ object ParseRawData {
     do {
       val shortQuery = rawQuery.drop(offset).take(batchSize)
       finished = shortQuery.list.length < batchSize
-      val parsed = shortQuery.list.map(parseEvent(_))
-      val numRows: Int =  events.insertAll(parsed: _*) match {
+      val parsed = shortQuery.list.par.map(parseEvent(_))
+      val numRows: Int =  events.insertAll(parsed.seq: _*) match {
         case Some(x: Int) => x
         case _ =>
           throw
@@ -394,15 +394,21 @@ object ParseRawData {
     println("done.")
   }
 
-  def main(args: Array[String]) {
+class ParseConf(args: Seq[String]) extends ScallopConf(args) {
+  val bufferSize = opt[Int](default = Some(2000))
+  val url = trailArg[String](required = true)
+}
 
-    val url = args(0)
+def main(args: Array[String]) {
 
-    Database.forURL(url, driver = "com.mysql.jdbc.Driver") withSession {
+    val conf = new ParseConf(args)
+    val bufferSize = conf.bufferSize()
 
-      parseAndInsert(Query(RawTables.orderDetails))
-      parseAndInsert(Query(RawTables.orderHistory))
-      parseAndInsert(Query(RawTables.tradeReports))
+    Database.forURL(conf.url(), driver = "com.mysql.jdbc.Driver") withSession {
+
+      parseAndInsert(Query(RawTables.orderDetails), bufferSize)
+      parseAndInsert(Query(RawTables.orderHistory), bufferSize)
+      parseAndInsert(Query(RawTables.tradeReports), bufferSize)
 
     }
   }
