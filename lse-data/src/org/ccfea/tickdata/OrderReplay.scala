@@ -187,7 +187,7 @@ class OrderBookView(val market: MarketState) {
   val myFrame = new JFrame()
   val timeLabel = new JLabel()
   myFrame.setLayout(new BorderLayout())
-  myFrame.add(orderBookView,orders: BorderLayout.CENTER)
+  myFrame.add(orderBookView, BorderLayout.CENTER)
   myFrame.add(timeLabel, BorderLayout.NORTH)
   myFrame.pack()
   myFrame.setVisible(true)
