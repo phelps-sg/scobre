@@ -168,15 +168,15 @@ class MarketState {
   }
 
   def processMarketOrder(order: Order) = {
-    val otherSide =
-      if (order.isBid) book.getUnmatchedAsks
-      else book.getUnmatchedBids
-    var qty = order.getQuantity
-    for (potentialMatch <- otherSide if qty >= potentialMatch.getQuantity) {
-      val limitOrderQty = potentialMatch.getQuantity
-      book.remove(potentialMatch)
-      qty = qty - limitOrderQty
-    }
+//    val otherSide =
+//      if (order.isBid) book.getUnmatchedAsks
+//      else book.getUnmatchedBids
+//    var qty = order.getQuantity
+//    for (potentialMatch <- otherSide if qty >= potentialMatch.getQuantity) {
+//      val limitOrderQty = potentialMatch.getQuantity
+//      book.remove(potentialMatch)
+//      qty = qty - limitOrderQty
+//    }
   }
 
   def printState = {
