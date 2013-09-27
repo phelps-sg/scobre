@@ -187,7 +187,7 @@ class OrderBookView(val market: MarketState) {
   val myFrame = new JFrame()
   val timeLabel = new JLabel()
   myFrame.setLayout(new BorderLayout())
-  myFrame.add(orderBookView, BorderLayout.CENTER)
+  myFrame.add(orderBookView,orders: BorderLayout.CENTER)
   myFrame.add(timeLabel, BorderLayout.NORTH)
   myFrame.pack()
   myFrame.setVisible(true)
@@ -203,10 +203,10 @@ class OrderBookView(val market: MarketState) {
   }
 }
 
-class OrderFlow(val orders: Seq[Event], val market: MarketState = new MarketState()) {
+class OrderFlow(val events: Seq[Event], val market: MarketState = new MarketState()) {
 
   def map[B](f: MarketState => B): Seq[B] = {
-    orders.map(ev => {
+    events.map(ev => {
       market.processEvent(ev)
       f(market)
     })
