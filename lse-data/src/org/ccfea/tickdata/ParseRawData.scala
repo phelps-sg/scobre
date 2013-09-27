@@ -396,7 +396,8 @@ object ParseRawData {
 
   def main(args: Array[String]) {
 
-    val url = TickDatabase.url(args)
+    val url = args(0)
+
     Database.forURL(url, driver = "com.mysql.jdbc.Driver") withSession {
 
       parseAndInsert(Query(RawTables.orderDetails))

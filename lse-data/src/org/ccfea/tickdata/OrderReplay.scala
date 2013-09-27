@@ -4,6 +4,8 @@ import scala.slick.driver.MySQLDriver.simple._
 import RelationalTables._
 import Database.threadLocalSession
 
+import org.rogach.scallop._
+
 import java.text.SimpleDateFormat
 
 import net.sourceforge.jasa.market._
@@ -203,7 +205,7 @@ class OrderBookView(val market: MarketState) {
   }
 }
 
-class OrderFlow(val events: Seq[Event], val market: MarketState = new MarketState()) {
+class MarketSimulator(val events: Seq[Event], val market: MarketState = new MarketState()) {
 
   def map[B](f: MarketState => B): Seq[B] = {
     events.map(ev => {
@@ -214,28 +216,34 @@ class OrderFlow(val events: Seq[Event], val market: MarketState = new MarketStat
 
 }
 
+class ReplayConf(args: Seq[String]) extends ScallopConf(args) {
+  val withGui = opt[Boolean](default = Some(false))
+  val maxNumEvents = opt[Int]()
+  val url = trailArg[String](required = true)
+}
+
 object OrderReplay {
 
   def main(args: Array[String]) {
 
-    val url = args(0)
-    val maxNumEvents: Option[Int] = if (args.length > 1) Some(args(1).toInt) else None
-    val withGui: Boolean = args.contains("--with-gui")
+    val conf = new ReplayConf(args)
 
-    Database.forURL(url, driver = "com.mysql.jdbc.Driver") withSession {
+    Database.forURL(conf.url(), driver = "com.mysql.jdbc.Driver") withSession {
 
       val allEventsByTime =
         Query(events).sortBy(_.messageSequenceNumber).sortBy(_.timeStamp)
 
-      val selectedEvents = maxNumEvents match {
+      val selectedEvents = conf.maxNumEvents.get match {
         case Some(n) => allEventsByTime.take(n)
         case None    => allEventsByTime
       }
 
+      val marketState = if (conf.withGui()) new MarketStateWithGUI() else new MarketState()
+      val simulator = new MarketSimulator(selectedEvents.list, marketState)
       val timeSeries =
         for {
-          market <- new OrderFlow(selectedEvents.list, if (withGui) new MarketStateWithGUI() else new MarketState())
-        } yield (market.time, market.midPrice)
+          state <- simulator
+        } yield (state.time, state.midPrice)
 
       for ((t, price) <- timeSeries) {
         println(t.get.getTicks + "\t" + (price match {
