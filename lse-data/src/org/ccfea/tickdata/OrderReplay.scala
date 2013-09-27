@@ -21,6 +21,47 @@ import java.awt.BorderLayout
 
 //import scala.tools.nsc._
 
+
+object OrderReplay {
+
+  def main(args: Array[String]) {
+
+    val conf = new ReplayConf(args)
+
+    Database.forURL(conf.url(), driver = "com.mysql.jdbc.Driver") withSession {
+
+      val allEventsByTime =
+        Query(events).sortBy(_.messageSequenceNumber).sortBy(_.timeStamp)
+
+      val selectedEvents = conf.maxNumEvents.get match {
+        case Some(n) => allEventsByTime.take(n)
+        case None    => allEventsByTime
+      }
+
+      val timeSeries = replayEvents(selectedEvents.list, conf.withGui())
+      outputTimeSeries(timeSeries)
+    }
+  }
+
+  def replayEvents(events: Seq[Event], withGui: Boolean = false) = {
+      val marketState = if (withGui) new MarketStateWithGUI() else new MarketState()
+      val simulator = new MarketSimulator(events, marketState)
+      for {
+          state <- simulator
+      } yield (state.time, state.midPrice)
+  }
+
+  def outputTimeSeries(timeSeries: Seq[(Option[SimulationTime], Option[Double])]) {
+      for ((t, price) <- timeSeries) {
+        println(t.get.getTicks + "\t" + (price match {
+          case Some(p) => p.toString()
+          case None => "NaN"
+        }))
+      }
+      Unit
+  }
+}
+
 class MarketState {
 
   val book = new FourHeapOrderBook()
@@ -222,37 +263,3 @@ class ReplayConf(args: Seq[String]) extends ScallopConf(args) {
   val url = trailArg[String](required = true)
 }
 
-object OrderReplay {
-
-  def main(args: Array[String]) {
-
-    val conf = new ReplayConf(args)
-
-    Database.forURL(conf.url(), driver = "com.mysql.jdbc.Driver") withSession {
-
-      val allEventsByTime =
-        Query(events).sortBy(_.messageSequenceNumber).sortBy(_.timeStamp)
-
-      val selectedEvents = conf.maxNumEvents.get match {
-        case Some(n) => allEventsByTime.take(n)
-        case None    => allEventsByTime
-      }
-
-      val marketState = if (conf.withGui()) new MarketStateWithGUI() else new MarketState()
-      val simulator = new MarketSimulator(selectedEvents.list, marketState)
-      val timeSeries =
-        for {
-          state <- simulator
-        } yield (state.time, state.midPrice)
-
-      for ((t, price) <- timeSeries) {
-        println(t.get.getTicks + "\t" + (price match {
-          case Some(p) => p.toString()
-          case None => "NaN"
-        }))
-      }
-
-    }
-
-  }
-}
