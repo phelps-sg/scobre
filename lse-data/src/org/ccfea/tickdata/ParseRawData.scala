@@ -26,14 +26,24 @@ object TickDatabase {
 }
 
 trait HasDateTime {
-  val df = new SimpleDateFormat("ddMMyyyy hh:mm:ss")
+
+  // without milliseconds
+  val dfShort = new SimpleDateFormat("ddMMyyyy HH:mm:ss")
+
+
+  // Time stamp format with milliseconds
+  val df = new SimpleDateFormat("ddMMyyyy HH:mm:ss.SSS")
 
   def date: String
-
   def time: String
 
   def timeStamp: Long = {
-    df.parse("%s %s".format(date, time)).getTime()
+    val dateTime = date + " " + time;
+    if (time.length > 8) {
+      df.parse(dateTime).getTime()
+    } else {
+      dfShort.parse(dateTime).getTime()
+    }
   }
 }
 
