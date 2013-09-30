@@ -8,28 +8,19 @@ import java.text.SimpleDateFormat
 
 import Database.threadLocalSession
 
-object TickDatabase {
+class DbConf(args: Seq[String]) extends ScallopConf(args) {
+  val url = trailArg[String](required = true)
+  val driver = opt[String](default = Some("com.mysql.jdbc.Driver"))
+}
 
-  val database = "lse_tickdata"
-
-  def url(args: Array[String]) = {
-
-    val host = args(0)
-    val user = args(1)
-    val password = args(2)
-    val port = if (args.length < 4) "3306" else args(3)
-
-    "jdbc:mysql://%s:%s/%s?user=%s&password=%s".format(
-      host, port, database, user, password)
-  }
-
+class ParseConf(args: Seq[String]) extends DbConf(args) {
+  val bufferSize = opt[Int](default = Some(2000))
 }
 
 trait HasDateTime {
 
   // without milliseconds
   val dfShort = new SimpleDateFormat("ddMMyyyy HH:mm:ss")
-
 
   // Time stamp format with milliseconds
   val df = new SimpleDateFormat("ddMMyyyy HH:mm:ss.SSS")
@@ -39,7 +30,7 @@ trait HasDateTime {
 
   def timeStamp: Long = {
     val dateTime = date + " " + time;
-    if (time.length > 8) {
+    if (time.length > 8 && time.contains(".")) {
       df.parse(dateTime).getTime()
     } else {
       dfShort.parse(dateTime).getTime()
@@ -404,17 +395,12 @@ object ParseRawData {
     println("done.")
   }
 
-class ParseConf(args: Seq[String]) extends ScallopConf(args) {
-  val bufferSize = opt[Int](default = Some(2000))
-  val url = trailArg[String](required = true)
-}
-
 def main(args: Array[String]) {
 
     val conf = new ParseConf(args)
     val bufferSize = conf.bufferSize()
 
-    Database.forURL(conf.url(), driver = "com.mysql.jdbc.Driver") withSession {
+    Database.forURL(conf.url(), driver = conf.driver()) withSession {
 
       parseAndInsert(Query(RawTables.orderDetails), bufferSize)
       parseAndInsert(Query(RawTables.orderHistory), bufferSize)

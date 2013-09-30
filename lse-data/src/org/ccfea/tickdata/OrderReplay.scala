@@ -28,10 +28,16 @@ object OrderReplay {
 
     val conf = new ReplayConf(args)
 
-    Database.forURL(conf.url(), driver = "com.mysql.jdbc.Driver") withSession {
+    Database.forURL(conf.url(), driver = conf.driver()) withSession {
+
+      val selectedAsset = conf.tiCode()
+      val eventsForSingleAsset = for {
+        event <- events
+        if (event.tiCode === selectedAsset)
+      } yield event
 
       val allEventsByTime =
-        Query(events).sortBy(_.messageSequenceNumber).sortBy(_.timeStamp)
+        eventsForSingleAsset.sortBy(_.messageSequenceNumber).sortBy(_.timeStamp)
 
       val selectedEvents = conf.maxNumEvents.get match {
         case Some(n) => allEventsByTime.take(n)
@@ -257,9 +263,9 @@ class MarketSimulator(val events: Seq[Event], val market: MarketState = new Mark
 
 }
 
-class ReplayConf(args: Seq[String]) extends ScallopConf(args) {
+class ReplayConf(args: Seq[String]) extends DbConf(args) {
   val withGui = opt[Boolean](default = Some(false))
   val maxNumEvents = opt[Int]()
-  val url = trailArg[String](required = true)
+  val tiCode = opt[String](required = true)
 }
 

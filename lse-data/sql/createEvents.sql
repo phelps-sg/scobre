@@ -54,9 +54,7 @@ CREATE TABLE events (
 
 CREATE INDEX id_events_time ON events(ti_code, time_stamp, message_sequence_number, event_type, order_code) USING BTREE;
 
--- CREATE INDEX id_events_publication_time_stamp ON events(publication_time_stamp);
 CREATE INDEX id_events_trade_size ON events(buy_sell_ind, trade_size);
--- CREATE INDEX id_events_trade_price ON events(trade_price);
 
 CREATE INDEX id_events_order_code ON events(order_code) USING HASH;
 CREATE INDEX id_events_trade_code ON events(trade_code) USING HASH;
