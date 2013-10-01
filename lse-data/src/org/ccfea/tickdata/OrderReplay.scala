@@ -6,6 +6,8 @@ import Database.threadLocalSession
 
 import org.rogach.scallop._
 
+import org.saddle._
+
 import java.text.SimpleDateFormat
 
 import net.sourceforge.jasa.market._
@@ -28,9 +30,14 @@ object OrderReplay {
 
     val conf = new ReplayConf(args)
 
-    Database.forURL(conf.url(), driver = conf.driver()) withSession {
+    val reply = new OrderReplay(conf.url(), conf.driver(), conf.tiCode(), conf.withGui(), None) // TODOconf.maxNumEvents.)
+  }
+}
 
-      val selectedAsset = conf.tiCode()
+class OrderReplay(val url: String, val driver: String, val selectedAsset: String, val withGui: Boolean = false, val maxNumEvents: Option[Int] = None) {
+
+    Database.forURL(url, driver = driver) withSession {
+
       val eventsForSingleAsset = for {
         event <- events
         if (event.tiCode === selectedAsset)
@@ -39,14 +46,13 @@ object OrderReplay {
       val allEventsByTime =
         eventsForSingleAsset.sortBy(_.messageSequenceNumber).sortBy(_.timeStamp)
 
-      val selectedEvents = conf.maxNumEvents.get match {
+      val selectedEvents = maxNumEvents match {
         case Some(n) => allEventsByTime.take(n)
         case None    => allEventsByTime
       }
 
-      val timeSeries = replayEvents(selectedEvents.list, conf.withGui())
+      val timeSeries = replayEvents(selectedEvents.list, withGui)
       outputTimeSeries(timeSeries)
-    }
   }
 
   def replayEvents(events: Seq[Event], withGui: Boolean = false) = {
