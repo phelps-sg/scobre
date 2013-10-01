@@ -22,6 +22,14 @@ libraryDependencies ++= Seq(
   // (OPTIONAL) "org.scala-saddle" %% "saddle-hdf5" % "1.3.+"
 )
 
+resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
+
+libraryDependencies ++= Seq(
+  "se.scalablesolutions.akka" % "akka-actor" % "1.2",
+  "se.scalablesolutions.akka" % "akka-stm" % "1.2",
+  "se.scalablesolutions.akka" % "akka-remote" % "1.2"
+)
+
 libraryDependencies += "org.rogach" %% "scallop" % "0.9.4"
 
 libraryDependencies ++= List(

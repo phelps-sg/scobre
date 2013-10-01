@@ -1,5 +1,6 @@
 package org.ccfea.tickdata
 
+import akka.actor._
 import scala.slick.driver.MySQLDriver.simple._
 import RelationalTables._
 import Database.threadLocalSession
@@ -34,7 +35,18 @@ object OrderReplay {
   }
 }
 
-class OrderReplay(val url: String, val driver: String, val selectedAsset: String, val withGui: Boolean = false, val maxNumEvents: Option[Int] = None) {
+object StartServer {
+
+  def main(args: Array[String]) {
+
+    val conf = new DbConf(args)
+    val server = new OrderReplayServer(conf.url(), conf.driver())
+  }
+}
+
+case class OrderReplay(val url: String, val driver: String, val selectedAsset: String, val withGui: Boolean = false, val maxNumEvents: Option[Int] = None) {
+
+  def execute() {
 
     Database.forURL(url, driver = driver) withSession {
 
@@ -53,6 +65,7 @@ class OrderReplay(val url: String, val driver: String, val selectedAsset: String
 
       val timeSeries = replayEvents(selectedEvents.list, withGui)
       outputTimeSeries(timeSeries)
+    }
   }
 
   def replayEvents(events: Seq[Event], withGui: Boolean = false) = {
@@ -72,6 +85,14 @@ class OrderReplay(val url: String, val driver: String, val selectedAsset: String
       }
       Unit
   }
+}
+
+class OrderReplayServer(val url: String, val driver: String) extends Actor {
+
+  def receive = {
+      case cmd @ OrderReplay(_, _, _, _, _) =>
+        cmd.execute()
+    }
 }
 
 class MarketState {
