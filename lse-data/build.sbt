@@ -21,6 +21,24 @@ libraryDependencies ++= Seq(
 
 libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-compiler" % _)
 
+resolvers ++= Seq(
+  "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
+  "Sonatype Releases" at "http://oss.sonatype.org/content/repositories/releases"
+)
+
+libraryDependencies ++= Seq(
+  "org.scala-saddle" %% "saddle-core" % "1.3.+"
+  // (OPTIONAL) "org.scala-saddle" %% "saddle-hdf5" % "1.3.+"
+)
+
+resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
+
+libraryDependencies ++= Seq(
+  "se.scalablesolutions.akka" % "akka-actor" % "1.2",
+  "se.scalablesolutions.akka" % "akka-stm" % "1.2",
+  "se.scalablesolutions.akka" % "akka-remote" % "1.2"
+)
+
 libraryDependencies += "org.rogach" %% "scallop" % "0.9.4"
 
 libraryDependencies ++= List(
@@ -36,6 +54,7 @@ libraryDependencies ++= List(
   "net.sourceforge.jtds" % "jtds" % "1.2.4" % "test"
 */
 )
+
 
 mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
   {
