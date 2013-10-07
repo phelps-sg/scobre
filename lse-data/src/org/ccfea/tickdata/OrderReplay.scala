@@ -31,7 +31,8 @@ object OrderReplay {
 
     val conf = new ReplayConf(args)
 
-    val reply = new OrderReplay(conf.url(), conf.driver(), conf.tiCode(), conf.withGui(), None) // TODOconf.maxNumEvents.)
+    val replay = new OrderReplay(conf.url(), conf.driver(), conf.tiCode(), conf.withGui(), None) // TODOconf.maxNumEvents.)
+    replay.run
   }
 }
 
@@ -46,7 +47,7 @@ object StartServer {
 
 case class OrderReplay(val url: String, val driver: String, val selectedAsset: String, val withGui: Boolean = false, val maxNumEvents: Option[Int] = None) {
 
-  def execute() {
+  def run {
 
     Database.forURL(url, driver = driver) withSession {
 
@@ -91,7 +92,7 @@ class OrderReplayServer(val url: String, val driver: String) extends Actor {
 
   def receive = {
       case cmd @ OrderReplay(_, _, _, _, _) =>
-        cmd.execute()
+        cmd.run
     }
 }
 
@@ -253,6 +254,7 @@ class MarketStateWithGUI extends MarketState {
 }
 
 class OrderBookView(val market: MarketState) {
+  //TODO: migrate to scala Swing swing wrappers
   val df = new SimpleDateFormat("HH:mm:ss:SSSS dd/MM yyyy")
   val auctioneer = new ContinuousDoubleAuctioneer()
   auctioneer.setOrderBook(market.book)
