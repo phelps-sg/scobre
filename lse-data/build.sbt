@@ -10,6 +10,15 @@ scalaVersion := "2.10.2"
 
 scalaSource in Compile := file("src/")
 
+resolvers += "Apache HBase" at "https://repository.apache.org/content/repositories/releases"
+
+resolvers += "Thrift" at "http://people.apache.org/~rawson/repo/"
+
+libraryDependencies ++= Seq(
+ "org.apache.hadoop" % "hadoop-core" % "0.20.2",
+ "org.apache.hbase" % "hbase" % "0.90.4"
+)
+
 libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-compiler" % _)
 
 libraryDependencies += "org.rogach" %% "scallop" % "0.9.4"

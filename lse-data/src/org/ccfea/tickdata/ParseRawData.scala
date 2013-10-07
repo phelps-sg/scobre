@@ -306,7 +306,12 @@ object RelationalTables {
 
 import RelationalTables._
 
-object ParseRawData {
+
+trait DataLoader {
+
+  val batchSize: Int
+
+  def run: Unit
 
   def parseEvent(rawEvent: HasDateTime): Event = {
 
@@ -371,11 +376,10 @@ object ParseRawData {
 
     }
 
-
   }
 
-  def parseAndInsert(rawQuery: Query[Any, _ <: HasDateTime], batchSize: Int = 2000) {
 
+  def parseAndInsertData(rawQuery: Query[Any, _ <: HasDateTime]) {
     println(rawQuery.selectStatement)
     var finished = false
     var offset = 0
@@ -383,29 +387,44 @@ object ParseRawData {
       val shortQuery = rawQuery.drop(offset).take(batchSize)
       finished = shortQuery.list.length < batchSize
       val parsed = shortQuery.list.par.map(parseEvent(_))
-      val numRows: Int =  events.insertAll(parsed.seq: _*) match {
-        case Some(x: Int) => x
-        case _ =>
-          throw
-            new UnsupportedOperationException("Unsupported database")
-      }
-
+      val numRows = insertData(parsed.seq)
       offset = offset + numRows
     } while (!finished)
     println("done.")
   }
 
-def main(args: Array[String]) {
+  def insertData(parsedEvents: Seq[Event]): Int
+
+}
+
+class SqlLoader(val batchSize: Int = 2000, val url: String, val driver: String) extends DataLoader {
+
+  def run {
+    Database.forURL(url = url, driver = driver) withSession {
+      parseAndInsertData(Query(RawTables.orderDetails))
+      parseAndInsertData(Query(RawTables.orderHistory))
+      parseAndInsertData(Query(RawTables.tradeReports))
+    }
+  }
+
+  def insertData(parsedEvents: Seq[Event]): Int = {
+    events.insertAll(parsedEvents.seq: _*) match {
+      case Some(x: Int) => x
+      case _ =>
+        throw
+          new UnsupportedOperationException("Unsupported database")
+    }
+  }
+
+}
+
+object ParseRawData {
+
+  def main(args: Array[String]) {
 
     val conf = new ParseConf(args)
-    val bufferSize = conf.bufferSize()
+    val loader = new SqlLoader(conf.bufferSize(), conf.url(), conf.driver())
+    loader.run
 
-    Database.forURL(conf.url(), driver = conf.driver()) withSession {
-
-      parseAndInsert(Query(RawTables.orderDetails), bufferSize)
-      parseAndInsert(Query(RawTables.orderHistory), bufferSize)
-      parseAndInsert(Query(RawTables.tradeReports), bufferSize)
-
-    }
   }
 }
