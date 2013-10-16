@@ -3,6 +3,7 @@ package org.ccfea.tickdata
 import org.rogach.scallop._
 import scala.slick.driver.MySQLDriver.simple._
 import java.text.SimpleDateFormat
+import org.ccfea.tickdata.hbase.HBaseLoader
 
 // Use the implicit threadLocalSession
 
@@ -248,7 +249,6 @@ object RawTables {
 
 object RelationalTables {
 
-
   implicit val eventTypeMapper =
     MappedTypeMapper.base[EventType.Value, String](
     {
@@ -423,7 +423,7 @@ object ParseRawData {
   def main(args: Array[String]) {
 
     val conf = new ParseConf(args)
-    val loader = new SqlLoader(conf.bufferSize(), conf.url(), conf.driver())
+    val loader = new HBaseLoader(conf.bufferSize(), conf.url(), conf.driver())
     loader.run
 
   }

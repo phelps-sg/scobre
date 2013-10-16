@@ -6,8 +6,9 @@ import RelationalTables._
 import Database.threadLocalSession
 
 import org.rogach.scallop._
+import org.ccfea.tickdata.hbase.HBaseOrderReplay
 
-import org.saddle._
+//import org.saddle._
 
 import java.text.SimpleDateFormat
 
@@ -24,49 +25,34 @@ import java.awt.BorderLayout
 
 //import scala.tools.nsc._
 
-
 object OrderReplay {
 
   def main(args: Array[String]) {
 
     val conf = new ReplayConf(args)
 
-    val replay = new OrderReplay(conf.url(), conf.driver(), conf.tiCode(), conf.withGui(), None) // TODOconf.maxNumEvents.)
+//    val replay = new SqlOrderReplay(conf.url(), conf.driver(), conf.tiCode(), conf.withGui(), None) // TODOconf.maxNumEvents.)
+    val replay = new HBaseOrderReplay(conf.tiCode(), conf.withGui(), None) // TODOconf.maxNumEvents.)
     replay.run
   }
 }
+//
+//object StartServer {
+//
+//  def main(args: Array[String]) {
+//
+//    val conf = new DbConf(args)
+//    val server = new OrderReplayServer(conf.url(), conf.driver())
+//  }
+//}
 
-object StartServer {
+abstract class OrderReplay( val selectedAsset: String, val withGui: Boolean = false, val maxNumEvents: Option[Int] = None) {
 
-  def main(args: Array[String]) {
-
-    val conf = new DbConf(args)
-    val server = new OrderReplayServer(conf.url(), conf.driver())
-  }
-}
-
-case class OrderReplay(val url: String, val driver: String, val selectedAsset: String, val withGui: Boolean = false, val maxNumEvents: Option[Int] = None) {
+  def retrieveEvents(): Seq[Event]
 
   def run {
-
-    Database.forURL(url, driver = driver) withSession {
-
-      val eventsForSingleAsset = for {
-        event <- events
-        if (event.tiCode === selectedAsset)
-      } yield event
-
-      val allEventsByTime =
-        eventsForSingleAsset.sortBy(_.messageSequenceNumber).sortBy(_.timeStamp)
-
-      val selectedEvents = maxNumEvents match {
-        case Some(n) => allEventsByTime.take(n)
-        case None    => allEventsByTime
-      }
-
-      val timeSeries = replayEvents(selectedEvents.list, withGui)
+      val timeSeries = replayEvents(retrieveEvents(), withGui)
       outputTimeSeries(timeSeries)
-    }
   }
 
   def replayEvents(events: Seq[Event], withGui: Boolean = false) = {
@@ -88,13 +74,39 @@ case class OrderReplay(val url: String, val driver: String, val selectedAsset: S
   }
 }
 
-class OrderReplayServer(val url: String, val driver: String) extends Actor {
+class SqlOrderReplay(val url: String, val driver: String, selectedAsset: String, withGui: Boolean, maxNumEvents: Option[Int]) extends OrderReplay(selectedAsset, withGui, maxNumEvents) {
 
-  def receive = {
-      case cmd @ OrderReplay(_, _, _, _, _) =>
-        cmd.run
+  def retrieveEvents(): Seq[Event] = {
+
+    Database.forURL(url, driver = driver) withSession {
+
+      val eventsForSingleAsset = for {
+        event <- events
+        if (event.tiCode === selectedAsset)
+      } yield event
+
+      val allEventsByTime =
+        eventsForSingleAsset.sortBy(_.messageSequenceNumber).sortBy(_.timeStamp)
+
+      val selectedEvents = maxNumEvents match {
+        case Some(n) => allEventsByTime.take(n)
+        case None    => allEventsByTime
+      }
+
+      selectedEvents.list
     }
+  }
 }
+
+
+//
+//class OrderReplayServer(val url: String, val driver: String) extends Actor {
+//
+//  def receive = {
+//      case cmd @ OrderReplay(_, _, _, _, _) =>
+//        cmd.run
+//    }
+//}
 
 class MarketState {
 
