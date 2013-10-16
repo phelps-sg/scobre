@@ -57,7 +57,7 @@ class HBaseLoader(batchSize: Int = 2000, url: String, driver: String) extends Sq
     }
   }
 
-  def convert(event: Event): Put = {
+  implicit def convert(event: Event): Put = {
 
     implicit val timeStamp = event.timeStamp
     implicit val put: Put = new Put(getKey(event))
@@ -83,8 +83,7 @@ class HBaseLoader(batchSize: Int = 2000, url: String, driver: String) extends Sq
   }
 
   override def insertData(parsedEvents: Seq[Event]): Int = {
-    val data: Seq[Put] = for(ev <- parsedEvents) yield convert(ev)
-    eventsTable.put(data)
+    eventsTable.put(parsedEvents.map(convert))
     parsedEvents.length
   }
 }

@@ -40,9 +40,8 @@ resolvers += "Apache HBase" at "https://repository.apache.org/content/repositori
 //resolvers += "Thrift" at "http://people.apache.org/~rawson/repo/"
 
 libraryDependencies ++= Seq(
-  "se.scalablesolutions.akka" % "akka-actor" % "1.2",
-  "se.scalablesolutions.akka" % "akka-stm" % "1.2",
-  "se.scalablesolutions.akka" % "akka-remote" % "1.2"
+  "com.typesafe.akka" % "akka-actor" % "2.0.3",
+  "com.typesafe.akka" % "akka-remote" % "2.0.3"
 )
 
 libraryDependencies += "org.rogach" %% "scallop" % "0.9.4"
