@@ -304,7 +304,7 @@ class MarketSimulator(val events: Iterable[Event], val market: MarketState = new
 
 }
 
-class ReplayConf(args: Seq[String]) extends DbConf(args) {
+class ReplayConf(args: Seq[String]) extends ScallopConf(args) {
   val withGui = opt[Boolean](default = Some(false))
   val maxNumEvents = opt[Int]()
   val tiCode = opt[String](required = true)

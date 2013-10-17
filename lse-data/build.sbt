@@ -4,7 +4,7 @@ assemblySettings
 
 name := "lse-data"
 
-version := "0.2"
+version := "0.4"
 
 scalaVersion := "2.10.1"
 
@@ -67,7 +67,10 @@ mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
   {
     case PathList("javax", "servlet", xs @ _*)         => MergeStrategy.first
     case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
+    case PathList(ps @ _*) if ps.last endsWith "pom.xml" => MergeStrategy.concat
+    case PathList(ps @ _*) if ps.last endsWith "pom.properties" => MergeStrategy.concat
     case "log4j.xml" => MergeStrategy.concat
+    case "pom.xml" => MergeStrategy.concat
     case x => old(x)
   }
 }

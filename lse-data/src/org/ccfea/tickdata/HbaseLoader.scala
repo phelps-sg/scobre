@@ -46,17 +46,17 @@ trait HBaseEventConverter {
     case Some(bytes) => Some(toBigDecimal(bytes))
     case None => None
   }
-
-  def getAssetId(tiCode: String): Long = {
-    tiCode.substring(2).toLong
-  }
-
-  def getTiCode(assetId: Long): String = {
-    "GB" + assetId.toString()
-  }
+//
+//  def getAssetId(tiCode: String): Long = {
+//    tiCode.substring(2).toLong
+//  }
+//
+//  def getTiCode(assetId: Long): String = {
+//    "GB" + assetId.toString()
+//  }
 
   def getKey(event: Event): Array[Byte] = {
-    Bytes.add(getAssetId(event.tiCode), event.timeStamp, event.messageSequenceNumber)
+    Bytes.add(event.tiCode + "0", event.timeStamp, event.messageSequenceNumber)
   }
 
 }
@@ -133,8 +133,8 @@ class HBaseOrderReplay(selectedAsset: String, withGui: Boolean, maxNumEvents: Op
 
   def retrieveEvents() = {
     // Setup partial key-scan on selectedAsset
-    val keyStart = Bytes.toBytes(getAssetId(selectedAsset))
-    val keyEnd = Bytes.toBytes(getAssetId(selectedAsset)+1)
+    val keyStart = Bytes.toBytes(selectedAsset + "0")
+    val keyEnd = Bytes.toBytes(selectedAsset + "1")
     val scan: Scan = new Scan(keyStart, keyEnd)
     scan.addFamily(dataFamily)
     scan.setCaching(cacheSize)
