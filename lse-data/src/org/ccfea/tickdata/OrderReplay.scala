@@ -48,14 +48,14 @@ object OrderReplay {
 
 abstract class OrderReplay( val selectedAsset: String, val withGui: Boolean = false, val maxNumEvents: Option[Int] = None) {
 
-  def retrieveEvents(): Seq[Event]
+  def retrieveEvents(): Iterable[Event]
 
   def run {
       val timeSeries = replayEvents(retrieveEvents(), withGui)
       outputTimeSeries(timeSeries)
   }
 
-  def replayEvents(events: Seq[Event], withGui: Boolean = false) = {
+  def replayEvents(events: Iterable[Event], withGui: Boolean = false) = {
       val marketState = if (withGui) new MarketStateWithGUI() else new MarketState()
       val simulator = new MarketSimulator(events, marketState)
       for {
@@ -63,7 +63,7 @@ abstract class OrderReplay( val selectedAsset: String, val withGui: Boolean = fa
       } yield (state.time, state.midPrice)
   }
 
-  def outputTimeSeries(timeSeries: Seq[(Option[SimulationTime], Option[Double])]) {
+  def outputTimeSeries(timeSeries: Iterable[(Option[SimulationTime], Option[Double])]) {
       for ((t, price) <- timeSeries) {
         println(t.get.getTicks + "\t" + (price match {
           case Some(p) => p.toString()
@@ -293,9 +293,9 @@ class OrderBookView(val market: MarketState) {
   }
 }
 
-class MarketSimulator(val events: Seq[Event], val market: MarketState = new MarketState()) {
+class MarketSimulator(val events: Iterable[Event], val market: MarketState = new MarketState()) {
 
-  def map[B](f: MarketState => B): Seq[B] = {
+  def map[B](f: MarketState => B): Iterable[B] = {
     events.map(ev => {
       market.processEvent(ev)
       f(market)

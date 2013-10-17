@@ -25,7 +25,27 @@ trait HBaseEventConverter {
     case l: Long => Bytes.toBytes(l)
   }
 
-  def toEventType(raw: Array[Byte]): EventType.Value = EventType(Bytes.toInt(raw))
+  implicit def toEventType(raw: Array[Byte]): EventType.Value = EventType(Bytes.toInt(raw))
+  implicit def toString(raw: Array[Byte]): String = Bytes.toString(raw)
+  implicit def toLong(raw: Array[Byte]): Long = Bytes.toLong(raw)
+  implicit def toBigDecimal(raw: Array[Byte]): BigDecimal = Bytes.toBigDecimal(raw)
+
+  //TODO: parameterize the following to avoid duplication
+
+  implicit def toOptionString(raw: Option[Array[Byte]]): Option[String] = raw match {
+   case Some(bytes) => Some(toString(bytes))
+   case None => None
+  }
+
+  implicit def toOptionLong(raw: Option[Array[Byte]]): Option[Long] = raw match {
+    case Some(bytes) => Some(toLong(bytes))
+    case None => None
+  }
+
+  implicit def toOptionBigDecimal(raw: Option[Array[Byte]]): Option[BigDecimal] = raw match {
+    case Some(bytes) => Some(toBigDecimal(bytes))
+    case None => None
+  }
 
   def getAssetId(tiCode: String): Long = {
     tiCode.substring(2).toLong
@@ -36,8 +56,7 @@ trait HBaseEventConverter {
   }
 
   def getKey(event: Event): Array[Byte] = {
-    Bytes.add(Bytes.toBytes(getAssetId(event.tiCode)),
-      Bytes.toBytes(event.messageSequenceNumber))
+    Bytes.add(getAssetId(event.tiCode), event.timeStamp, event.messageSequenceNumber)
   }
 
 }
@@ -63,6 +82,7 @@ class HBaseLoader(batchSize: Int = 2000, url: String, driver: String) extends Sq
     implicit val put: Put = new Put(getKey(event))
 
     store("eventType", event.eventType)
+    store("marketSegmentCode", event.marketSegmentCode)
     store("marketMechanismType", event.marketMechanismType)
     store("aggregateSize", event.aggregateSize)
     store("buySellInd", event.buySellInd)
@@ -90,27 +110,59 @@ class HBaseLoader(batchSize: Int = 2000, url: String, driver: String) extends Sq
 
 class HBaseOrderReplay(selectedAsset: String, withGui: Boolean, maxNumEvents: Option[Int]) extends OrderReplay(selectedAsset, withGui, maxNumEvents) with HBaseEventConverter {
 
+  def cacheSize: Int = 2000
+
+  def getColumn(result: Result, name: String): Option[Array[Byte]] = {
+    val column =  result.getColumn(dataFamily, name)
+    column.size match {
+      case 0 => None
+      case 1 => Some(column(0).getValue)
+      case _ => throw new IllegalArgumentException("More than one result in column " + name)
+    }
+  }
+
+  def getTimeStamp(result: Result): Long = {
+    val column = result.getColumn(dataFamily, "eventType")
+    assert(column.size == 1)
+    column(0).getTimestamp
+  }
+
+  def getMessageSequenceNumber(result: Result): Long = {
+    Bytes.toLong(Bytes.tail(result.getRow, 8))
+  }
+
   def retrieveEvents() = {
+    // Setup partial key-scan on selectedAsset
     val keyStart = Bytes.toBytes(getAssetId(selectedAsset))
     val keyEnd = Bytes.toBytes(getAssetId(selectedAsset)+1)
     val scan: Scan = new Scan(keyStart, keyEnd)
     scan.addFamily(dataFamily)
-    scan.setCaching(2000)
+    scan.setCaching(cacheSize)
     val resultScanner: ResultScanner = eventsTable.getScanner(scan)
-    for(result <- resultScanner) {
-      println("=================")
-      val col = result.getColumn(dataFamily, "eventType")
-      println("Size = " + col.size())
-      for(kv <- col) {
-        println("key = " + kv.getKey)
-        println("value = " + toEventType(kv.getValue))
-        println("timestamp = " + new java.util.Date(kv.getTimestamp))
-      }
-
-    }
-    new mutable.LinkedList()
+    for(r <- resultScanner)
+     yield new Event(None,
+                        getColumn(r, "eventType").get,
+                        getMessageSequenceNumber(r),
+                        getTimeStamp(r),
+                        selectedAsset,
+                        getColumn(r, "marketSegmentCode").get,
+                        getColumn(r, "marketMechanismType"),
+                        getColumn(r, "aggregateSize"),
+                        getColumn(r, "buySellInd"),
+                        getColumn(r, "orderCode"),
+                        getColumn(r, "tradeSize"),
+                        getColumn(r, "broadcastUpdateAction"),
+                        getColumn(r, "marketSectorCode"),
+                        getColumn(r, "marketMechanismGroup"),
+                        getColumn(r, "price"),
+                        getColumn(r, "singleFillInd"),
+                        getColumn(r, "matchingOrderCode"),
+                        getColumn(r, "resultingTradeCode"),
+                        getColumn(r, "tradeCode"),
+                        getColumn(r, "tradeTimeInd"),
+                        getColumn(r, "convertedPriceInd")
+                  )
   }
-
 }
 
 
