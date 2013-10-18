@@ -93,8 +93,8 @@ class MarketState {
 
       => {
         if (orderMap.contains(orderCode)) {
-          val removedOrder = orderMap(orderCode)
-          book.remove(removedOrder)
+          val order = orderMap(orderCode)
+          book remove order
         } else {
           //TODO
         }
@@ -116,19 +116,22 @@ class MarketState {
       => {
         if (orderMap.contains(orderCode)) {
           val order = orderMap(orderCode)
-          book.remove(order)
+          book remove order
         } else {
         }
       }
 
+      /********************************************************************
+        *        Logic for transaction events                            *
+        ********************************************************************/
       case Event(id, EventType.Transaction,
-      messageSequenceNumber, timeStamp,
-      tiCode, marketSegmentCode,
-      None, None, None, None,
-      Some(tradeSize), Some(broadcastUpdateAction),
-      None, None, Some(tradePrice), None,
-      None, None,
-      tradeCode, Some(tradeTimeInd), Some(convertedPriceInd))
+                messageSequenceNumber, timeStamp,
+                tiCode, marketSegmentCode,
+                None, None, None, None,
+                Some(tradeSize), Some(broadcastUpdateAction),
+                None, None, Some(tradePrice), None,
+                None, None,
+                tradeCode, Some(tradeTimeInd), Some(convertedPriceInd))
 
       => {
         lastTransactionPrice = Some(tradePrice.toDouble)
@@ -140,9 +143,9 @@ class MarketState {
 
   def processLimitOrder(order: Order) = {
     if (order.isAsk) {
-      book.insertUnmatchedAsk(order)
+      book insertUnmatchedAsk order
     } else {
-      book.insertUnmatchedBid(order)
+      book insertUnmatchedBid order
     }
   }
 
