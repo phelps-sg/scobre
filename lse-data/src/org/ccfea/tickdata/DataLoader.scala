@@ -12,6 +12,8 @@ trait DataLoader {
 
   def run: Unit
 
+  def insertData(parsedEvents: Seq[Event]): Int
+
   def parseEvent(rawEvent: HasDateTime): Event = {
 
     implicit def orderActionTypeToEventType(orderActionType: String): EventType.Value = {

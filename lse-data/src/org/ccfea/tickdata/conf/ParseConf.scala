@@ -8,4 +8,6 @@ package org.ccfea.tickdata.conf
 
 class ParseConf(args: Seq[String]) extends DbConf(args) {
   val bufferSize = opt[Int](default = Some(2000))
+  val fileName = opt[String]()
+  val recordType = opt[String]()
 }

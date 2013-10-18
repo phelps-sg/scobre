@@ -37,5 +37,4 @@ trait SqlLoader extends DataLoader {
     println("done.")
   }
 
-  def insertData(parsedEvents: Seq[Event]): Int
 }

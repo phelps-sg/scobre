@@ -14,24 +14,47 @@ import collection.JavaConversions._
  */
 class MarketState {
 
+  /**
+   * The current state of the book.
+   */
   val book = new FourHeapOrderBook()
+
+  /**
+   * Lookup table of orderCode to Orders.
+   */
   val orderMap = collection.mutable.Map[String, Order]()
+
+  /**
+   * The time of the most recent event.
+   */
   var time: Option[SimulationTime] = None
+
+  /**
+   * The most recent transaction price.
+   */
   var lastTransactionPrice: Option[Double] = None
 
+
+  /**
+   * Update the state in response to a new incoming event.
+   * @param ev  The new event
+   */
   def processEvent(ev: Event) = {
 
     time = Some(new SimulationTime(ev.timeStamp))
 
     ev match {
 
+        /********************************************************************
+         *        Logic for order submitted events                          *
+         ********************************************************************/
       case Event(id, EventType.OrderSubmitted,
-      messageSequenceNumber, timeStamp,
-      tiCode, marketSegmentCode,
-      Some(marketMechanismType), Some(aggregateSize), Some(buySellInd),
-      Some(orderCode),
-      None, Some(broadcastUpdateAction), Some(marketSectorCode), Some(marketMechanismGroup), Some(price), Some(singleFillInd),
-      None, None, None, None, None)
+                  messageSequenceNumber, timeStamp, tiCode, marketSegmentCode,
+                  Some(marketMechanismType), Some(aggregateSize), Some(buySellInd), Some(orderCode),
+                  None,
+                  Some(broadcastUpdateAction), Some(marketSectorCode), Some(marketMechanismGroup), Some(price),
+                    Some(singleFillInd),
+                  None, None, None, None, None)
 
       => {
 
@@ -43,6 +66,7 @@ class MarketState {
         order.setTimeStamp(time.get)
         if (orderMap.contains(orderCode)) {
           //                    println("Order revision to " + orderMap(orderCode))
+          //TODO
         }
         orderMap(orderCode) = order
         if (marketMechanismType equals "LO") {
@@ -52,42 +76,43 @@ class MarketState {
         }
       }
 
-      case Event(id, EventType.OrderDeleted | EventType.OrderExpired | EventType.TransactionLimit,
-      messageSequenceNumber, timeStamp,
-      tiCode, marketSegmentCode,
-      marketMechanismType, aggregateSize, buySellInd,
-      Some(orderCode),
-      tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
-      None, None, None, None, None)
+        /********************************************************************
+         *        Logic for order deleted (and related) events              *
+         ********************************************************************/
+       case Event(id, EventType.OrderDeleted | EventType.OrderExpired | EventType.TransactionLimit,
+                  messageSequenceNumber, timeStamp,
+                  tiCode, marketSegmentCode, marketMechanismType, aggregateSize, buySellInd,
+                  Some(orderCode),
+                  tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
+                  None, None, None, None, None)
 
       => {
-        //                  println("Removing order " + orderCode)
         if (orderMap.contains(orderCode)) {
           val removedOrder = orderMap(orderCode)
-          //                    println("Removed " + removedOrder)
           book.remove(removedOrder)
         } else {
-          //                    println("Unable to find order " + orderCode)
+          //TODO
         }
 
       }
 
-      case Event(id, EventType.OrderFilled,
-      messageSequenceNumber, timeStamp,
-      tiCode, marketSegmentCode,
-      marketMechanismType, aggregateSize, buySellInd,
-      Some(orderCode),
-      tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
-      matchingOrderCode, resultingTradeCode, None, None, None)
+
+        /********************************************************************
+         *        Logic for order filled events                             *
+         ********************************************************************/
+       case Event(id, EventType.OrderFilled,
+                  messageSequenceNumber, timeStamp, tiCode,
+                  marketSegmentCode, marketMechanismType, aggregateSize, buySellInd,
+                  Some(orderCode),
+                  tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
+                  matchingOrderCode, resultingTradeCode,
+                  None, None, None)
 
       => {
-        //            println("Order matched " + orderCode)
         if (orderMap.contains(orderCode)) {
           val order = orderMap(orderCode)
-          //              println("Found order " + order)
           book.remove(order)
         } else {
-          //              println("Unable to find order " + orderCode)
         }
       }
 
@@ -114,19 +139,9 @@ class MarketState {
     } else {
       book.insertUnmatchedBid(order)
     }
-    //    book.matchOrders()
   }
 
   def processMarketOrder(order: Order) = {
-    //    val otherSide =
-    //      if (order.isBid) book.getUnmatchedAsks
-    //      else book.getUnmatchedBids
-    //    var qty = order.getQuantity
-    //    for (potentialMatch <- otherSide if qty >= potentialMatch.getQuantity) {
-    //      val limitOrderQty = potentialMatch.getQuantity
-    //      book.remove(potentialMatch)
-    //      qty = qty - limitOrderQty
-    //    }
   }
 
   def printState = {
@@ -151,7 +166,7 @@ class MarketState {
     }
   }
 
-  //TODO cache
+  //TODO this results in a sort
   def bidPrice(level: Int) = price(level, book.getUnmatchedBids)
   def askPrice(level: Int) = price(level, book.getUnmatchedAsks)
 

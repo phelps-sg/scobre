@@ -9,6 +9,6 @@ import org.rogach.scallop.ScallopConf
  */
 
 class DbConf(args: Seq[String]) extends ScallopConf(args) {
-  val url = trailArg[String](required = true)
+  val url = opt[String]()
   val driver = opt[String](default = Some("com.mysql.jdbc.Driver"))
 }
