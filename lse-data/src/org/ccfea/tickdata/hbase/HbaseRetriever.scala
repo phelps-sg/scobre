@@ -6,9 +6,12 @@ import org.ccfea.tickdata.{Event, AbstractOrderReplay}
 import collection.JavaConversions._
 
 /**
+ * Retrieve time-sorted events for a selected asset from Apache HBase.
  * (c) Steve Phelps 2013
  */
-class HBaseOrderReplay(selectedAsset: String, withGui: Boolean, maxNumEvents: Option[Int]) extends AbstractOrderReplay(selectedAsset, withGui, maxNumEvents) with HBaseEventConverter {
+trait HBaseRetriever extends HBaseEventConverter {
+
+  def selectedAsset: String
 
   def cacheSize: Int = 2000
 

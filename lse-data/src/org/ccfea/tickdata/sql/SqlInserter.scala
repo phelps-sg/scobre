@@ -7,7 +7,8 @@ import RelationalTables.events
 import Database.threadLocalSession
 
 /**
- * Functionality for inserting the parsed data into a SQL database.
+ * Functionality for inserting the parsed events into a SQL database.
+ *
  * (c) Steve Phelps 2013
  */
 trait SqlInserter {

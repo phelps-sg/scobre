@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Import CSV files into Apache HBase.
+
 if [ $# -lt 1 ]; then
 	echo "Usage: importdata.sh <FILENAMES>"
 	exit 1

@@ -7,12 +7,23 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 /**
+ * Read and parse the raw data from CSV files.
+ *
  * (c) Steve Phelps 2013
  */
 trait CsvLoader extends DataLoader {
 
+  /**
+   * The name of the file containing the raw CSV data.
+   */
   val fileName: String
+
+  /**
+   * One of "order_history_raw", "order_detail_raw" or "trade_reports_raw" to indicate the
+   * source of the data.
+   */
   val recordType: String
+
   val separator: Char = ','
   val quote: Char = '"'
   val escape: Char = '\\'

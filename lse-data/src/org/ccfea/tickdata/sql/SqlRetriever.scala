@@ -7,11 +7,16 @@ import RelationalTables.events
 import Database.threadLocalSession
 
 /**
- * Replay events which are stored in a SQL database.
+ * Retrieve time-sorted events for the selected asset from a SQL database.
  *
  * (c) Steve Phelps 2013
  */
-class SqlOrderReplay(val url: String, val driver: String, selectedAsset: String, withGui: Boolean, maxNumEvents: Option[Int]) extends AbstractOrderReplay(selectedAsset, withGui, maxNumEvents) {
+trait SqlRetriever {
+
+  def selectedAsset: String
+  def url: String
+  def driver: String
+  def maxNumEvents: Option[Int]
 
   def retrieveEvents(): Seq[Event] = {
 

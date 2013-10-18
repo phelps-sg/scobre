@@ -19,7 +19,6 @@ object ParseRawData {
   def main(args: Array[String]) {
 
     val conf = new ParseConf(args)
-    //val loader = new SqlToHBaseImport(conf.bufferSize(), conf.url(), conf.driver())
     val loader = new CsvToHbaseImport(batchSize = conf.bufferSize(),
                                         fileName = conf.fileName(),
                                           recordType = conf.recordType())

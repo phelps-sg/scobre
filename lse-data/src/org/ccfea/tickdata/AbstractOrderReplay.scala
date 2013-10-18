@@ -10,7 +10,7 @@ import net.sourceforge.jabm.SimulationTime
  * (c) Steve Phelps 2013
  */
 
-abstract class AbstractOrderReplay( val selectedAsset: String, val withGui: Boolean = false, val maxNumEvents: Option[Int] = None) {
+abstract class AbstractOrderReplay(val withGui: Boolean = false) {
 
   def retrieveEvents(): Iterable[Event]
 

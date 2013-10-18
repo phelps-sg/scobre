@@ -4,12 +4,12 @@ import org.ccfea.tickdata.{Event, HasDateTime, DataLoader}
 import scala.slick.driver.MySQLDriver.simple._
 // Use the implicit threadLocalSession
 import Database.threadLocalSession
+
 /**
  * Functionality for importing the original raw data from Sql tables.
  *
  * (c) Steve Phelps 2013
  */
-
 trait SqlLoader extends DataLoader {
 
   def url: String
