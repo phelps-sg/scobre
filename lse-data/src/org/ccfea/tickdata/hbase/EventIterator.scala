@@ -6,7 +6,7 @@ import collection.JavaConversions._
 
 class EventIterator(val scanner: ResultScanner) extends Iterator[Event] with HBaseEventConverter {
 
-  def resultIterator: Iterator[Result] = scanner.iterator()
+  val resultIterator: Iterator[Result] = scanner.iterator()
 
   def hasNext: Boolean = resultIterator.hasNext
 

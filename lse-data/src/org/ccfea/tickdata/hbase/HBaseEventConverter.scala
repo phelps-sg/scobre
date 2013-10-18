@@ -108,7 +108,7 @@ trait HBaseEventConverter {
   }
 
   def getTiCode(result: Result): String = {
-    Bytes.head(result, 12)
+    Bytes.head(result.getRow, 12)
   }
 }
 

@@ -17,6 +17,8 @@ abstract class AbstractOrderReplay(val withGui: Boolean = false) extends Iterabl
     outputTimeSeries(timeSeries)
   }
 
+  def retrieveEvents: Iterable[Event]
+
   def replayEvents = {
     val marketState = if (withGui) new MarketStateWithGUI() else new MarketState()
     val simulator = new MarketSimulator(this, marketState)

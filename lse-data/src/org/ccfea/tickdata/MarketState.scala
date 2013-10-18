@@ -41,6 +41,8 @@ class MarketState {
    */
   def processEvent(ev: Event) = {
 
+    assert(ev.timeStamp >= (time match { case None => 0; case Some(t) => t.getTicks}))
+
     time = Some(new SimulationTime(ev.timeStamp))
 
     ev match {
@@ -65,8 +67,7 @@ class MarketState {
         order.setIsBid(buySellInd equals "B")
         order.setTimeStamp(time.get)
         if (orderMap.contains(orderCode)) {
-          //                    println("Order revision to " + orderMap(orderCode))
-          //TODO
+          println("Submission using existing order code" + orderCode)
         }
         orderMap(orderCode) = order
         if (marketMechanismType equals "LO") {
@@ -89,9 +90,9 @@ class MarketState {
       => {
         if (orderMap.contains(orderCode)) {
           val order = orderMap(orderCode)
-          book remove order
+          book.remove(order)
         } else {
-          //TODO
+          println("Cannot find order for " + orderCode)
         }
 
       }
@@ -111,8 +112,9 @@ class MarketState {
       => {
         if (orderMap.contains(orderCode)) {
           val order = orderMap(orderCode)
-          book remove order
+          book.remove(order)
         } else {
+          println("Cannot find order for " + orderCode)
         }
       }
 
@@ -132,15 +134,15 @@ class MarketState {
         lastTransactionPrice = Some(tradePrice.toDouble)
       }
 
-      case _ => // println("Do not know how to process " + ev)
+      case _ => println("Do not know how to process " + ev)
     }
   }
 
   def processLimitOrder(order: Order) = {
     if (order.isAsk) {
-      book insertUnmatchedAsk order
+      book.insertUnmatchedAsk(order)
     } else {
-      book insertUnmatchedBid order
+      book.insertUnmatchedBid(order)
     }
   }
 
