@@ -14,7 +14,7 @@ trait HBaseRetriever extends HBaseEventConverter with Iterable[Event] {
 
   def selectedAsset: String
 
-  def cacheSize: Int = 20000
+  def cacheSize: Int = 2000
 
   val keyStart = Bytes.toBytes(selectedAsset + "0")
   val keyEnd = Bytes.toBytes(selectedAsset + "1")

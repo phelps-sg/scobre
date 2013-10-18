@@ -77,7 +77,7 @@ trait HBaseEventConverter {
   /**
    * Get the HBase key for an event.  The key design is:
    *
-   *   <tiCode> 0 <timeStamp> <messageSequenceNumber>
+   *   <tiCode> (12 bytes) | "0" (1 byte) | <timeStamp> (8 bytes) | <messageSequenceNumber> (8 bytes)
    *
    * The "0" separator allows for partial key scans on tiCode (ie a particular asset).
    *
@@ -86,6 +86,14 @@ trait HBaseEventConverter {
    */
   def getKey(event: Event): Array[Byte] = {
     Bytes.add(event.tiCode + "0", event.timeStamp, event.messageSequenceNumber)
+  }
+
+  def getMessageSequenceNumber(result: Result): Long = {
+    Bytes.toLong(Bytes.tail(result.getRow, 8))
+  }
+
+  def getTiCode(result: Result): String = {
+    Bytes.head(result.getRow, 12)
   }
 
   def getColumn(result: Result, name: String): Option[Array[Byte]] = {
@@ -103,12 +111,5 @@ trait HBaseEventConverter {
     column(0).getTimestamp
   }
 
-  def getMessageSequenceNumber(result: Result): Long = {
-    Bytes.toLong(Bytes.tail(result.getRow, 8))
-  }
-
-  def getTiCode(result: Result): String = {
-    Bytes.head(result.getRow, 12)
-  }
 }
 
