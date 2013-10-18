@@ -10,18 +10,16 @@ import net.sourceforge.jabm.SimulationTime
  * (c) Steve Phelps 2013
  */
 
-abstract class AbstractOrderReplay(val withGui: Boolean = false) {
-
-  def retrieveEvents(): Iterable[Event]
+abstract class AbstractOrderReplay(val withGui: Boolean = false) extends Iterable[Event] {
 
   def run {
-    val timeSeries = replayEvents(retrieveEvents(), withGui)
+    val timeSeries = replayEvents
     outputTimeSeries(timeSeries)
   }
 
-  def replayEvents(events: Iterable[Event], withGui: Boolean = false) = {
+  def replayEvents = {
     val marketState = if (withGui) new MarketStateWithGUI() else new MarketState()
-    val simulator = new MarketSimulator(events, marketState)
+    val simulator = new MarketSimulator(this, marketState)
     for {
       state <- simulator
     } yield (state.time, state.midPrice)

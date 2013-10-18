@@ -20,12 +20,7 @@ class MarketState {
   val book = new FourHeapOrderBook()
 
   /**
-   * Lookup table of orderCode to Orders.                                              countryOfRegister, currencyCode, tradeCode,
-        tradePrice, tradeSize, date, time,
-        broadcastUpdateAction, tradeTypeInd,
-        tradeTimeInd, bargainConditions, convertedPriceInd,
-        publicationDate, publicationTime) =>
-
+   * Lookup table mapping order-codes to Orders.
    */
   val orderMap = collection.mutable.Map[String, Order]()
 
