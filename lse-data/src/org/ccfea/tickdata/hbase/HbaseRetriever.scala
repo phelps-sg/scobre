@@ -5,14 +5,6 @@ import org.apache.hadoop.hbase.util.Bytes
 import org.ccfea.tickdata.{Event, AbstractOrderReplay}
 import collection.JavaConversions._
 
-class EventIterator(val scanner: ResultScanner) extends Iterator[Event] with HBaseEventConverter {
-
-  def resultIterator: Iterator[Result] = scanner.iterator()
-
-  def hasNext: Boolean = resultIterator.hasNext
-
-  def next(): Event = resultIterator.next()
-}
 
 /**
  * Retrieve time-sorted events for a selected asset from Apache HBase.
