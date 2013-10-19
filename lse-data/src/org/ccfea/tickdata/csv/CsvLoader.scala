@@ -1,6 +1,6 @@
 package org.ccfea.tickdata.csv
 
-import org.ccfea.tickdata.{Event, DataLoader}
+import org.ccfea.tickdata.{HasDateTime, Event, DataLoader}
 import org.ccfea.tickdata.rawdata._
 import java.io.{BufferedReader, InputStreamReader, FileInputStream}
 import scala.collection.mutable
@@ -30,16 +30,17 @@ trait CsvLoader extends DataLoader {
 
   def run = {
     val reader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName) ))
-    val events = new ListBuffer[Event]
+    val events = new ListBuffer[HasDateTime]
     try {
       var next = true
       while (next) {
         val line = reader.readLine()
         if (line != null) {
-          val event = parseEvent(toRecord(parse(line)))
+          val event = toRecord(parse(line))
           events += event
           if (events.size > batchSize) {
-            insertData(events.seq)
+            val parsed = events.par.map(parseEvent(_))
+            insertData(parsed.seq)
             events.clear()
           }
         }
@@ -76,7 +77,7 @@ trait CsvLoader extends DataLoader {
     }
   }
 
-  def toRecord(values: Array[Option[String]]) = {
+  def toRecord(values: Array[Option[String]]): HasDateTime = {
 
     implicit def toOptionBigDecimal(x: Option[String]): Option[BigDecimal] = {
       x match {

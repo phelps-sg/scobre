@@ -2,10 +2,11 @@ package org.ccfea.tickdata
 
 import net.sourceforge.jabm.SimulationTime
 
-import net.sourceforge.jasa.market.{Order, FourHeapOrderBook}
 import net.sourceforge.jasa.agent.SimpleTradingAgent
 
 import collection.JavaConversions._
+import net.sourceforge.jasa.market.Order
+import net.sourceforge.jasa.market.FourHeapOrderBook
 
 /**
  * The state of the market at a single point in time.
@@ -139,11 +140,8 @@ class MarketState {
   }
 
   def processLimitOrder(order: Order) = {
-    if (order.isAsk) {
-      book.insertUnmatchedAsk(order)
-    } else {
-      book.insertUnmatchedBid(order)
-    }
+    if (order.isAsk) book.insertUnmatchedAsk(order) else book.insertUnmatchedBid(order)
+//    book add order
   }
 
   def processMarketOrder(order: Order) = {
@@ -154,25 +152,29 @@ class MarketState {
   }
 
   def midPrice: Option[Double] = {
-    val bid = book.getHighestUnmatchedBid
-    val ask = book.getLowestUnmatchedAsk
-    if (bid == null || ask == null) {
-      None
-    } else {
-      Some((bid.getPrice + ask.getPrice) / 2.0)
+
+    val quote: (Option[Order], Option[Order]) =
+      (if (book.getHighestUnmatchedBid == null) None else Some(book.getHighestUnmatchedBid),
+       if (book.getHighestMatchedAsk==null)     None else Some(book.getHighestMatchedAsk))
+
+    quote match {
+      case (None,      None)      => None
+      case (Some(bid), None)      => Some(bid.getPrice)
+      case (None,      Some(ask)) => Some(ask.getPrice)
+      case (Some(bid), Some(ask)) => Some((bid.getPrice + ask.getPrice) / 2)
     }
   }
 
-  def price(level: Int, orders: Seq[Order]): Option[Double] = {
-    if (level < orders.length) {
-      Some(orders.sorted.get(level).getPrice)
-    } else {
-      None
-    }
-  }
+//  def price(level: Int, orders: Seq[Order]): Option[Double] = {
+//    if (level < orders.length) {
+//      Some(orders.sorted.get(level).getPrice)
+//    } else {
+//      None
+//    }
+//  }
 
   //TODO this results in a sort
-  def bidPrice(level: Int) = price(level, book.getUnmatchedBids)
-  def askPrice(level: Int) = price(level, book.getUnmatchedAsks)
+//  def bidPrice(level: Int) = price(level, book.getUnmatchedBids)
+//  def askPrice(level: Int) = price(level, book.getUnmatchedAsks)
 
 }

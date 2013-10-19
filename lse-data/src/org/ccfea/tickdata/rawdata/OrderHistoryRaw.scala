@@ -7,7 +7,6 @@ import org.ccfea.tickdata.HasDateTime
  *
  * (c) Steve Phelps 2013
  */
-
 case class OrderHistoryRaw(orderCode: String,
                            orderActionType: String,
                            matchingOrderCode: Option[String],
