@@ -7,7 +7,6 @@ import org.ccfea.tickdata.HasDateTime
  *
  * (c) Steve Phelps 2013
  */
-
 case class OrderDetailRaw(orderCode: String, marketSegmentCode: String,
                           marketSectorCode: String, tiCode: String,
                           countryofRegister: String, currencyCode: String,

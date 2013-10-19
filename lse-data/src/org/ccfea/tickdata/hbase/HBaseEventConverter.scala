@@ -1,9 +1,10 @@
 package org.ccfea.tickdata.hbase
 
 import org.apache.hadoop.hbase.HBaseConfiguration
-import org.apache.hadoop.hbase.client.{HTable, HBaseAdmin}
+import org.apache.hadoop.hbase.client.{Result, HTable, HBaseAdmin}
 import org.apache.hadoop.hbase.util.Bytes
 import org.ccfea.tickdata.{Event, EventType}
+import collection.JavaConversions._
 
 /**
  * Misc. functionality for converting events to/from byte arrays.
@@ -47,10 +48,36 @@ trait HBaseEventConverter {
     case None => None
   }
 
+
+  implicit def toEvent(r: Result) = {
+    new Event(None,
+      getColumn(r, "eventType").get,
+      getMessageSequenceNumber(r),
+      getTimeStamp(r),
+      getTiCode(r),
+      getColumn(r, "marketSegmentCode").get,
+      getColumn(r, "marketMechanismType"),
+      getColumn(r, "aggregateSize"),
+      getColumn(r, "buySellInd"),
+      getColumn(r, "orderCode"),
+      getColumn(r, "tradeSize"),
+      getColumn(r, "broadcastUpdateAction"),
+      getColumn(r, "marketSectorCode"),
+      getColumn(r, "marketMechanismGroup"),
+      getColumn(r, "price"),
+      getColumn(r, "singleFillInd"),
+      getColumn(r, "matchingOrderCode"),
+      getColumn(r, "resultingTradeCode"),
+      getColumn(r, "tradeCode"),
+      getColumn(r, "tradeTimeInd"),
+      getColumn(r, "convertedPriceInd")
+    )
+  }
+
   /**
    * Get the HBase key for an event.  The key design is:
    *
-   *   <tiCode> 0 <timeStamp> <messageSequenceNumber>
+   *   <tiCode> (12 bytes) | "0" (1 byte) | <timeStamp> (8 bytes) | <messageSequenceNumber> (8 bytes)
    *
    * The "0" separator allows for partial key scans on tiCode (ie a particular asset).
    *
@@ -59,6 +86,29 @@ trait HBaseEventConverter {
    */
   def getKey(event: Event): Array[Byte] = {
     Bytes.add(event.tiCode + "0", event.timeStamp, event.messageSequenceNumber)
+  }
+
+  def getMessageSequenceNumber(result: Result): Long = {
+    Bytes.toLong(Bytes.tail(result.getRow, 8))
+  }
+
+  def getTiCode(result: Result): String = {
+    Bytes.head(result.getRow, 12)
+  }
+
+  def getColumn(result: Result, name: String): Option[Array[Byte]] = {
+    val column =  result.getColumn(dataFamily, name)
+    column.size match {
+      case 0 => None
+      case 1 => Some(column(0).getValue)
+      case _ => throw new IllegalArgumentException("More than one result in column " + name)
+    }
+  }
+
+  def getTimeStamp(result: Result): Long = {
+    val column = result.getColumn(dataFamily, "eventType")
+    assert(column.size == 1)
+    column(0).getTimestamp
   }
 
 }

@@ -2,10 +2,11 @@ package org.ccfea.tickdata
 
 import net.sourceforge.jabm.SimulationTime
 
-import net.sourceforge.jasa.market.{Order, FourHeapOrderBook}
 import net.sourceforge.jasa.agent.SimpleTradingAgent
 
 import collection.JavaConversions._
+import net.sourceforge.jasa.market.Order
+import net.sourceforge.jasa.market.FourHeapOrderBook
 
 /**
  * The state of the market at a single point in time.
@@ -20,12 +21,7 @@ class MarketState {
   val book = new FourHeapOrderBook()
 
   /**
-   * Lookup table of orderCode to Orders.                                              countryOfRegister, currencyCode, tradeCode,
-        tradePrice, tradeSize, date, time,
-        broadcastUpdateAction, tradeTypeInd,
-        tradeTimeInd, bargainConditions, convertedPriceInd,
-        publicationDate, publicationTime) =>
-
+   * Lookup table mapping order-codes to Orders.
    */
   val orderMap = collection.mutable.Map[String, Order]()
 
@@ -45,6 +41,8 @@ class MarketState {
    * @param ev  The new event
    */
   def processEvent(ev: Event) = {
+
+    assert(ev.timeStamp >= (time match { case None => 0; case Some(t) => t.getTicks}))
 
     time = Some(new SimulationTime(ev.timeStamp))
 
@@ -70,8 +68,7 @@ class MarketState {
         order.setIsBid(buySellInd equals "B")
         order.setTimeStamp(time.get)
         if (orderMap.contains(orderCode)) {
-          //                    println("Order revision to " + orderMap(orderCode))
-          //TODO
+          println("Submission using existing order code" + orderCode)
         }
         orderMap(orderCode) = order
         if (marketMechanismType equals "LO") {
@@ -94,9 +91,9 @@ class MarketState {
       => {
         if (orderMap.contains(orderCode)) {
           val order = orderMap(orderCode)
-          book remove order
+          book.remove(order)
         } else {
-          //TODO
+          println("Cannot find order for " + orderCode)
         }
 
       }
@@ -116,8 +113,9 @@ class MarketState {
       => {
         if (orderMap.contains(orderCode)) {
           val order = orderMap(orderCode)
-          book remove order
+          book.remove(order)
         } else {
+          println("Cannot find order for " + orderCode)
         }
       }
 
@@ -137,16 +135,13 @@ class MarketState {
         lastTransactionPrice = Some(tradePrice.toDouble)
       }
 
-      case _ => // println("Do not know how to process " + ev)
+      case _ => println("Do not know how to process " + ev)
     }
   }
 
   def processLimitOrder(order: Order) = {
-    if (order.isAsk) {
-      book insertUnmatchedAsk order
-    } else {
-      book insertUnmatchedBid order
-    }
+    if (order.isAsk) book.insertUnmatchedAsk(order) else book.insertUnmatchedBid(order)
+//    book add order
   }
 
   def processMarketOrder(order: Order) = {
@@ -157,25 +152,29 @@ class MarketState {
   }
 
   def midPrice: Option[Double] = {
-    val bid = book.getHighestUnmatchedBid
-    val ask = book.getLowestUnmatchedAsk
-    if (bid == null || ask == null) {
-      None
-    } else {
-      Some((bid.getPrice + ask.getPrice) / 2.0)
+
+    val quote: (Option[Order], Option[Order]) =
+      (if (book.getHighestUnmatchedBid == null) None else Some(book.getHighestUnmatchedBid),
+       if (book.getHighestMatchedAsk==null)     None else Some(book.getHighestMatchedAsk))
+
+    quote match {
+      case (None,      None)      => None
+      case (Some(bid), None)      => Some(bid.getPrice)
+      case (None,      Some(ask)) => Some(ask.getPrice)
+      case (Some(bid), Some(ask)) => Some((bid.getPrice + ask.getPrice) / 2)
     }
   }
 
-  def price(level: Int, orders: Seq[Order]): Option[Double] = {
-    if (level < orders.length) {
-      Some(orders.sorted.get(level).getPrice)
-    } else {
-      None
-    }
-  }
+//  def price(level: Int, orders: Seq[Order]): Option[Double] = {
+//    if (level < orders.length) {
+//      Some(orders.sorted.get(level).getPrice)
+//    } else {
+//      None
+//    }
+//  }
 
   //TODO this results in a sort
-  def bidPrice(level: Int) = price(level, book.getUnmatchedBids)
-  def askPrice(level: Int) = price(level, book.getUnmatchedAsks)
+//  def bidPrice(level: Int) = price(level, book.getUnmatchedBids)
+//  def askPrice(level: Int) = price(level, book.getUnmatchedAsks)
 
 }
