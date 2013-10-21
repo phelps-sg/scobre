@@ -2,7 +2,7 @@ package org.ccfea.tickdata
 
 /**
  * An event that has occurred in the exchange.  A time-ordered sequence of Events can be replayed
- * through a simulator in * order to reconstruct the state of the market at any given time.
+ * through a simulator in order to reconstruct the state of the market at any given time.
  *
  * (c) Steve Phelps 2013
  */
