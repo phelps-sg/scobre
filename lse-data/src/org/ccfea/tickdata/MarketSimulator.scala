@@ -1,7 +1,9 @@
 package org.ccfea.tickdata
 
 /**
- * A simulator which takes a sequence of events and replays them, producing a MarketState object for each event.
+ * A simulator which takes a sequence of events and replays them, producing some function of a
+ * MarketState object for each event.  The specified function can be used to collect data of interest
+ * on the market, e.g. the mid-price, as a time-series.
  *
  * (c) Steve Phelps 2013
  */
