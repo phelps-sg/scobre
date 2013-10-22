@@ -25,7 +25,7 @@ cat_data() {
 	esac
 }
 
-# Import the specified CSV file into the appropriate mysql table
+# Import the specified CSV file into the appropriate table
 import() {
 	FILE=$1
 
@@ -43,14 +43,10 @@ import() {
 # Main           #
 ##################
 
-if [ -z "$SOCKET" ]; then
-	export SOCKET=/var/run/mysqld/mysqld.sock
-fi
-
 # Remove previous named pipe
 rm -f /tmp/lsedata.txt
 
-# Create a named pipe to the mysql command
+# Create a named pipe to the importing process
 mkfifo /tmp/lsedata.txt
 
 for filename in $*

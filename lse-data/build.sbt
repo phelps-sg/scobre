@@ -46,6 +46,8 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "org.rogach" %% "scallop" % "0.9.4"
 
+libraryDependencies += "org.clapper" % "grizzled-slf4j_2.10" % "1.0.1"
+
 libraryDependencies ++= List(
   "com.typesafe.slick" %% "slick" % "1.0.1",
   //"org.slf4j" % "slf4j-nop" % "1.6.4",

@@ -12,7 +12,9 @@ import collection.JavaConversions._
  */
 trait HBaseEventConverter {
 
-  val conf = new HBaseConfiguration()
+  val conf = HBaseConfiguration.create()
+  conf.addResource("mysite.xml")
+  conf.set("hbase.master", "cseesp1:60000")
   val admin = new HBaseAdmin(conf)
 
   val eventsTable = new HTable(conf, "events")
