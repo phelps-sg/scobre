@@ -29,10 +29,10 @@
 	<property>
 		<name>hbase.master</name>
 		<!-- <value>sphelps-Aspire-S3</value> -->
-		<value>192.168.1.12</value>
+		<value>cseesp1</value>
 	</property>
 	<property>
 		<name>hbase.zookeeper.quorum</name>
-		<value>192.168.1.12</value>
+		<value>cseesp1</value>
 	</property>
 </configuration>

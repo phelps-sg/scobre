@@ -46,7 +46,6 @@ import() {
 BASEDIR=`dirname $0`
 export BASEDIR=$BASEDIR/..
 
-
 # Configure Java class path
 export CLASSPATH=$BASEDIR/target/scala-2.10/lse-data-assembly-0.4.jar:$BASEDIR/etc
 
