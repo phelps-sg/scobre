@@ -29,10 +29,10 @@
 	<property>
 		<name>hbase.master</name>
 		<!-- <value>sphelps-Aspire-S3</value> -->
-		<value>cseesp1</value>
+		<value>gamer-i5</value>
 	</property>
 	<property>
 		<name>hbase.zookeeper.quorum</name>
-		<value>cseesp1</value>
+		<value>gamer-i5</value>
 	</property>
 </configuration>
