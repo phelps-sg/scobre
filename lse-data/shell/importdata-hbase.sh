@@ -12,7 +12,7 @@ import_pipe() {
 	
 	echo "Importing $TABLE"
 
-	java -cp lse-data.jar org.ccfea.tickdata.ParseRawData -b 5000 -r $TABLE -f /tmp/lsedata.txt
+	java org.ccfea.tickdata.ParseRawData -b 5000 -r $TABLE -f /tmp/lsedata.txt
 }
 
 cat_data() {
@@ -42,6 +42,13 @@ import() {
 ##################
 # Main           #
 ##################
+
+BASEDIR=`dirname $0`
+export BASEDIR=$BASEDIR/..
+
+
+# Configure Java class path
+export CLASSPATH=$BASEDIR/target/scala-2.10/lse-data-assembly-0.4.jar:$BASEDIR/etc
 
 # Remove previous named pipe
 rm -f /tmp/lsedata.txt
