@@ -1,9 +1,6 @@
 package org.ccfea.tickdata
 
-import java.text.SimpleDateFormat
-import net.sourceforge.jasa.market.auctioneer.ContinuousDoubleAuctioneer
-import javax.swing.{SwingUtilities, JLabel, JFrame}
-import java.awt.BorderLayout
+import grizzled.slf4j.Logger
 
 /**
  * Provides a visualisation of the current-state of the order-book on top of the standard
@@ -15,9 +12,11 @@ class MarketStateWithGUI extends MarketState {
 
   val view: OrderBookView = new OrderBookView(this)
 
+  override val logger = Logger(classOf[MarketStateWithGUI])
+
   override def processEvent(ev: Event) = {
     val result = super.processEvent(ev)
-    println(ev)
+    logger.info(ev)
     view.update
     result
   }

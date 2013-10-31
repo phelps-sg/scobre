@@ -1,6 +1,7 @@
 package org.ccfea.tickdata
 
 import rawdata._
+import grizzled.slf4j.Logger
 
 /**
  * Parse the raw data from LSE and convert it to a sequence of Events.
@@ -10,6 +11,8 @@ import rawdata._
 
 trait DataLoader {
 
+  val logger = Logger(classOf[DataLoader])
+
   val batchSize: Int
 
   def run: Unit
@@ -17,6 +20,8 @@ trait DataLoader {
   def insertData(parsedEvents: Seq[Event]): Int
 
   def parseEvent(rawEvent: HasDateTime): Event = {
+
+    logger.debug("Raw event = " + rawEvent)
 
     implicit def orderActionTypeToEventType(orderActionType: String): EventType.Value = {
       orderActionType match {

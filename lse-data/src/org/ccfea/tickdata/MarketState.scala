@@ -5,8 +5,11 @@ import net.sourceforge.jabm.SimulationTime
 import net.sourceforge.jasa.agent.SimpleTradingAgent
 
 import collection.JavaConversions._
+
 import net.sourceforge.jasa.market.Order
 import net.sourceforge.jasa.market.FourHeapOrderBook
+
+import grizzled.slf4j.Logger
 
 /**
  * The state of the market at a single point in time.
@@ -35,12 +38,15 @@ class MarketState {
    */
   var lastTransactionPrice: Option[Double] = None
 
+  val logger = Logger(classOf[MarketState])
 
   /**
    * Update the state in response to a new incoming event.
    * @param ev  The new event
    */
   def processEvent(ev: Event) = {
+
+    logger.debug("Processing event " + ev)
 
     assert(ev.timeStamp >= (time match { case None => 0; case Some(t) => t.getTicks}))
 
@@ -68,7 +74,7 @@ class MarketState {
         order.setIsBid(buySellInd equals "B")
         order.setTimeStamp(time.get)
         if (orderMap.contains(orderCode)) {
-          println("Submission using existing order code" + orderCode)
+          logger.warn("Submission using existing order code" + orderCode)
         }
         orderMap(orderCode) = order
         if (marketMechanismType equals "LO") {
@@ -93,7 +99,7 @@ class MarketState {
           val order = orderMap(orderCode)
           book.remove(order)
         } else {
-          println("Cannot find order for " + orderCode)
+          logger.warn("Cannot find order for " + orderCode)
         }
 
       }
@@ -115,7 +121,7 @@ class MarketState {
           val order = orderMap(orderCode)
           book.remove(order)
         } else {
-          println("Cannot find order for " + orderCode)
+          logger.warn("Cannot find order for " + orderCode)
         }
       }
 
@@ -135,7 +141,7 @@ class MarketState {
         lastTransactionPrice = Some(tradePrice.toDouble)
       }
 
-      case _ => println("Do not know how to process " + ev)
+      case _ => logger.warn("Do not know how to process " + ev)
     }
   }
 

@@ -39,16 +39,22 @@ trait CsvLoader extends DataLoader {
           val event = toRecord(parse(line))
           events += event
           if (events.size > batchSize) {
-            val parsed = events.par.map(parseEvent(_))
-            insertData(parsed.seq)
-            events.clear()
+            parseAndInsert(events)
           }
         }
         else next = false
       }
     } finally {
+      // Parse remaining events in buffer
+      parseAndInsert(events)
       reader.close()
     }
+  }
+
+  def parseAndInsert(events: ListBuffer[HasDateTime]) = {
+    val parsed = events.par.map(parseEvent(_))
+    insertData(parsed.seq)
+    events.clear()
   }
 
   def parse(line: String): Array[Option[String]] = {
@@ -71,8 +77,14 @@ trait CsvLoader extends DataLoader {
   }
 
   def parseNull(value: String): Option[String] = {
+
     value match {
+
       case "NULL" => None
+
+      // At some points in the LSE data the empty-string is also used to denote NULL values
+      case "" => None
+
       case x => Some(x)
     }
   }
@@ -95,6 +107,7 @@ trait CsvLoader extends DataLoader {
       i = i+1
       result
     }
+
 
     recordType match {
 
