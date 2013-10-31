@@ -15,12 +15,12 @@ CREATE TABLE events (
 	ti_code VARCHAR(12) NOT NULL,
 	market_segment_code VARCHAR(4) NOT NULL,
 --	country_of_register VARCHAR(2) NOT NULL,
---	currency_code VARCHAR(3) NOT NULL,
+	currency_code VARCHAR(3) NOT NULL,
 
 -- common to order events
     market_mechanism_type VARCHAR(2) NULL,
     aggregate_size DECIMAL(12, 0) NULL,
-    buy_sell_ind CHAR(1) NULL,
+    trade_direction ENUM('buy', 'sell') NULL,
     order_code VARCHAR(10) NULL,
 
 -- common to transactions and revisions

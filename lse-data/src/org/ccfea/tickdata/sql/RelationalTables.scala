@@ -1,6 +1,6 @@
 package org.ccfea.tickdata.sql
 
-import org.ccfea.tickdata.{Event, EventType}
+import org.ccfea.tickdata.{TradeDirection, Event, EventType}
 import scala.slick.driver.MySQLDriver.simple._
 
 /**
@@ -28,6 +28,17 @@ object RelationalTables {
       }
     })
 
+  implicit val tradeDirectionMapper =
+    MappedTypeMapper.base[TradeDirection.Value, String](
+    {
+      td => td.toString
+    }, {
+      id => id match {
+        case "buy"  => TradeDirection.Buy
+        case "sell" => TradeDirection.Sell
+      }
+    })
+
   val events = new Table[Event]("events") {
 
     def eventID = column[Option[Long]]("event_id", O.AutoInc, O.PrimaryKey)
@@ -42,7 +53,7 @@ object RelationalTables {
     def currencyCode = column[String]("currency_code")
     def marketSectorCode = column[Option[String]]("market_sector_code")
     def participantCode = column[Option[String]]("participant_code")
-    def buySellInd = column[Option[String]]("buy_sell_ind")
+    def tradeDirection = column[Option[TradeDirection.Value]]("trade_direction")
     def marketMechanismGroup = column[Option[String]]("market_mechanism_group")
     def marketMechanismType = column[Option[String]]("market_mechanism_type")
     def price = column[Option[BigDecimal]]("price")
@@ -61,7 +72,7 @@ object RelationalTables {
     def convertedPriceInd = column[Option[String]]("converted_price_ind")
     //      def publicationTimeStamp = column[Option[Long]]("publication_time_stamp")
 
-    def * = eventID ~ eventType ~ messageSequenceNumber ~ timeStamp ~ tiCode ~ marketSegmentCode ~ marketMechanismType ~ aggregateSize ~ buySellInd ~ orderCode ~ tradeSize ~ broadcastUpdateAction ~ marketSectorCode ~ marketMechanismGroup ~ price ~ singleFillInd ~ matchingOrderCode ~ resultingTradeCode ~ tradeCode ~ tradeTimeInd ~ convertedPriceInd <> (Event, Event.unapply _)
+    def * = eventID ~ eventType ~ messageSequenceNumber ~ timeStamp ~ tiCode ~ marketSegmentCode ~ currencyCode ~ marketMechanismType ~ aggregateSize ~ tradeDirection ~ orderCode ~ tradeSize ~ broadcastUpdateAction ~ marketSectorCode ~ marketMechanismGroup ~ price ~ singleFillInd ~ matchingOrderCode ~ resultingTradeCode ~ tradeCode ~ tradeTimeInd ~ convertedPriceInd <> (Event, Event.unapply _)
   }
 
 }

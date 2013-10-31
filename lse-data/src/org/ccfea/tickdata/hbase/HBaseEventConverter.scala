@@ -3,7 +3,7 @@ package org.ccfea.tickdata.hbase
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.{Result, HTable, HBaseAdmin}
 import org.apache.hadoop.hbase.util.Bytes
-import org.ccfea.tickdata.{Event, EventType}
+import org.ccfea.tickdata.{TradeDirection, Event, EventType}
 import collection.JavaConversions._
 
 /**
@@ -24,11 +24,13 @@ trait HBaseEventConverter {
   implicit def toBytes(x: Any): Array[Byte] = x match {
     case s: String => Bytes.toBytes(s)
     case evType: EventType.Value => Bytes.toBytes(evType.id)
+    case td: TradeDirection.Value => Bytes.toBytes(td.id)
     case p: BigDecimal => Bytes.toBytes(new java.math.BigDecimal(p.toString()))
     case l: Long => Bytes.toBytes(l)
   }
 
   implicit def toEventType(raw: Array[Byte]): EventType.Value = EventType(Bytes.toInt(raw))
+  implicit def toTradeDirection(raw: Array[Byte]): TradeDirection.Value = TradeDirection(Bytes.toInt(raw))
   implicit def toString(raw: Array[Byte]): String = Bytes.toString(raw)
   implicit def toLong(raw: Array[Byte]): Long = Bytes.toLong(raw)
   implicit def toBigDecimal(raw: Array[Byte]): BigDecimal = Bytes.toBigDecimal(raw)
@@ -50,6 +52,10 @@ trait HBaseEventConverter {
     case None => None
   }
 
+  implicit def toOptionTradeDirection(raw: Option[Array[Byte]]): Option[TradeDirection.Value] = raw match {
+    case Some(bytes) => Some(toTradeDirection(bytes))
+    case None => None
+  }
 
   implicit def toEvent(r: Result) = {
     new Event(None,
@@ -58,9 +64,10 @@ trait HBaseEventConverter {
       getTimeStamp(r),
       getTiCode(r),
       getColumn(r, "marketSegmentCode").get,
+      getColumn(r, "currencyCode").get,
       getColumn(r, "marketMechanismType"),
       getColumn(r, "aggregateSize"),
-      getColumn(r, "buySellInd"),
+      getColumn(r, "tradeDirection"),
       getColumn(r, "orderCode"),
       getColumn(r, "tradeSize"),
       getColumn(r, "broadcastUpdateAction"),

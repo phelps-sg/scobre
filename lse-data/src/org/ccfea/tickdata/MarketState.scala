@@ -58,8 +58,8 @@ class MarketState {
          *        Logic for order submitted events                          *
          ********************************************************************/
       case Event(id, EventType.OrderSubmitted,
-                  messageSequenceNumber, timeStamp, tiCode, marketSegmentCode,
-                  Some(marketMechanismType), Some(aggregateSize), Some(buySellInd), Some(orderCode),
+                  messageSequenceNumber, timeStamp, tiCode, marketSegmentCode, currencyCode,
+                  Some(marketMechanismType), Some(aggregateSize), Some(tradeDirection), Some(orderCode),
                   None,
                   Some(broadcastUpdateAction), Some(marketSectorCode), Some(marketMechanismGroup), Some(price),
                     Some(singleFillInd),
@@ -71,10 +71,10 @@ class MarketState {
         order.setPrice(price.toDouble)
         order.setQuantity(aggregateSize.toInt)
         order.setAgent(new SimpleTradingAgent())
-        order.setIsBid(buySellInd equals "B")
+        order.setIsBid(tradeDirection == TradeDirection.Buy)
         order.setTimeStamp(time.get)
         if (orderMap.contains(orderCode)) {
-          logger.warn("Submission using existing order code" + orderCode)
+          logger.warn("Submission using existing order code: " + orderCode)
         }
         orderMap(orderCode) = order
         if (marketMechanismType equals "LO") {
@@ -89,7 +89,7 @@ class MarketState {
          ********************************************************************/
        case Event(id, EventType.OrderDeleted | EventType.OrderExpired | EventType.TransactionLimit,
                   messageSequenceNumber, timeStamp,
-                  tiCode, marketSegmentCode, marketMechanismType, aggregateSize, buySellInd,
+                  tiCode, marketSegmentCode, marketMechanismType, currencyCode, aggregateSize, tradeDirection,
                   Some(orderCode),
                   tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
                   None, None, None, None, None)
@@ -110,7 +110,7 @@ class MarketState {
          ********************************************************************/
        case Event(id, EventType.OrderFilled,
                   messageSequenceNumber, timeStamp, tiCode,
-                  marketSegmentCode, marketMechanismType, aggregateSize, buySellInd,
+                  marketSegmentCode, currencyCode, marketMechanismType, aggregateSize, tradeDirection,
                   Some(orderCode),
                   tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
                   matchingOrderCode, resultingTradeCode,
@@ -130,7 +130,7 @@ class MarketState {
         ********************************************************************/
       case Event(id, EventType.Transaction,
                 messageSequenceNumber, timeStamp,
-                tiCode, marketSegmentCode,
+                tiCode, marketSegmentCode, currencyCode,
                 None, None, None, None,
                 Some(tradeSize), Some(broadcastUpdateAction),
                 None, None, Some(tradePrice), None,

@@ -32,9 +32,10 @@ trait HBaseInserter extends HBaseEventConverter {
 
     store("eventType", event.eventType)
     store("marketSegmentCode", event.marketSegmentCode)
+    store("currencyCode", event.currencyCode)
     store("marketMechanismType", event.marketMechanismType)
     store("aggregateSize", event.aggregateSize)
-    store("buySellInd", event.buySellInd)
+    store("tradeDirection", event.tradeDirection)
     store("orderCode", event.orderCode)
     store("tradeSize", event.tradeSize)
     store("broadcastUpdateAction", event.broadcastUpdateAction)

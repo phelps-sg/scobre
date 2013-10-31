@@ -33,6 +33,13 @@ trait DataLoader {
       }
     }
 
+    implicit def buySellIndToTradeDirection(buySellInd: String): TradeDirection.Value = {
+      buySellInd match {
+        case "B" => TradeDirection.Buy
+        case "S" => TradeDirection.Sell
+      }
+    }
+
     rawEvent match {
 
       case OrderHistoryRaw(orderCode, orderActionType, matchingOrderCode,
@@ -43,7 +50,7 @@ trait DataLoader {
                               messageSequenceNumber, date, time) =>
 
           Event(None, orderActionType, messageSequenceNumber,
-            rawEvent.timeStamp, tiCode, marketSegmentCode,
+            rawEvent.timeStamp, tiCode, marketSegmentCode, currencyCode,
             Some(marketMechanismType), Some(aggregateSize), Some(buySellInd),
             Some(orderCode), Some(tradeSize), None, None, None, None, None,
             matchingOrderCode, tradeCode,
@@ -58,7 +65,7 @@ trait DataLoader {
                           messageSequenceNumber) =>
 
           Event(None, EventType.OrderSubmitted, messageSequenceNumber,
-            rawEvent.timeStamp, tiCode, marketSegmentCode,
+            rawEvent.timeStamp, tiCode, marketSegmentCode, currencyCode,
             Some(marketMechanismType), Some(aggregateSize), Some(buySellInd),
             Some(orderCode), None, Some(broadcastUpdateAction),
             Some(marketSectorCode), Some(marketMechanismGroup), Some(price), Some(singleFillInd),
@@ -74,7 +81,7 @@ trait DataLoader {
 
           Event(None, EventType.Transaction,
             messageSequenceNumber, rawEvent.timeStamp,
-            tiCode, marketSegmentCode,
+            tiCode, marketSegmentCode, currencyCode,
             None, None, None, None,
             Some(tradeSize), Some(broadcastUpdateAction),
             None, None, tradePrice, None,
