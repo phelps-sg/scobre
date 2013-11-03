@@ -8,6 +8,7 @@ if [ $# -lt 1 ]; then
 fi
 
 TICODE=$1
+shift
 
 ##################
 # Main           #
@@ -15,5 +16,5 @@ TICODE=$1
 
 source config.sh
 
-java org.ccfea.tickdata.OrderReplay -t $TICODE
+java org.ccfea.tickdata.OrderReplay -t $TICODE $@
 #java org.ccfea.tickdata.OrderReplay -t GB0009252882 --with-gui
