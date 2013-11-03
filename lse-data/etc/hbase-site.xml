@@ -22,17 +22,17 @@
  */
 -->
 <configuration>
- 	<!-- <property>
+ 	 <property>
                 <name>hbase.rootdir</name>
                 <value>file:///var/lib/hbase</value>
-        </property> -->
-	<property>
+        </property> 
+	<!-- <property>
 		<name>hbase.master</name>
-		<!-- <value>sphelps-Aspire-S3</value> -->
+		<value>sphelps-Aspire-S3</value> 
 		<value>gamer-i5</value>
 	</property>
 	<property>
 		<name>hbase.zookeeper.quorum</name>
 		<value>gamer-i5</value>
-	</property>
+	</property> -->
 </configuration>

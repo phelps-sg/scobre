@@ -125,6 +125,27 @@ class MarketState {
         }
       }
 
+
+        /********************************************************************
+         *        Logic for order matched events
+         ********************************************************************/
+       case Event(id, EventType.OrderMatched,
+                  messageSequenceNumber, timeStamp, tiCode,
+                  marketSegmentCode, currencyCode, marketMechanismType, aggregateSize, tradeDirection,
+                  Some(orderCode),
+                  tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
+                  matchingOrderCode, resultingTradeCode,
+                  None, None, None)
+
+      => {
+        if (orderMap.contains(orderCode)) {
+          val order = orderMap(orderCode)
+          logger.debug("partially filled order " + order)
+        }  else {
+          logger.debug("unknown order code " + orderCode)
+        }
+      }
+
       /********************************************************************
         *        Logic for transaction events                            *
         ********************************************************************/
