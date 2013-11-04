@@ -42,5 +42,81 @@ case class Event(eventID: Option[Long],
                  //                 bargainConditions: Option[String],
                  convertedPriceInd: Option[String]
                  //                 publicationTimeStamp: Option[Long]
-)
 
+                  ) {
+
+  def toObjectOrientedEvent(ev: Event) = {
+
+    ev match {
+
+      /********************************************************************
+        *        Logic for order submitted events                          *
+        ********************************************************************/
+      case Event(id, EventType.OrderSubmitted,
+      messageSequenceNumber, timeStamp, tiCode, marketSegmentCode, currencyCode,
+      Some(marketMechanismType), Some(aggregateSize), Some(tradeDirection), Some(orderCode),
+      None,
+      Some(broadcastUpdateAction), Some(marketSectorCode), Some(marketMechanismGroup), Some(price),
+      Some(singleFillInd),
+      None, None, None, None, None)
+
+      => // new OrderSubmittedEvent(orderCode, price, aggregateSize, tradeDirection, marketMechanismType)
+
+
+      /********************************************************************
+        *        Logic for order deleted (and related) events              *
+        ********************************************************************/
+      case Event(id, EventType.OrderDeleted | EventType.OrderExpired | EventType.TransactionLimit,
+      messageSequenceNumber, timeStamp,
+      tiCode, marketSegmentCode, marketMechanismType, currencyCode, aggregateSize, tradeDirection,
+      Some(orderCode),
+      tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
+      None, None, None, None, None)
+
+      => // new OrderRemovedEvent(orderCode)
+
+
+      /********************************************************************
+        *        Logic for order filled events                             *
+        ********************************************************************/
+      case Event(id, EventType.OrderFilled,
+      messageSequenceNumber, timeStamp, tiCode,
+      marketSegmentCode, currencyCode, marketMechanismType, aggregateSize, tradeDirection,
+      Some(orderCode),
+      tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
+      matchingOrderCode, resultingTradeCode,
+      None, None, None)
+
+      => // new OrderFilledEvent(orderCode)
+
+      /********************************************************************
+        *        Logic for order matched events
+        ********************************************************************/
+      case Event(id, EventType.OrderMatched,
+      messageSequenceNumber, timeStamp, tiCode,
+      marketSegmentCode, currencyCode, marketMechanismType, aggregateSize, tradeDirection,
+      Some(orderCode),
+      tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
+      matchingOrderCode, resultingTradeCode,
+      None, None, None)
+
+      => // new OrderMatchedEvent(orderCode)
+
+      /********************************************************************
+        *        Logic for transaction events                            *
+        ********************************************************************/
+      case Event(id, EventType.Transaction,
+      messageSequenceNumber, timeStamp,
+      tiCode, marketSegmentCode, currencyCode,
+      None, None, None, None,
+      Some(tradeSize), Some(broadcastUpdateAction),
+      None, None, Some(tradePrice), None,
+      None, None,
+      tradeCode, Some(tradeTimeInd), Some(convertedPriceInd))
+
+      => //processTransaction(tradePrice)
+
+
+    }
+  }
+}

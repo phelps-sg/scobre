@@ -10,6 +10,7 @@ import net.sourceforge.jasa.market.Order
 import net.sourceforge.jasa.market.FourHeapOrderBook
 
 import grizzled.slf4j.Logger
+import java.util.GregorianCalendar
 
 /**
  * The state of the market at a single point in time.
@@ -50,7 +51,15 @@ class MarketState {
 
     assert(ev.timeStamp >= (time match { case None => 0; case Some(t) => t.getTicks}))
 
-    time = Some(new SimulationTime(ev.timeStamp))
+
+    val newTime = new SimulationTime(ev.timeStamp)
+
+    this.time match {
+      case Some(t) => if (getDay(newTime) != getDay(t)) processNewDay()
+      case None =>
+    }
+
+    this.time = Some(newTime)
 
     ev match {
 
@@ -65,24 +74,8 @@ class MarketState {
                     Some(singleFillInd),
                   None, None, None, None, None)
 
-      => {
+      => processOrderSubmission(orderCode, price, aggregateSize, tradeDirection, marketMechanismType)
 
-        val order = new Order()
-        order.setPrice(price.toDouble)
-        order.setQuantity(aggregateSize.toInt)
-        order.setAgent(new SimpleTradingAgent())
-        order.setIsBid(tradeDirection == TradeDirection.Buy)
-        order.setTimeStamp(time.get)
-        if (orderMap.contains(orderCode)) {
-          logger.warn("Submission using existing order code: " + orderCode)
-        }
-        orderMap(orderCode) = order
-        if (marketMechanismType equals "LO") {
-          processLimitOrder(order)
-        } else {
-          processMarketOrder(order)
-        }
-      }
 
         /********************************************************************
          *        Logic for order deleted (and related) events              *
@@ -94,15 +87,7 @@ class MarketState {
                   tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
                   None, None, None, None, None)
 
-      => {
-        if (orderMap.contains(orderCode)) {
-          val order = orderMap(orderCode)
-          book.remove(order)
-        } else {
-          logger.warn("Cannot find order for " + orderCode)
-        }
-
-      }
+      => processOrderRemoval(orderCode)
 
 
         /********************************************************************
@@ -116,15 +101,7 @@ class MarketState {
                   matchingOrderCode, resultingTradeCode,
                   None, None, None)
 
-      => {
-        if (orderMap.contains(orderCode)) {
-          val order = orderMap(orderCode)
-          book.remove(order)
-        } else {
-          logger.warn("Cannot find order for " + orderCode)
-        }
-      }
-
+      => processOrderFilled(orderCode)
 
         /********************************************************************
          *        Logic for order matched events
@@ -137,14 +114,7 @@ class MarketState {
                   matchingOrderCode, resultingTradeCode,
                   None, None, None)
 
-      => {
-        if (orderMap.contains(orderCode)) {
-          val order = orderMap(orderCode)
-          logger.debug("partially filled order " + order)
-        }  else {
-          logger.debug("unknown order code " + orderCode)
-        }
-      }
+      => processOrderMatched(orderCode)
 
       /********************************************************************
         *        Logic for transaction events                            *
@@ -158,9 +128,8 @@ class MarketState {
                 None, None,
                 tradeCode, Some(tradeTimeInd), Some(convertedPriceInd))
 
-      => {
-        lastTransactionPrice = Some(tradePrice.toDouble)
-      }
+      => processTransaction(tradePrice)
+
 
       case _ => logger.warn("Do not know how to process " + ev)
     }
@@ -203,5 +172,67 @@ class MarketState {
   //TODO this results in a sort
 //  def bidPrice(level: Int) = price(level, book.getUnmatchedBids)
 //  def askPrice(level: Int) = price(level, book.getUnmatchedAsks)
+
+  def processTransaction(price: BigDecimal) = {
+    this.lastTransactionPrice = Some(price.toDouble)
+  }
+
+  def processOrderRemoval(orderCode: String) = {
+      if (orderMap.contains(orderCode)) {
+        val order = orderMap(orderCode)
+        book.remove(order)
+      } else {
+        logger.warn("Unknown order code when removing order: " + orderCode)
+      }
+    }
+
+    def processOrderFilled(orderCode: String) = {
+        if (orderMap.contains(orderCode)) {
+          val order = orderMap(orderCode)
+          logger.debug("Removing order " + orderCode + " from book: " + order)
+          book.remove(order)
+        } else {
+          logger.warn("Unknown order code when order filled: " + orderCode)
+        }
+    }
+
+    def processOrderMatched(orderCode: String) = {
+        if (orderMap.contains(orderCode)) {
+          val order = orderMap(orderCode)
+          logger.debug("partially filled order " + order)
+        }  else {
+          logger.debug("unknown order code " + orderCode)
+        }
+      }
+
+    def processOrderSubmission(orderCode: String, price: BigDecimal, aggregateSize: Long, tradeDirection: TradeDirection.Value,
+                                  marketMechanismType: String) = {
+      val order = new Order()
+      order.setPrice(price.toDouble)
+      order.setQuantity(aggregateSize.toInt)
+      order.setAgent(new SimpleTradingAgent())
+      order.setIsBid(tradeDirection == TradeDirection.Buy)
+      order.setTimeStamp(time.get)
+      if (orderMap.contains(orderCode)) {
+        logger.warn("Submission using existing order code: " + orderCode)
+      }
+      orderMap(orderCode) = order
+      if (marketMechanismType equals "LO") {
+        processLimitOrder(order)
+      } else {
+        processMarketOrder(order)
+      }
+  }
+
+  def processNewDay() = {
+    //TODO
+    //book.clear()
+  }
+
+  def getDay(t: SimulationTime) = {
+    val cal = new GregorianCalendar()
+    cal.setTime(new java.util.Date(t.getTicks))
+    cal.get(java.util.Calendar.DAY_OF_MONTH)
+  }
 
 }
