@@ -1,8 +1,8 @@
 package org.ccfea.tickdata.hbase
 
 import org.apache.hadoop.hbase.client.Put
-import org.ccfea.tickdata.Event
 import collection.JavaConversions._
+import org.ccfea.tickdata.event.Event
 
 /**
  * Store events in Apache HBase.

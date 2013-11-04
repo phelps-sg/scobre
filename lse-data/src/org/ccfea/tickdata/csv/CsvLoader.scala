@@ -1,6 +1,6 @@
 package org.ccfea.tickdata.csv
 
-import org.ccfea.tickdata.{HasDateTime, Event, DataLoader}
+import org.ccfea.tickdata.{HasDateTime, DataLoader}
 import org.ccfea.tickdata.rawdata._
 import java.io.{BufferedReader, InputStreamReader, FileInputStream}
 import scala.collection.mutable

@@ -2,15 +2,15 @@ package org.ccfea.tickdata.hbase
 
 import org.apache.hadoop.hbase.client.{ResultScanner, Scan, Result}
 import org.apache.hadoop.hbase.util.Bytes
-import org.ccfea.tickdata.{Event, AbstractOrderReplay}
 import collection.JavaConversions._
+import org.ccfea.tickdata.event.{OrderReplayEvent, Event}
 
 
 /**
  * Retrieve time-sorted events for a selected asset from Apache HBase.
  * (c) Steve Phelps 2013
  */
-trait HBaseRetriever extends HBaseEventConverter with Iterable[Event] {
+trait HBaseRetriever extends HBaseEventConverter with Iterable[OrderReplayEvent] {
 
   def selectedAsset: String
 
@@ -23,10 +23,9 @@ trait HBaseRetriever extends HBaseEventConverter with Iterable[Event] {
   scan.setCaching(cacheSize)
   val scanner = eventsTable.getScanner(scan)
 
-  def iterator: Iterator[Event] = {
+  def iterator: Iterator[OrderReplayEvent] = {
     new EventIterator(scanner)
   }
-
 
   def retrieveEvents() = {
     for(r <- scanner) yield toEvent(r)

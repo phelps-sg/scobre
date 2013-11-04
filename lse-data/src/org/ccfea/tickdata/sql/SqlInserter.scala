@@ -1,8 +1,9 @@
 package org.ccfea.tickdata.sql
 
 import scala.slick.driver.MySQLDriver.simple._
-import org.ccfea.tickdata.Event
 import RelationalTables.events
+import org.ccfea.tickdata.event.Event
+
 // Use the implicit threadLocalSession
 import Database.threadLocalSession
 

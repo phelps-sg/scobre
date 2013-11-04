@@ -1,8 +1,10 @@
 package org.ccfea.tickdata.sql
 
 import scala.slick.driver.MySQLDriver.simple._
-import org.ccfea.tickdata.{Event, AbstractOrderReplay}
+import org.ccfea.tickdata.{AbstractOrderReplay}
 import RelationalTables.events
+import org.ccfea.tickdata.event.{OrderReplayEvent, Event}
+
 // Use the implicit threadLocalSession
 import Database.threadLocalSession
 
@@ -11,14 +13,14 @@ import Database.threadLocalSession
  *
  * (c) Steve Phelps 2013
  */
-trait SqlRetriever {
+trait SqlRetriever { //TODO extends Iterable[OrderReplayEvent] {
 
   def selectedAsset: String
   def url: String
   def driver: String
   def maxNumEvents: Option[Int]
 
-  def retrieveEvents(): Seq[Event] = {
+  def retrieveEvents(): Iterable[Event] = {
 
     Database.forURL(url, driver = driver) withSession {
 
@@ -38,5 +40,16 @@ trait SqlRetriever {
       selectedEvents.list
     }
   }
+
+  //TODO
+//  def iterator: Iterable[OrderReplayEvent] = {
+//    val evs = retrieveEvents().iterator
+//    new Iterable[OrderReplayEvent] {
+//      def iterator = new Iterator[OrderReplayEvent] {
+//        def next = evs.next.toOrderReplayEvent
+//        def hasNext = evs.hasNext
+//      }
+//    }
+//  }
 }
 
