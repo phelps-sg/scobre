@@ -2,6 +2,7 @@ package org.ccfea.tickdata
 
 import rawdata._
 import grizzled.slf4j.Logger
+import org.ccfea.tickdata.event.Event
 
 /**
  * Parse the raw data from LSE and convert it to a sequence of Events.

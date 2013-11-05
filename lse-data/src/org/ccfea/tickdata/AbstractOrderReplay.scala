@@ -1,6 +1,7 @@
 package org.ccfea.tickdata
 
 import net.sourceforge.jabm.SimulationTime
+import org.ccfea.tickdata.event.OrderReplayEvent
 
 /**
  * Super-class of all order replay classes.  These classes replay events through a simulator
@@ -10,7 +11,7 @@ import net.sourceforge.jabm.SimulationTime
  * (c) Steve Phelps 2013
  */
 
-abstract class AbstractOrderReplay(val withGui: Boolean = false) extends Iterable[Event] {
+abstract class AbstractOrderReplay(val withGui: Boolean = false) extends Iterable[OrderReplayEvent] {
 
   def run {
     val timeSeries = replayEvents

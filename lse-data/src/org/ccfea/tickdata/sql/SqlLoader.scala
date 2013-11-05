@@ -1,6 +1,6 @@
 package org.ccfea.tickdata.sql
 
-import org.ccfea.tickdata.{Event, HasDateTime, DataLoader}
+import org.ccfea.tickdata.{HasDateTime, DataLoader}
 import scala.slick.driver.MySQLDriver.simple._
 // Use the implicit threadLocalSession
 import Database.threadLocalSession

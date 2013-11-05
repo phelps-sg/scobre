@@ -1,7 +1,8 @@
 package org.ccfea.tickdata.sql
 
-import org.ccfea.tickdata.{TradeDirection, Event, EventType}
+import org.ccfea.tickdata.{TradeDirection, EventType}
 import scala.slick.driver.MySQLDriver.simple._
+import org.ccfea.tickdata.event.Event
 
 /**
  * SQL Schema for parsed events data.
