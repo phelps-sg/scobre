@@ -67,8 +67,15 @@ case class Event(eventID: Option[Long],
                   Some(singleFillInd),
                   None, None, None, None, None)
 
-      => new OrderSubmittedEvent(timeStamp, messageSequenceNumber, tiCode, orderCode, price, aggregateSize,
-                                    tradeDirection, marketMechanismType)
+      => {
+        marketMechanismType match {
+          case "LO" => new
+            LimitOrderSubmittedEvent(timeStamp, messageSequenceNumber, tiCode, orderCode,
+                                      aggregateSize, tradeDirection, price)
+          case "MO" => new
+            MarketOrderSubmittedEvent(timeStamp, messageSequenceNumber, tiCode, orderCode, aggregateSize, tradeDirection)
+        }
+      }
 
 
       /********************************************************************

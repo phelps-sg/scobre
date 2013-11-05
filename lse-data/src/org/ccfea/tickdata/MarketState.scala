@@ -60,21 +60,13 @@ class MarketState {
     val newTime = new SimulationTime(ev.timeStamp)
 
     this.time match {
-      case Some(t) => if (getDay(newTime) != getDay(t)) processNewDay()
+      case Some(t) => if (getDay(newTime) != getDay(t)) startNewDay()
       case None =>
     }
 
     this.time = Some(newTime)
 
     process(ev)
-  }
-
-  def processLimitOrder(order: Order) = {
-    if (order.isAsk) book.insertUnmatchedAsk(order) else book.insertUnmatchedBid(order)
-//    book add order
-  }
-
-  def processMarketOrder(order: Order) = {
   }
 
   def printState = {
@@ -106,14 +98,16 @@ class MarketState {
   //TODO this results in a sort
 //  def bidPrice(level: Int) = price(level, book.getUnmatchedBids)
 //  def askPrice(level: Int) = price(level, book.getUnmatchedAsks)
-//
+
   def process(ev: OrderReplayEvent): Unit = {
     ev match {
-      case tr: TransactionEvent   =>  process(tr)
-      case or: OrderRemovedEvent  =>  process(or)
-      case of: OrderFilledEvent   =>  process(of)
-      case om: OrderMatchedEvent  =>  process(om)
-      case os: OrderSubmittedEvent => process(os)
+      case tr: TransactionEvent           =>  process(tr)
+      case or: OrderRemovedEvent          =>  process(or)
+      case of: OrderFilledEvent           =>  process(of)
+      case om: OrderMatchedEvent          =>  process(om)
+      case lo: LimitOrderSubmittedEvent   =>  process(lo)
+      case mo: MarketOrderSubmittedEvent  =>  process(mo)
+      case _ => logger.warn("Unknown event type: " + ev)
     }
   }
 
@@ -149,7 +143,7 @@ class MarketState {
     }
   }
 
-  def process(ev: OrderSubmittedEvent): Unit = {
+  def process(ev: LimitOrderSubmittedEvent): Unit = {
     val order = new Order()
     order.setPrice(ev.price.toDouble)
     order.setQuantity(ev.aggregateSize.toInt)
@@ -160,14 +154,15 @@ class MarketState {
       logger.warn("Submission using existing order code: " + ev.orderCode)
     }
     orderMap(ev.orderCode) = order
-    if (ev.marketMechanismType equals "LO") {
-      processLimitOrder(order)
-    } else {
-      processMarketOrder(order)
-    }
+    if (order.isAsk) book.insertUnmatchedAsk(order) else book.insertUnmatchedBid(order)
   }
 
-  def processNewDay() = {
+  def process(ev: MarketOrderSubmittedEvent): Unit = {
+    logger.debug("New market order submitted: " + ev)
+    // No action required
+  }
+
+  def startNewDay() = {
     //TODO
     //book.clear()
   }
