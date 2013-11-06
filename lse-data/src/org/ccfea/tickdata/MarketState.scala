@@ -32,7 +32,7 @@ class MarketState {
   /**
    * Lookup table mapping order-codes to Orders.
    */
-  val orderMap = collection.mutable.Map[String, Order]()
+  val orderMap = collection.mutable.Map[String, net.sourceforge.jasa.market.Order]()
 
   /**
    * The time of the most recent event.
@@ -46,7 +46,7 @@ class MarketState {
 
   val logger = Logger(classOf[MarketState])
 
-  implicit def toJasaOrder(o: Order): net.sourceforge.jasa.market.Order = {
+  def toJasaOrder(o: AbstractOrder): net.sourceforge.jasa.market.Order = {
     val order = new net.sourceforge.jasa.market.Order()
     o match {
       case lo:LimitOrder => {
@@ -55,7 +55,6 @@ class MarketState {
         order.setAgent(new SimpleTradingAgent())
         order.setIsBid(lo.tradeDirection == TradeDirection.Buy)
       }
-      case _ =>
     }
     order.setTimeStamp(time.get)
     order
@@ -69,9 +68,9 @@ class MarketState {
 
     logger.debug("Processing event " + ev)
 
-    assert(ev.timeStamp >= (time match { case None => 0; case Some(t) => t.getTicks}))
+    assert(ev.timeStamp.getTime >= (time match { case None => 0; case Some(t) => t.getTicks}))
 
-    val newTime = new SimulationTime(ev.timeStamp)
+    val newTime = new SimulationTime(ev.timeStamp.getTime)
 
     this.time match {
       case Some(t) => if (getDay(newTime) != getDay(t)) startNewDay()
@@ -161,13 +160,14 @@ class MarketState {
 
   def process(ev: OrderSubmittedEvent): Unit = {
     val order = ev.order
-    if (orderMap.contains(ev.order.orderCode)) {
+    if (orderMap.contains(order.orderCode)) {
       logger.warn("Submission using existing order code: " + order.orderCode)
     }
     order match {
        case lo: LimitOrder => {
-                  orderMap(ev.order.orderCode) = ev.order
-                  if (ev.order.isAsk) book.insertUnmatchedAsk(ev.order) else book.insertUnmatchedBid(ev.order)
+         val newOrder = toJasaOrder(order)
+         if (newOrder.isAsk) book.insertUnmatchedAsk(newOrder) else book.insertUnmatchedBid(newOrder)
+         orderMap(order.orderCode) = newOrder
         //    book.add(order)
        }
        case _ =>

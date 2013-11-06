@@ -3,5 +3,8 @@ package org.ccfea.tickdata
 /**
  * (C) Steve Phelps 2013
  */
-class OrderWithVolume(orderCode: String, val aggregateSize: Long, val tradeDirection: TradeDirection.Value)
-  extends Order(orderCode)
+abstract class OrderWithVolume extends AbstractOrder {
+  def orderCode: String
+  def aggregateSize: Long
+  def tradeDirection: TradeDirection.Value
+}

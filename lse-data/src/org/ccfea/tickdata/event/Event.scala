@@ -3,6 +3,7 @@ package org.ccfea.tickdata.event
 import org.ccfea.tickdata._
 import grizzled.slf4j.Logger
 import scala.Some
+import java.util.Date
 
 /**
  * A non-relational representation of an event that has occurred in the exchange.
@@ -79,7 +80,7 @@ case class Event(eventID: Option[Long],
             case _ =>
               new OtherOrder(orderCode, marketMechanismType)
           }
-        new OrderSubmittedEvent(timeStamp, messageSequenceNumber, tiCode, order)
+        new OrderSubmittedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, order)
       }
 
 
@@ -93,7 +94,7 @@ case class Event(eventID: Option[Long],
                   tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
                   None, None, None, None, None)
 
-      => new OrderRemovedEvent(timeStamp, messageSequenceNumber, tiCode, new Order(orderCode))
+      => new OrderRemovedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode))
 
 
       /********************************************************************
@@ -107,7 +108,7 @@ case class Event(eventID: Option[Long],
                   matchingOrderCode, resultingTradeCode,
                   None, None, None)
 
-      => new OrderFilledEvent(timeStamp, messageSequenceNumber, tiCode, new Order(orderCode))
+      => new OrderFilledEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode))
 
       /********************************************************************
         *        Order matched events
@@ -120,7 +121,7 @@ case class Event(eventID: Option[Long],
                     matchingOrderCode, resultingTradeCode,
                     None, None, None)
 
-      => new OrderMatchedEvent(timeStamp, messageSequenceNumber, tiCode, new Order(orderCode))
+      => new OrderMatchedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode))
 
       /********************************************************************
         *        transaction events                            *
@@ -134,7 +135,7 @@ case class Event(eventID: Option[Long],
                   None, None,
                   tradeCode, Some(tradeTimeInd), Some(convertedPriceInd))
 
-      => new TransactionEvent(timeStamp, messageSequenceNumber, tiCode, tradePrice, tradeSize)
+      => new TransactionEvent(new Date(timeStamp), messageSequenceNumber, tiCode, tradePrice, tradeSize)
 
     }
   }
