@@ -97,7 +97,7 @@ class MarketState {
       case (None,      None)      => None
       case (Some(bid), None)      => Some(bid)
       case (None,      Some(ask)) => Some(ask)
-      case (Some(bid), Some(ask)) => Some((bid + ask) / 2)
+      case (Some(bid), Some(ask)) => Some((bid + ask) / 2.0)
     }
   }
 
