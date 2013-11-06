@@ -1,7 +1,7 @@
 package org.ccfea.tickdata.event
 
-import org.ccfea.tickdata.AbstractOrder
 import java.util.Date
+import org.ccfea.tickdata.order.AbstractOrder
 
 /**
  * (C) Steve Phelps 2013

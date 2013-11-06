@@ -1,6 +1,6 @@
 package org.ccfea.tickdata.event
 
-import org.ccfea.tickdata.AbstractOrder
+import org.ccfea.tickdata.order.AbstractOrder
 
 /**
  * (C) Steve Phelps 2013
