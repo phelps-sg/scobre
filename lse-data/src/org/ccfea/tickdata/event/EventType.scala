@@ -1,4 +1,4 @@
-package org.ccfea.tickdata
+package org.ccfea.tickdata.event
 
 /**
  * The type of event that has occurred in the exchange.

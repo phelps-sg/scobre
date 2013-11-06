@@ -1,8 +1,8 @@
 package org.ccfea.tickdata.event
 
-import org.ccfea.tickdata.{TradeDirection, EventType}
-import scala.Some
+import org.ccfea.tickdata._
 import grizzled.slf4j.Logger
+import scala.Some
 
 /**
  * A non-relational representation of an event that has occurred in the exchange.
@@ -71,18 +71,15 @@ case class Event(eventID: Option[Long],
                   None, None, None, None, None)
 
       => {
-        marketMechanismType match {
-          case "LO" => new
-            LimitOrderSubmittedEvent(timeStamp, messageSequenceNumber, tiCode, orderCode,
-                                      aggregateSize, tradeDirection, price)
-          case "MO" => new
-            MarketOrderSubmittedEvent(timeStamp, messageSequenceNumber, tiCode, orderCode, aggregateSize, tradeDirection)
-
-          case _ =>
-            logger.warn("Unknown marketMechanismType: " + marketMechanismType)
-            new OtherOrderSubmittedEvent(timeStamp, messageSequenceNumber, tiCode, orderCode,
-                                            aggregateSize, tradeDirection, marketMechanismType)
-        }
+        val order = marketMechanismType match {
+            case "LO" =>
+              new LimitOrder(orderCode, aggregateSize, tradeDirection, price)
+            case "MO" =>
+              new MarketOrder(orderCode, aggregateSize, tradeDirection)
+            case _ =>
+              new OtherOrder(orderCode, marketMechanismType)
+          }
+        new OrderSubmittedEvent(timeStamp, messageSequenceNumber, tiCode, order)
       }
 
 
@@ -96,7 +93,7 @@ case class Event(eventID: Option[Long],
                   tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
                   None, None, None, None, None)
 
-      => new OrderRemovedEvent(timeStamp, messageSequenceNumber, tiCode, orderCode)
+      => new OrderRemovedEvent(timeStamp, messageSequenceNumber, tiCode, new Order(orderCode))
 
 
       /********************************************************************
@@ -110,7 +107,7 @@ case class Event(eventID: Option[Long],
                   matchingOrderCode, resultingTradeCode,
                   None, None, None)
 
-      => new OrderFilledEvent(timeStamp, messageSequenceNumber, tiCode, orderCode)
+      => new OrderFilledEvent(timeStamp, messageSequenceNumber, tiCode, new Order(orderCode))
 
       /********************************************************************
         *        Order matched events
@@ -123,7 +120,7 @@ case class Event(eventID: Option[Long],
                     matchingOrderCode, resultingTradeCode,
                     None, None, None)
 
-      => new OrderMatchedEvent(timeStamp, messageSequenceNumber, tiCode, orderCode)
+      => new OrderMatchedEvent(timeStamp, messageSequenceNumber, tiCode, new Order(orderCode))
 
       /********************************************************************
         *        transaction events                            *

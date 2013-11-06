@@ -3,9 +3,9 @@ package org.ccfea.tickdata.hbase
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.{Result, HTable, HBaseAdmin}
 import org.apache.hadoop.hbase.util.Bytes
-import org.ccfea.tickdata.{TradeDirection, EventType}
+import org.ccfea.tickdata.{TradeDirection}
 import collection.JavaConversions._
-import org.ccfea.tickdata.event.Event
+import org.ccfea.tickdata.event.{EventType, Event}
 
 /**
  * Misc. functionality for converting events to/from byte arrays.

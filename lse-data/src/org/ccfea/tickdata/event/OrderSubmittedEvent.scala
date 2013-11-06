@@ -1,12 +1,9 @@
 package org.ccfea.tickdata.event
 
-import org.ccfea.tickdata.TradeDirection
+import org.ccfea.tickdata.Order
 
 /**
  * (C) Steve Phelps 2013
  */
-abstract class OrderSubmittedEvent extends OrderCodeEvent {
-  def aggregateSize: Long
-  def tradeDirection: TradeDirection.Value
-}
-
+case class OrderSubmittedEvent(val timeStamp: Long, val messageSequenceNumber: Long,
+                          val tiCode: String, val order: Order) extends OrderReplayEvent

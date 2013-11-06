@@ -6,7 +6,6 @@ import net.sourceforge.jasa.agent.SimpleTradingAgent
 
 import collection.JavaConversions._
 
-import net.sourceforge.jasa.market.Order
 import net.sourceforge.jasa.market.FourHeapOrderBook
 
 import grizzled.slf4j.Logger
@@ -15,7 +14,6 @@ import org.ccfea.tickdata.event._
 import org.ccfea.tickdata.event.OrderFilledEvent
 import org.ccfea.tickdata.event.OrderMatchedEvent
 import scala.Some
-import org.ccfea.tickdata.event.OrderSubmittedEvent
 import org.ccfea.tickdata.event.Event
 
 /**
@@ -48,6 +46,21 @@ class MarketState {
 
   val logger = Logger(classOf[MarketState])
 
+  implicit def toJasaOrder(o: Order): net.sourceforge.jasa.market.Order = {
+    val order = new net.sourceforge.jasa.market.Order()
+    o match {
+      case lo:LimitOrder => {
+        order.setPrice(lo.price.toDouble)
+        order.setQuantity(lo.aggregateSize.toInt)
+        order.setAgent(new SimpleTradingAgent())
+        order.setIsBid(lo.tradeDirection == TradeDirection.Buy)
+      }
+      case _ =>
+    }
+    order.setTimeStamp(time.get)
+    order
+  }
+
   /**
    * Update the state in response to a new incoming event.
    * @param ev  The new event
@@ -76,15 +89,15 @@ class MarketState {
 
   def midPrice: Option[Double] = {
 
-    val quote: (Option[Order], Option[Order]) =
-      (if (book.getHighestUnmatchedBid == null) None else Some(book.getHighestUnmatchedBid),
-       if (book.getHighestMatchedAsk==null)     None else Some(book.getHighestMatchedAsk))
+    val quote: (Option[Double], Option[Double]) =
+      (if (book.getHighestUnmatchedBid == null) None else Some(book.getHighestUnmatchedBid.getPrice),
+       if (book.getHighestMatchedAsk==null)     None else Some(book.getHighestMatchedAsk.getPrice))
 
     quote match {
       case (None,      None)      => None
-      case (Some(bid), None)      => Some(bid.getPrice)
-      case (None,      Some(ask)) => Some(ask.getPrice)
-      case (Some(bid), Some(ask)) => Some((bid.getPrice + ask.getPrice) / 2)
+      case (Some(bid), None)      => Some(bid)
+      case (None,      Some(ask)) => Some(ask)
+      case (Some(bid), Some(ask)) => Some((bid + ask) / 2)
     }
   }
 
@@ -106,8 +119,7 @@ class MarketState {
       case or: OrderRemovedEvent          =>  process(or)
       case of: OrderFilledEvent           =>  process(of)
       case om: OrderMatchedEvent          =>  process(om)
-      case lo: LimitOrderSubmittedEvent   =>  process(lo)
-      case mo: MarketOrderSubmittedEvent  =>  process(mo)
+      case lo: OrderSubmittedEvent        =>  process(lo)
       case _ => logger.warn("Unknown event type: " + ev)
     }
   }
@@ -117,51 +129,49 @@ class MarketState {
   }
 
   def process(ev: OrderRemovedEvent): Unit = {
-    if (orderMap.contains(ev.orderCode)) {
-      val order = orderMap(ev.orderCode)
+    val orderCode = ev.order.orderCode
+    if (orderMap.contains(orderCode)) {
+      val order = orderMap(orderCode)
       book.remove(order)
     } else {
-      logger.warn("Unknown order code when removing order: " + ev.orderCode)
+      logger.warn("Unknown order code when removing order: " + orderCode)
     }
   }
 
   def process(ev: OrderFilledEvent): Unit = {
-      if (orderMap.contains(ev.orderCode)) {
-        val order = orderMap(ev.orderCode)
-        logger.debug("Removing order " + ev.orderCode + " from book: " + order)
+    val orderCode = ev.order.orderCode
+      if (orderMap.contains(orderCode)) {
+        val order = orderMap(orderCode)
+        logger.debug("Removing order " + orderCode + " from book: " + order)
         book.remove(order)
       } else {
-        logger.warn("Unknown order code when order filled: " + ev.orderCode)
+        logger.warn("Unknown order code when order filled: " + orderCode)
       }
   }
 
   def process(ev: OrderMatchedEvent): Unit = {
-    if (orderMap.contains(ev.orderCode)) {
-      val order = orderMap(ev.orderCode)
+    val orderCode = ev.order.orderCode
+    if (orderMap.contains(orderCode)) {
+      val order = orderMap(orderCode)
       logger.debug("partially filled order " + order)
     }  else {
-      logger.debug("unknown order code " + ev.orderCode)
+      logger.debug("unknown order code " + orderCode)
     }
   }
 
-  def process(ev: LimitOrderSubmittedEvent): Unit = {
-    val order = new Order()
-    order.setPrice(ev.price.toDouble)
-    order.setQuantity(ev.aggregateSize.toInt)
-    order.setAgent(new SimpleTradingAgent())
-    order.setIsBid(ev.tradeDirection == TradeDirection.Buy)
-    order.setTimeStamp(time.get)
-    if (orderMap.contains(ev.orderCode)) {
-      logger.warn("Submission using existing order code: " + ev.orderCode)
+  def process(ev: OrderSubmittedEvent): Unit = {
+    val order = ev.order
+    if (orderMap.contains(ev.order.orderCode)) {
+      logger.warn("Submission using existing order code: " + order.orderCode)
     }
-    orderMap(ev.orderCode) = order
-    if (order.isAsk) book.insertUnmatchedAsk(order) else book.insertUnmatchedBid(order)
-//    book.add(order)
-  }
-
-  def process(ev: MarketOrderSubmittedEvent): Unit = {
-    logger.debug("New market order submitted: " + ev)
-    // No action required
+    order match {
+       case lo: LimitOrder => {
+                  orderMap(ev.order.orderCode) = ev.order
+                  if (ev.order.isAsk) book.insertUnmatchedAsk(ev.order) else book.insertUnmatchedBid(ev.order)
+        //    book.add(order)
+       }
+       case _ =>
+    }
   }
 
   def startNewDay() = {
