@@ -10,11 +10,12 @@ import collection.JavaConversions._
  */
 class OrderBook extends net.sourceforge.jasa.market.OrderBook {
 
-  //TODO
-  val ascendingOrder = Ordering.fromLessThan[Order](_.compareTo(_) >= 0)
-  val descendingOrder = Ordering.fromLessThan[Order](_.compareTo(_) < 0)
-  val asks = new mutable.TreeSet[Order]()(ascendingOrder)
-  val bids = new mutable.TreeSet[Order]()(descendingOrder)
+  object AscendingOrder extends Ordering[Order] {
+    def compare(x: Order, y: Order) = x.compareTo(y)
+  }
+
+  val asks = new mutable.TreeSet[Order]()(AscendingOrder.reverse)
+  val bids = new mutable.TreeSet[Order]()(AscendingOrder)
 
   val nullOrder = new Order()
   val emptyList = new util.LinkedList[Order]()

@@ -29,6 +29,7 @@ class MarketState {
    * The current state of the book.
    */
   val book = new FourHeapOrderBook()
+//  val book = new OrderBook()
 
   /**
    * Lookup table mapping order-codes to Orders.
@@ -155,6 +156,7 @@ class MarketState {
     }
     orderMap(ev.orderCode) = order
     if (order.isAsk) book.insertUnmatchedAsk(order) else book.insertUnmatchedBid(order)
+//    book.add(order)
   }
 
   def process(ev: MarketOrderSubmittedEvent): Unit = {
@@ -163,8 +165,7 @@ class MarketState {
   }
 
   def startNewDay() = {
-    //TODO
-    //book.clear()
+    book.reset()
   }
 
   def getDay(t: SimulationTime) = {
