@@ -2,10 +2,11 @@ package org.ccfea.tickdata.event
 
 import org.ccfea.tickdata.{TradeDirection, EventType}
 import scala.Some
+import grizzled.slf4j.Logger
 
 /**
  * A non-relational representation of an event that has occurred in the exchange.
- * A time-ordered sequence of Events can be replayed * through a simulator in order to
+ * A time-ordered sequence of Events can be replayed through a simulator in order to
  * reconstruct the state of the market at any given time.  Events are represented as a flat
  * tuple in order to maintain high-performance and avoid complicated joins across many tables.
  * They are implicitly converted to an object-oriented representation using the method
@@ -52,6 +53,8 @@ case class Event(eventID: Option[Long],
 
                   ) {
 
+  val logger = Logger(classOf[Event])
+
   def toOrderReplayEvent: OrderReplayEvent = {
 
     this match {
@@ -74,6 +77,11 @@ case class Event(eventID: Option[Long],
                                       aggregateSize, tradeDirection, price)
           case "MO" => new
             MarketOrderSubmittedEvent(timeStamp, messageSequenceNumber, tiCode, orderCode, aggregateSize, tradeDirection)
+
+          case _ =>
+            logger.warn("Unknown marketMechanismType: " + marketMechanismType)
+            new OtherOrderSubmittedEvent(timeStamp, messageSequenceNumber, tiCode, orderCode,
+                                            aggregateSize, tradeDirection, marketMechanismType)
         }
       }
 

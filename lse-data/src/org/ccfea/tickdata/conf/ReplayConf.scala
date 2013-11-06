@@ -12,5 +12,6 @@ class ReplayConf(args: Seq[String]) extends ScallopConf(args) {
   val withGui = opt[Boolean](default = Some(false))
   val maxNumEvents = opt[Int]()
   val tiCode = opt[String](required = true)
+  val outFileName = opt[String](required = false)
 }
 

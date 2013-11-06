@@ -4,14 +4,14 @@ import scala.slick.driver.MySQLDriver.simple._
 import org.ccfea.tickdata.hbase.HBaseRetriever
 import org.ccfea.tickdata.conf.ReplayConf
 
-class HBaseOrderReplay(val selectedAsset: String, withGui: Boolean = false)
-  extends AbstractOrderReplay(withGui) with HBaseRetriever
+class HBaseOrderReplay(val selectedAsset: String, withGui: Boolean = false, outFileName: Option[String] = None)
+  extends AbstractOrderReplay(withGui, outFileName) with HBaseRetriever
 
 object OrderReplay {
 
   def main(args: Array[String]) {
     val conf = new ReplayConf(args)
-    val replay = new HBaseOrderReplay(conf.tiCode(), conf.withGui())
+    val replay = new HBaseOrderReplay(conf.tiCode(), conf.withGui(), conf.outFileName.get)
     replay.run
   }
 

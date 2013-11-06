@@ -2,6 +2,7 @@ package org.ccfea.tickdata
 
 import net.sourceforge.jabm.SimulationTime
 import org.ccfea.tickdata.event.OrderReplayEvent
+import java.io.PrintStream
 
 /**
  * Super-class of all order replay classes.  These classes replay events through a simulator
@@ -11,7 +12,16 @@ import org.ccfea.tickdata.event.OrderReplayEvent
  * (c) Steve Phelps 2013
  */
 
-abstract class AbstractOrderReplay(val withGui: Boolean = false) extends Iterable[OrderReplayEvent] {
+abstract class AbstractOrderReplay(val withGui: Boolean = false, val outFileName: Option[String] = None)
+    extends Iterable[OrderReplayEvent] {
+
+  val out = outFileName match {
+    case Some(fileName) => {
+      val outFile = new java.io.FileOutputStream(outFileName.get)
+      new PrintStream(outFile)
+    }
+    case None => System.out
+  }
 
   def run {
     val timeSeries = replayEvents
@@ -28,7 +38,7 @@ abstract class AbstractOrderReplay(val withGui: Boolean = false) extends Iterabl
 
   def outputTimeSeries(timeSeries: Iterable[(Option[SimulationTime], Option[Double])]) {
     for ((t, price) <- timeSeries) {
-      println(t.get.getTicks + "\t" + (price match {
+      out.println(t.get.getTicks + "\t" + (price match {
         case Some(p) => p.toString()
         case None => "NaN"
       }))
