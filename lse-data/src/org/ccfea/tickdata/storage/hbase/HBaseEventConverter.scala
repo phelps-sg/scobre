@@ -6,6 +6,7 @@ import org.apache.hadoop.hbase.util.Bytes
 import collection.JavaConversions._
 import org.ccfea.tickdata.event.{EventType, Event}
 import org.ccfea.tickdata.order.TradeDirection
+import java.util.Date
 
 /**
  * Misc. functionality for converting events to/from byte arrays.
@@ -94,6 +95,11 @@ trait HBaseEventConverter {
    */
   def getKey(event: Event): Array[Byte] = {
     Bytes.add(event.tiCode + "0", event.timeStamp, event.messageSequenceNumber)
+  }
+
+  def generateScanKey(tiCode: String, date: Option[Date], isStart: Boolean) = date match {
+    case Some(date) => Bytes.add(tiCode + "0", Bytes.toBytes(date.getTime), 0L)
+    case None => Bytes.toBytes(tiCode + (if (isStart) "0" else "1"))
   }
 
   def getMessageSequenceNumber(result: Result): Long = {

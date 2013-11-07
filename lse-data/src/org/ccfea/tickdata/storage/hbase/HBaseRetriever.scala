@@ -21,11 +21,8 @@ trait HBaseRetriever extends HBaseEventConverter with Iterable[OrderReplayEvent]
   def startDate: Option[Date]
   def endDate: Option[Date]
 
-  val assetKeyStart = Bytes.toBytes(selectedAsset + "0")
-  val assetKeyEnd = Bytes.toBytes(selectedAsset + "0")
-
-  val keyStart = appendDate(assetKeyStart, startDate)
-  val keyEnd = appendDate(assetKeyEnd, endDate)
+  val keyStart = generateScanKey(selectedAsset, startDate, true)
+  val keyEnd = generateScanKey(selectedAsset, endDate, false)
 
   logger.debug("startDate = " + startDate)
   logger.debug("endDate = " + endDate)
@@ -42,11 +39,6 @@ trait HBaseRetriever extends HBaseEventConverter with Iterable[OrderReplayEvent]
 
   def retrieveEvents() = {
     for(r <- scanner) yield toEvent(r)
-  }
-
-  def appendDate(key: Array[Byte], date: Option[Date]) = date match {
-    case Some(date) => Bytes.add(key, Bytes.toBytes(date.getTime), 0L)
-    case None => key
   }
 
 }
