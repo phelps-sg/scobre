@@ -12,7 +12,7 @@ import_pipe() {
 	
 	echo "Importing $TABLE"
 
-	java org.ccfea.tickdata.ParseRawData -b 5000 -r $TABLE -f /tmp/lsedata.txt
+	java org.ccfea.tickdata.ParseRawData -b 2600 -r $TABLE -f /tmp/lsedata.txt
 }
 
 cat_data() {

@@ -8,7 +8,11 @@ class EventIterator(val scanner: ResultScanner) extends Iterator[OrderReplayEven
 
   val resultIterator: Iterator[Result] = scanner.iterator()
 
-  def hasNext: Boolean = resultIterator.hasNext
+  def hasNext: Boolean = {
+    val result = resultIterator.hasNext
+//    if (!result) scanner.close
+    result
+  }
 
   def next(): OrderReplayEvent = resultIterator.next().toOrderReplayEvent
 

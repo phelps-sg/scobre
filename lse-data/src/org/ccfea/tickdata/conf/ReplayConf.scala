@@ -1,6 +1,7 @@
 package org.ccfea.tickdata.conf
 
 import org.rogach.scallop.ScallopConf
+import java.util.Date
 
 /**
  * Parser for command-line options related to order replay.
@@ -13,5 +14,7 @@ class ReplayConf(args: Seq[String]) extends ScallopConf(args) {
   val maxNumEvents = opt[Int]()
   val tiCode = opt[String](required = true)
   val outFileName = opt[String](required = false)
+  val startDate = opt[String](required = false)
+  val endDate = opt[String](required = false)
 }
 

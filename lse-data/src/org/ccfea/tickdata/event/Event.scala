@@ -109,10 +109,10 @@ case class Event(eventID: Option[Long],
                   marketSegmentCode, currencyCode, marketMechanismType, aggregateSize, tradeDirection,
                   Some(orderCode),
                   tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
-                  matchingOrderCode, resultingTradeCode,
+                  Some(matchingOrderCode), resultingTradeCode,
                   None, None, None)
 
-      => new OrderFilledEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode))
+      => new OrderFilledEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode), new Order(matchingOrderCode))
 
       /********************************************************************
         *        Order matched events
@@ -122,10 +122,10 @@ case class Event(eventID: Option[Long],
                     marketSegmentCode, currencyCode, marketMechanismType, aggregateSize, tradeDirection,
                     Some(orderCode),
                     tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
-                    matchingOrderCode, resultingTradeCode,
+                    Some(matchingOrderCode), resultingTradeCode,
                     None, None, None)
 
-      => new OrderMatchedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode))
+      => new OrderMatchedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode), new Order(matchingOrderCode))
 
       /********************************************************************
         *        transaction events                            *

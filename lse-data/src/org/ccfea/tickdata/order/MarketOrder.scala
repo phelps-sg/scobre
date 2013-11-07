@@ -4,4 +4,11 @@ package org.ccfea.tickdata.order
 /**
  * (C) Steve Phelps 2013
  */
-case class MarketOrder(orderCode: String, aggregateSize: Long, tradeDirection: TradeDirection.Value) extends OrderWithVolume
+class MarketOrder(val orderCode: String, val aggregateSize: Long, val tradeDirection: TradeDirection.Value)
+  extends OrderWithVolume {
+
+  override def toString() = {
+    "MarketOrder(" + orderCode + "," + aggregateSize + "," + tradeDirection + ")"
+  }
+
+}
