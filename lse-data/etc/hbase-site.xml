@@ -24,10 +24,6 @@
 <configuration>
 	<property>
 		<name>hbase.master</name>
-		<value>cseesp1.essex.ac.uk</value>
-	</property>
-	<property>
-		<name>hbase.zookeeper.quorum</name>
-		<value>cseesp1.essex.ac.uk</value>
+		<value>file:///var/lib/hbase</value>
 	</property>
 </configuration>

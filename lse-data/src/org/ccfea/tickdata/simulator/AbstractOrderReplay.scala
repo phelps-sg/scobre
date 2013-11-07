@@ -3,6 +3,7 @@ package org.ccfea.tickdata.simulator
 import net.sourceforge.jabm.SimulationTime
 import org.ccfea.tickdata.event.OrderReplayEvent
 import java.io.PrintStream
+import java.util.Date
 
 /**
  * Super-class of all order replay classes.  These classes replay events through a simulator
@@ -28,9 +29,12 @@ abstract class AbstractOrderReplay(val withGui: Boolean = false, val outFileName
     outputTimeSeries(timeSeries)
   }
 
-  def replayEvents = {
+  def simulator = {
     val marketState = if (withGui) new MarketStateWithGUI() else new MarketState()
-    val simulator = new MarketSimulator(this, marketState)
+    new MarketSimulator(this, marketState)
+  }
+
+  def replayEvents = {
     for {
       state <- simulator
     } yield (state.time, state.midPrice)

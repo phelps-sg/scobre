@@ -3,9 +3,9 @@ package org.ccfea.tickdata
 import scala.slick.driver.MySQLDriver.simple._
 import org.ccfea.tickdata.conf.ReplayConf
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
-import org.ccfea.tickdata.simulator.AbstractOrderReplay
+import org.ccfea.tickdata.simulator.{OrderBookSnapshot, AbstractOrderReplay}
 import java.text.DateFormat
-import java.util.Date
+import java.util.{Calendar, GregorianCalendar, Date}
 import grizzled.slf4j.Logger
 
 object OrderReplay {
@@ -15,6 +15,30 @@ object OrderReplay {
   class HBaseOrderReplay(val selectedAsset: String, withGui: Boolean = false, outFileName: Option[String] = None,
                             val startDate: Option[Date], val endDate: Option[Date])
     extends AbstractOrderReplay(withGui, outFileName) with HBaseRetriever
+
+  class HBaseOrderBookSnapshot(val selectedAsset: String, val time: Date, outFileName: Option[String])
+      extends OrderBookSnapshot with HBaseRetriever {
+
+    def calStart = {
+      val calEnd = new GregorianCalendar()
+      calEnd.setTime(time)
+      val calStart = new GregorianCalendar()
+      calStart.set(Calendar.YEAR, calEnd.get(Calendar.YEAR))
+      calStart.set(Calendar.MONTH, calEnd.get(Calendar.MONTH))
+      calStart.set(Calendar.DAY_OF_MONTH, calEnd.get(Calendar.DAY_OF_MONTH))
+      calStart
+    }
+
+    def calEnd = {
+      val calEnd = new GregorianCalendar()
+      calEnd.setTime(time)
+      calEnd.add(Calendar.SECOND, 100)
+      calEnd
+    }
+
+    override def startDate = Some(calStart.getTime)
+    override def endDate = Some(calEnd.getTime)
+  }
 
   def parseDate(date: Option[String]): Option[Date] = date match {
     case None => None
@@ -33,6 +57,11 @@ object OrderReplay {
 
     val replay = new HBaseOrderReplay(conf.tiCode(), conf.withGui(), conf.outFileName.get, startDate, endDate)
     replay.run
+
+//    val date = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).parse(conf.startDate.get.get)
+//    println(date)
+//    val snapShot = new HBaseOrderBookSnapshot(conf.tiCode(), date, conf.outFileName.get)
+//    snapShot.run
   }
 
 }
