@@ -3,7 +3,7 @@ package org.ccfea.tickdata.storage.sql
 import scala.slick.driver.MySQLDriver.simple._
 import RelationalTables.events
 import org.ccfea.tickdata.event.{OrderReplayEvent, Event}
-import org.ccfea.tickdata.simulator.AbstractOrderReplay
+import org.ccfea.tickdata.simulator.OrderReplayer
 
 // Use the implicit threadLocalSession
 import Database.threadLocalSession

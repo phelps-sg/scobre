@@ -13,7 +13,7 @@ import java.util.Date
  * (c) Steve Phelps 2013
  */
 
-abstract class AbstractOrderReplay(val withGui: Boolean = false, val outFileName: Option[String] = None)
+abstract class OrderReplayer(val withGui: Boolean = false, val outFileName: Option[String] = None)
     extends Iterable[OrderReplayEvent] {
 
   val out = outFileName match {

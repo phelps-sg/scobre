@@ -9,7 +9,7 @@ import collection.JavaConversions._
 /**
  * (C) Steve Phelps 2013
  */
-abstract class OrderBookSnapshot extends AbstractOrderReplay {
+abstract class OrderBookSnapshot extends OrderReplayer {
 
   def time: Date
 
