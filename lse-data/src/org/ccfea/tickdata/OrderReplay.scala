@@ -3,7 +3,7 @@ package org.ccfea.tickdata
 import scala.slick.driver.MySQLDriver.simple._
 import org.ccfea.tickdata.conf.ReplayConf
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
-import org.ccfea.tickdata.simulator.{OrderBookSnapshot, OrderReplayer}
+import org.ccfea.tickdata.simulator.{OrderBookSnapshotter, OrderReplayer}
 import java.text.DateFormat
 import java.util.{Calendar, GregorianCalendar, Date}
 import grizzled.slf4j.Logger
@@ -16,8 +16,8 @@ object OrderReplay {
                             val startDate: Option[Date], val endDate: Option[Date])
     extends OrderReplayer(withGui, outFileName) with HBaseRetriever
 
-  class HBaseOrderBookSnapshot(val selectedAsset: String, val time: Date, outFileName: Option[String])
-      extends OrderBookSnapshot with HBaseRetriever {
+  class HBaseOrderBookSnapshotter(val selectedAsset: String, val time: Date, outFileName: Option[String])
+      extends OrderBookSnapshotter with HBaseRetriever {
 
     def calStart = {
       val calEnd = new GregorianCalendar()
@@ -55,12 +55,12 @@ object OrderReplay {
     logger.debug("startDate = " + startDate)
     logger.debug("endDate = " + endDate)
 
-    val replay = new HBaseOrderReplayer(conf.tiCode(), conf.withGui(), conf.outFileName.get, startDate, endDate)
-    replay.run
+    val replayer = new HBaseOrderReplayer(conf.tiCode(), conf.withGui(), conf.outFileName.get, startDate, endDate)
+    replayer.run
 
 //    val date = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).parse(conf.startDate.get.get)
 //    println(date)
-//    val snapShot = new HBaseOrderBookSnapshot(conf.tiCode(), date, conf.outFileName.get)
+//    val snapShot = new HBaseOrderBookSnapshotter(conf.tiCode(), date, conf.outFileName.get)
 //    snapShot.run
   }
 
