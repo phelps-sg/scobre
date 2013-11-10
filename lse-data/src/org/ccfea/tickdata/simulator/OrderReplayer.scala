@@ -13,10 +13,14 @@ import java.util.Date
  * (c) Steve Phelps 2013
  */
 
-abstract class OrderReplayer(val withGui: Boolean = false, val outFileName: Option[String] = None)
-    extends Iterable[OrderReplayEvent] {
+trait OrderReplayer extends Iterable[OrderReplayEvent] with Runnable {
 
-  val out = outFileName match {
+  val out: java.io.PrintStream = openOutput
+
+  def withGui: Boolean
+  def outFileName: Option[String]
+
+  def openOutput = outFileName match {
     case Some(fileName) => {
       val outFile = new java.io.FileOutputStream(outFileName.get)
       new PrintStream(outFile)
@@ -25,8 +29,8 @@ abstract class OrderReplayer(val withGui: Boolean = false, val outFileName: Opti
   }
 
   def run {
-    val timeSeries = replayEvents
-    outputTimeSeries(timeSeries)
+    val data = replayEvents
+    outputResult(data)
   }
 
   def simulator = {
@@ -34,19 +38,8 @@ abstract class OrderReplayer(val withGui: Boolean = false, val outFileName: Opti
     new MarketSimulator(this, marketState)
   }
 
-  def replayEvents = {
-    for {
-      state <- simulator
-    } yield (state.time, state.midPrice)
-  }
+  def replayEvents: Any
 
-  def outputTimeSeries(timeSeries: Iterable[(Option[SimulationTime], Option[Double])]) {
-    for ((t, price) <- timeSeries) {
-      out.println(t.get.getTicks + "\t" + (price match {
-        case Some(p) => p.toString()
-        case None => "NaN"
-      }))
-    }
-    Unit
-  }
+  def outputResult(data: Any)
+
 }
