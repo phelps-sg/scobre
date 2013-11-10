@@ -119,13 +119,14 @@ case class Event(eventID: Option[Long],
         ********************************************************************/
       case Event(id, EventType.OrderMatched,
                     messageSequenceNumber, timeStamp, tiCode,
-                    marketSegmentCode, currencyCode, marketMechanismType, aggregateSize, tradeDirection,
+                    marketSegmentCode, currencyCode, marketMechanismType, Some(aggregateSize), tradeDirection,
                     Some(orderCode),
                     tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
                     Some(matchingOrderCode), resultingTradeCode,
                     None, None, None)
 
-      => new OrderMatchedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode), new Order(matchingOrderCode))
+      => new OrderMatchedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode),
+                                 new Order(matchingOrderCode), aggregateSize)
 
       /********************************************************************
         *        transaction events                            *

@@ -10,14 +10,16 @@ import java.awt.BorderLayout
  *
  * (c) Steve Phelps 2013
  */
-class OrderBookView(val market: MarketState) {
+class OrderBookView(val market: MarketState, val maxLevels: Int = 10) {
   //TODO: migrate to scala Swing swing wrappers
+
+
   val df = new SimpleDateFormat("HH:mm:ss:SSSS dd/MM yyyy")
   val auctioneer = new ContinuousDoubleAuctioneer()
   auctioneer.setOrderBook(market.book)
   val orderBookView = new net.sourceforge.jasa.view.OrderBookView()
   orderBookView.setAuctioneer(auctioneer)
-  orderBookView.setMaxDepth(30)
+  orderBookView.setMaxDepth(maxLevels)
   orderBookView.afterPropertiesSet()
   val myFrame = new JFrame()
   val timeLabel = new JLabel()

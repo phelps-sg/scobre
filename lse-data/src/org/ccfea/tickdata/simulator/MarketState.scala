@@ -154,6 +154,9 @@ class MarketState {
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
       logger.debug("partially filled order " + order)
+      val qty: Int = order.getQuantity
+      order.setQuantity(ev.aggregateSize.toInt)
+      assert(order.getQuantity > 0 && order.getQuantity < qty)
     }  else {
       logger.debug("unknown order code " + orderCode)
     }
