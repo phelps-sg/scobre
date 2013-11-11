@@ -5,14 +5,15 @@ This software allows the user to reconstruct the state of the limit order-book
 from low-level tick-data provided by the London Stock-Exchange (LSE).  The
 tick-data can be hosted in either mysql, or Apache HBase, and tools are
 provided for loading to the data into either of these back-ends from the
-compressed CSV (Comma-separated Variables) files provided by the LSE.  Once the
-data has been loaded, events corresponding to a particular asset and a
+compressed [raw files](file:./lse-data/doc/data.pdf)  provided by the LSE.
+Once the data has been loaded, events corresponding to a particular asset and a
 particular date-range can be replayed through an order-book simulator in order
 to reconstruct the state of the book.  Variables such as the mid-price can then
 be recorded as a time-series in CSV format.
 
-The software is written in Scala and Java, along with various Unix shell
-scripts which automate the import and order-replay process.
+The software is written in [Scala](http://www.scala-lang.org/) and Java, along
+with various Unix [shell scripts](http://www.calpoly.edu/~rasplund/script.html) which automate the import and order-replay
+process.
 
 Pre-requisites
 --------------
@@ -65,4 +66,12 @@ will not provide a GUI:
 
 	cd scripts
 	./replay.sh GB0009252882 -s 5/6/2007 -e 6/6/2007 -o hf.csv
+
+Documentation
+-------------
+
+See:
+
+- The [data description](file:./lse-data/doc/data.pdf) provided by the LSE
+- The [API documentation](file:./lse-data/doc/scaladoc/index.html)
 
