@@ -28,6 +28,8 @@ Pre-requisites
   version 0.94](https://www.apache.org/dyn/closer.cgi/hbase/).  The software
 can optionally connect to an existing server which already hosts the data.
 
+- Optionally, the best Integrated Development Environment (IDE) to use for working on the project is [IntelliJ IDEA](https://www.jetbrains.com/idea/).
+
 Installation
 ------------
 
@@ -70,8 +72,22 @@ will not provide a GUI:
 Documentation
 -------------
 
-See:
-
 - The [data description](file:./lse-data/doc/data.pdf) provided by the LSE
 - The [API documentation](file:./lse-data/doc/scaladoc/index.html)
+
+Compiling and modifying the code
+--------------------------------
+
+To compile the source-code to separate .class files, execute the following command.
+
+	sbt 
+
+To compile to a single JAR file use:
+
+	sbt assembly
+
+To generate all the files required for an IntelliJ IDEA project, use:
+
+	sbt gen-idea
+
 
