@@ -13,7 +13,7 @@ import java.util.Date
  * (c) Steve Phelps 2013
  */
 
-trait OrderReplayer extends Iterable[OrderReplayEvent] with Runnable {
+trait OrderReplayer[T] extends Iterable[OrderReplayEvent] with Runnable {
 
   val out: java.io.PrintStream = openOutput
 
@@ -38,8 +38,8 @@ trait OrderReplayer extends Iterable[OrderReplayEvent] with Runnable {
     new MarketSimulator(this, marketState)
   }
 
-  def replayEvents: Any
+  def replayEvents: Iterable[T]
 
-  def outputResult(data: Any)
+  def outputResult(data: Iterable[T])
 
 }

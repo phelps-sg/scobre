@@ -10,30 +10,27 @@ import util.control.Breaks._
 /**
  * (C) Steve Phelps 2013
  */
-abstract class OrderBookSnapshotter extends OrderReplayer {
+abstract class OrderBookSnapshotter extends OrderReplayer[Option[FourHeapOrderBook]] {
 
-  def time: Date
+  def t: SimulationTime
 
-  override def run = {
-    val book: Option[FourHeapOrderBook] = takeSnapshot(new SimulationTime(time.getTime))
-    save(book.get)
-  }
-
-  def save(book: FourHeapOrderBook) {
+  def outputResult(result: Iterable[Option[FourHeapOrderBook]]) {
+    //TODO
+    val book = result.iterator.next().get
     for(ask <- book.askIterator()) {
       out.println(ask.getQuantity + "\t" + ask.getPrice)
     }
   }
 
-  def takeSnapshot(t: SimulationTime): Option[FourHeapOrderBook] = {
+  def replayEvents: Iterable[Option[FourHeapOrderBook]] = {
     for (state <- simulator; time = state.time) {
       if (time.get.compareTo(t) >=0) {
-        return Some(state.book)
+        return List( Some(state.book) )
       } else {
         println(time)
       }
     }
-    return None
+    return List()
   }
 
 }

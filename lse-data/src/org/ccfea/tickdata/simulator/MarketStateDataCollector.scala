@@ -3,11 +3,11 @@ package org.ccfea.tickdata.simulator
 /**
  * (C) Steve Phelps 2013
  */
-trait MarketStateDataCollector extends OrderReplayer {
+trait MarketStateDataCollector[T] extends OrderReplayer[T] {
 
-  def collectData(state: MarketState): Any
+  def collectData(state: MarketState): T
 
-  def replayEvents: Any = {
+  def replayEvents: Iterable[T] = {
     simulator.map(collectData)
   }
 }

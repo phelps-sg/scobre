@@ -15,11 +15,11 @@ object OrderReplay {
 
   class HBaseMidPriceCollector(val selectedAsset: String, val withGui: Boolean = false, val outFileName: Option[String] = None,
                                 val startDate: Option[Date], val endDate: Option[Date])
-    extends MarketStateDataCollector with HBaseRetriever {
+    extends MarketStateDataCollector[(Option[SimulationTime], Option[Double])] with HBaseRetriever {
 
       def collectData(state: MarketState) = (state.time, state.midPrice)
 
-      def outputResult(data: Any) = {
+      def outputResult(data: Iterable[(Option[SimulationTime], Option[Double])]) = {
         data match {
           case timeSeries: Iterable[(Option[SimulationTime], Option[Double])] => {
             for ((t, price) <- timeSeries) {
