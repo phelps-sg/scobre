@@ -28,7 +28,7 @@ Pre-requisites
   version 0.94](https://www.apache.org/dyn/closer.cgi/hbase/).  The software
 can optionally connect to an existing server which already hosts the data.
 
-- Optionally, the best Integrated Development Environment (IDE) to use for working on the project is [IntelliJ IDEA](https://www.jetbrains.com/idea/).
+- Optionally, the best Integrated Development Environment (IDE) to use for working on the project is [IntelliJ IDEA](https://www.jetbrains.com/idea/) with the [Scala plugin](http://confluence.jetbrains.com/display/SCA/Scala+Plugin+for+IntelliJ+IDEA) installed.
 
 Installation
 ------------
