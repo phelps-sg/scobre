@@ -3,61 +3,23 @@ package org.ccfea.tickdata
 import scala.slick.driver.MySQLDriver.simple._
 import org.ccfea.tickdata.conf.ReplayConf
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
-import org.ccfea.tickdata.simulator.{MarketStateDataCollector, MarketState, OrderBookSnapshotter, OrderReplayer}
+import org.ccfea.tickdata.simulator._
 import java.text.DateFormat
 import java.util.{Calendar, GregorianCalendar, Date}
 import grizzled.slf4j.Logger
 import net.sourceforge.jabm.SimulationTime
+import scala.Some
 
 object OrderReplay {
 
   val logger = Logger("org.ccfea.tickdata.OrderReplay")
 
-  class HBaseMidPriceCollector(val selectedAsset: String, val withGui: Boolean = false, val outFileName: Option[String] = None,
+  class HBasePriceCollector(dataCollector: MarketState => (Option[SimulationTime], Option[Double]),
+                                val selectedAsset: String, val withGui: Boolean = false,
+                                val outFileName: Option[String] = None,
                                 val startDate: Option[Date], val endDate: Option[Date])
-    extends MarketStateDataCollector[(Option[SimulationTime], Option[Double])] with HBaseRetriever {
+    extends UnivariateTimeSeriesCollector(dataCollector) with HBaseRetriever
 
-      def collectData(state: MarketState) = (state.time, state.midPrice)
-
-      def outputResult(data: Iterable[(Option[SimulationTime], Option[Double])]) = {
-        data match {
-          case timeSeries: Iterable[(Option[SimulationTime], Option[Double])] => {
-            for ((t, price) <- timeSeries) {
-              out.println(t.get.getTicks + "\t" + (price match {
-                case Some(p) => p.toString()
-                case None => "NaN"
-              }))
-            }
-            Unit
-          }
-        }
-      }
-  }
-//
-//  class HBaseOrderBookSnapshotter(val selectedAsset: String, val time: Date, outFileName: Option[String])
-//      extends OrderBookSnapshotter with HBaseRetriever {
-//
-//    def calStart = {
-//      val calEnd = new GregorianCalendar()
-//      calEnd.setTime(time)
-//      val calStart = new GregorianCalendar()
-//      calStart.set(Calendar.YEAR, calEnd.get(Calendar.YEAR))
-//      calStart.set(Calendar.MONTH, calEnd.get(Calendar.MONTH))
-//      calStart.set(Calendar.DAY_OF_MONTH, calEnd.get(Calendar.DAY_OF_MONTH))
-//      calStart
-//    }
-//
-//    def calEnd = {
-//      val calEnd = new GregorianCalendar()
-//      calEnd.setTime(time)
-//      calEnd.add(Calendar.SECOND, 100)
-//      calEnd
-//    }
-//
-//    override def startDate = Some(calStart.getTime)
-//    override def endDate = Some(calEnd.getTime)
-//  }
-//
   def parseDate(date: Option[String]): Option[Date] = date match {
     case None => None
     case Some(dateStr) =>  Some(DateFormat.getDateInstance(DateFormat.SHORT).parse(dateStr))
@@ -73,7 +35,11 @@ object OrderReplay {
     logger.debug("startDate = " + startDate)
     logger.debug("endDate = " + endDate)
 
-    val replayer = new HBaseMidPriceCollector(conf.tiCode(), conf.withGui(), conf.outFileName.get, startDate, endDate)
+    def midPriceCollector(state: MarketState) = (state.time, state.midPrice)
+    def transactionPriceCollector(state: MarketState) = (state.time, state.lastTransactionPrice)
+
+    val replayer = new HBasePriceCollector(midPriceCollector,
+                                  conf.tiCode(), conf.withGui(), conf.outFileName.get, startDate, endDate)
     replayer.run
 
 //    val date = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).parse(conf.startDate.get.get)
