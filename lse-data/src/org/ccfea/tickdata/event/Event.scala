@@ -14,7 +14,7 @@ import org.ccfea.tickdata.order.Order
  * A time-ordered sequence of Events can be replayed through a simulator in order to
  * reconstruct the state of the market at any given time.  Events are represented as a flat
  * tuple in order to maintain high-performance and avoid complicated joins across many tables.
- * They are implicitly converted to an object-oriented representation using the method
+ * They can be converted to an object-oriented representation using the method
  * toOrderReplayEvent.
  *
  * (c) Steve Phelps 2013
