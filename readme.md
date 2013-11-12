@@ -80,7 +80,7 @@ Compiling and modifying the code
 
 To compile the source-code to separate .class files, execute the following command.
 
-	sbt 
+	sbt compile
 
 To compile to a single JAR file use:
 
