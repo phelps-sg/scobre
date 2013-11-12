@@ -35,10 +35,8 @@ object OrderReplay {
     logger.debug("startDate = " + startDate)
     logger.debug("endDate = " + endDate)
 
-    def midPriceCollector(state: MarketState) = (state.time, state.midPrice)
-    def transactionPriceCollector(state: MarketState) = (state.time, state.lastTransactionPrice)
-
-    val replayer = new HBasePriceCollector(transactionPriceCollector,
+    val replayer =
+      new HBasePriceCollector( (state: MarketState) => (state.time, state.midPrice),
                                   conf.tiCode(), conf.withGui(), conf.outFileName.get, startDate, endDate)
     replayer.run
 

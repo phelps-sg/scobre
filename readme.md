@@ -53,7 +53,8 @@ The script replay.sh in the scripts directory can then be used retreive a
 time-series of the mid-price.  
 
 The following example will replay all recorded events for the asset with given
-ISIN and provide a GUI visualisation of the order-book.
+[ISIN](http://www.isin.org/isin-database/) and provide a GUI visualisation of
+the order-book.
 
 	cd scripts
 	./replay.sh GB0009252882 --with-gui
