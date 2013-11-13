@@ -8,5 +8,5 @@ import org.ccfea.tickdata.order.AbstractOrder
  */
 case class OrderMatchedEvent(val timeStamp: Date, val messageSequenceNumber: Long,
                               val tiCode: String, val order: AbstractOrder, val matchingOrder: AbstractOrder,
-                              val aggregateSize: Long)
+                              val resultingTradeCode: String)
   extends OrderEvent

@@ -16,6 +16,7 @@ import org.ccfea.tickdata.event.OrderMatchedEvent
 import scala.Some
 import org.ccfea.tickdata.event.Event
 import org.ccfea.tickdata.order.{TradeDirection, AbstractOrder, LimitOrder}
+import scala.collection.mutable
 
 /**
  * The state of the market at a single point in time.
@@ -34,6 +35,8 @@ class MarketState {
    * Lookup table mapping order-codes to Orders.
    */
   val orderMap = collection.mutable.Map[String, net.sourceforge.jasa.market.Order]()
+
+  val transactionMap = collection.mutable.Map[String, mutable.ListBuffer[AbstractOrder]]()
 
   /**
    * The time of the most recent event.
@@ -72,11 +75,11 @@ class MarketState {
     assert(ev.timeStamp.getTime >= (time match { case None => 0; case Some(t) => t.getTicks}))
 
     val newTime = new SimulationTime(ev.timeStamp.getTime)
-
-    this.time match {
-      case Some(t) => if (getDay(newTime) != getDay(t)) startNewDay()
-      case None =>
-    }
+//
+//    this.time match {
+//      case Some(t) => if (getDay(newTime) != getDay(t)) startNewDay()
+//      case None =>
+//    }
 
     this.time = Some(newTime)
 
@@ -126,6 +129,22 @@ class MarketState {
 
   def process(ev: TransactionEvent): Unit = {
     this.lastTransactionPrice = Some(ev.transactionPrice.toDouble)
+    if (transactionMap.contains(ev.tradeCode)) {
+      val matchedOrders = transactionMap(ev.tradeCode)
+      for(order <- matchedOrders) {
+        if (orderMap.contains(order.orderCode)) {
+          val jasaOrder = orderMap(order.orderCode)
+          logger.debug("Adjusting qty for order based on partial match" + ev)
+          jasaOrder.setQuantity(jasaOrder.getQuantity - ev.tradeSize.toInt)
+          logger.debug("New order = " + jasaOrder)
+          assert(jasaOrder.getQuantity > 0)
+        } else {
+          logger.warn("Could not find order code " + order.orderCode + " for transaction " + ev)
+        }
+      }
+    } else {
+      logger.debug("No outstanding orders corresponding to trade code- order filled? " + ev.tradeCode)
+    }
   }
 
   def process(ev: OrderRemovedEvent): Unit = {
@@ -154,22 +173,12 @@ class MarketState {
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
       logger.debug("partially filled order " + order)
-      val existingQty: Int = order.getQuantity
       val matchedOrder =
           if (orderMap.contains(ev.matchingOrder.orderCode))  Some(orderMap(ev.matchingOrder.orderCode)) else None
-      val newQty = matchedOrder match {
-        case None           => ev.aggregateSize.toInt
-        case Some(matched)  => existingQty - Math.min(order.getQuantity, matched.getQuantity)
+      if (!transactionMap.contains(ev.resultingTradeCode)) {
+        transactionMap(ev.resultingTradeCode) = mutable.ListBuffer[AbstractOrder]()
       }
-      order.setQuantity(newQty)
-      if(order.getQuantity >= existingQty || newQty <= 0) {
-        logger.warn("Partial match did not result in volume decrease: event=" + ev + " order=" + order)
-        logger.warn("matchedOrder = " + matchedOrder)
-      }
-      if (newQty <= 0) {
-        logger.error("Negative volume detected: removing order from book to correct")
-        book.remove(order)
-      }
+      transactionMap(ev.resultingTradeCode).append(ev.order)
     }  else {
       logger.warn("unknown order code " + orderCode)
     }
@@ -191,9 +200,9 @@ class MarketState {
     }
   }
 
-  def startNewDay() = {
-    book.reset()
-  }
+//  def startNewDay() = {
+//    book.reset()
+//  }
 
   def getDay(t: SimulationTime) = {
     val cal = new GregorianCalendar()

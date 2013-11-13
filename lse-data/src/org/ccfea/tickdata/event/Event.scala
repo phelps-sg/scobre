@@ -126,7 +126,7 @@ case class Event(eventID: Option[Long],
                     None, None, None)
 
       => new OrderMatchedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode),
-                                 new Order(matchingOrderCode), aggregateSize)
+                                 new Order(matchingOrderCode), resultingTradeCode.get)
 
       /********************************************************************
         *        transaction events                            *
@@ -140,7 +140,7 @@ case class Event(eventID: Option[Long],
                   None, None,
                   tradeCode, Some(tradeTimeInd), Some(convertedPriceInd))
 
-      => new TransactionEvent(new Date(timeStamp), messageSequenceNumber, tiCode, tradePrice, tradeSize)
+      => new TransactionEvent(new Date(timeStamp), messageSequenceNumber, tiCode, tradeCode.get, tradePrice, tradeSize)
 
     }
   }
