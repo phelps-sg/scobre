@@ -38,12 +38,7 @@ object OrderReplay {
     val replayer =
       new HBasePriceCollector( (state: MarketState) => (state.time, state.midPrice),
                                   conf.tiCode(), conf.withGui(), conf.outFileName.get, startDate, endDate)
-    replayer.run
-
-//    val date = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).parse(conf.startDate.get.get)
-//    println(date)
-//    val snapShot = new HBaseOrderBookSnapshotter(conf.tiCode(), date, conf.outFileName.get)
-//    snapShot.run
+    replayer.run()
   }
 
 }

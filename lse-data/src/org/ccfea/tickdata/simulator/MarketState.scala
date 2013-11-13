@@ -154,11 +154,24 @@ class MarketState {
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
       logger.debug("partially filled order " + order)
-      val qty: Int = order.getQuantity
-      order.setQuantity(ev.aggregateSize.toInt)
-      assert(order.getQuantity > 0 && order.getQuantity < qty)
+      val existingQty: Int = order.getQuantity
+      val matchedOrder =
+          if (orderMap.contains(ev.matchingOrder.orderCode))  Some(orderMap(ev.matchingOrder.orderCode)) else None
+      val newQty = matchedOrder match {
+        case None           => ev.aggregateSize.toInt
+        case Some(matched)  => existingQty - Math.min(order.getQuantity, matched.getQuantity)
+      }
+      order.setQuantity(newQty)
+      if(order.getQuantity >= existingQty || newQty <= 0) {
+        logger.warn("Partial match did not result in volume decrease: event=" + ev + " order=" + order)
+        logger.warn("matchedOrder = " + matchedOrder)
+      }
+      if (newQty <= 0) {
+        logger.error("Negative volume detected: removing order from book to correct")
+        book.remove(order)
+      }
     }  else {
-      logger.debug("unknown order code " + orderCode)
+      logger.warn("unknown order code " + orderCode)
     }
   }
 

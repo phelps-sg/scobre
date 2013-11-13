@@ -10,7 +10,7 @@ import java.awt.BorderLayout
  *
  * (c) Steve Phelps 2013
  */
-class OrderBookView(val market: MarketState, val maxLevels: Int = 10) {
+class OrderBookView(val market: MarketState, val maxLevels: Int = 12) {
   //TODO: migrate to scala Swing swing wrappers
 
 

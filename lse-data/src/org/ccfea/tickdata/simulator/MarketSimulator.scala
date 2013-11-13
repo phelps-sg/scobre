@@ -18,5 +18,9 @@ class MarketSimulator(val events: Iterable[OrderReplayEvent], val market: Market
     })
   }
 
+  def step() = {
+    market.newEvent(events.iterator.next())
+  }
+
 }
 

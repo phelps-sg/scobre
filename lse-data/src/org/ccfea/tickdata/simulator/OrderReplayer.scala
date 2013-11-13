@@ -20,7 +20,10 @@ trait OrderReplayer[T] extends Iterable[OrderReplayEvent] with Runnable {
   def withGui: Boolean
   def outFileName: Option[String]
 
-  def openOutput = outFileName match {
+  val marketState = if (withGui) new MarketStateWithGUI() else new MarketState()
+  val simulator = new MarketSimulator(this, marketState)
+
+  def openOutput() = outFileName match {
     case Some(fileName) => {
       val outFile = new java.io.FileOutputStream(outFileName.get)
       new PrintStream(outFile)
@@ -28,17 +31,16 @@ trait OrderReplayer[T] extends Iterable[OrderReplayEvent] with Runnable {
     case None => System.out
   }
 
-  def run {
+  def run() {
     val data = replayEvents
     outputResult(data)
   }
 
-  def simulator = {
-    val marketState = if (withGui) new MarketStateWithGUI() else new MarketState()
-    new MarketSimulator(this, marketState)
+  def step() {
+    simulator.step()
   }
 
-  def replayEvents: Iterable[T]
+  def replayEvents(): Iterable[T]
 
   def outputResult(data: Iterable[T])
 
