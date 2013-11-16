@@ -5,10 +5,10 @@ import net.sourceforge.jabm.SimulationTime
 /**
  * (C) Steve Phelps 2013
  */
-abstract class UnivariateTimeSeriesCollector(val dataCollector: MarketState => (Option[SimulationTime], Option[Double]))
+abstract class UnivariateTimeSeriesCollector(val dataCollector: MarketState => Option[Double])
     extends MarketStateDataCollector[(Option[SimulationTime], Option[Double])]{
 
-  def collectData(state: MarketState) = dataCollector(state)
+  def collectData(state: MarketState) = (state.time, dataCollector(state))
 
   def outputResult(data: Iterable[(Option[SimulationTime], Option[Double])]) = {
     for ((t, price) <- data) {
