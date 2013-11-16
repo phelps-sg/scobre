@@ -12,20 +12,36 @@ object OrderReplay {
 
   val logger = Logger("org.ccfea.tickdata.OrderReplay")
 
-  class HBasePriceCollector(dataCollector: MarketState => Option[Double],
-                                val selectedAsset: String, val withGui: Boolean = false,
-                                val outFileName: Option[String] = None,
-                                val startDate: Option[Date], val endDate: Option[Date])
-    extends UnivariateTimeSeriesCollector(dataCollector) with HBaseRetriever
+  def main(args: Array[String]) {
+
+    implicit val conf = new ReplayConf(args)
+    val getPropertyMethod = classOf[MarketState].getMethod(conf.property())
+
+    simulateAndCollate {
+      getPropertyMethod invoke _
+    }
+
+//    simulateAndCollate {
+//      _.quote.bid
+//    }
+//
+//    simulateAndCollate {
+//      _.lastTransactionPrice
+//    }
+  }
 
   def parseDate(date: Option[String]): Option[Date] = date match {
     case None => None
     case Some(dateStr) =>  Some(DateFormat.getDateInstance(DateFormat.SHORT).parse(dateStr))
   }
 
-  def main(args: Array[String]) {
+  def simulateAndCollate( dataCollector: MarketState => Option[AnyVal])(implicit conf: ReplayConf) = {
 
-    val conf = new ReplayConf(args)
+      class HBasePriceCollector(dataCollector: MarketState => Option[AnyVal],
+                                    val selectedAsset: String, val withGui: Boolean = false,
+                                    val outFileName: Option[String] = None,
+                                    val startDate: Option[Date], val endDate: Option[Date])
+        extends UnivariateTimeSeriesCollector(dataCollector) with HBaseRetriever
 
     val startDate = parseDate(conf.startDate.get)
     val endDate = parseDate(conf.endDate.get)
@@ -34,9 +50,16 @@ object OrderReplay {
     logger.debug("endDate = " + endDate)
 
     val replayer =
-      new HBasePriceCollector( _.midPrice, conf.tiCode(), conf.withGui(), conf.outFileName.get,
+      new HBasePriceCollector( dataCollector, conf.tiCode(), conf.withGui(), conf.outFileName.get,
                                   startDate, endDate)
     replayer.run()
+  }
+
+  implicit def AnyRefToOptionAnyVal(x: AnyRef): Option[AnyVal] = x match {
+    case Some(double: Double) => Some(double)
+    case Some(long: Long) => Some(long)
+    case l: java.lang.Long => Some(l)
+    case None => None
   }
 
 }

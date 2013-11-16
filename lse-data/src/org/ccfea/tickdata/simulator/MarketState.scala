@@ -29,13 +29,16 @@ class MarketState {
    * The current state of the book.
    */
   val book = new FourHeapOrderBook()
-//  val book = new OrderBook()
 
   /**
    * Lookup table mapping order-codes to Orders.
    */
   val orderMap = collection.mutable.Map[String, net.sourceforge.jasa.market.Order]()
 
+  /**
+   *
+   * Lookup table mapping each transaction code to a list of the corresponding matched orders
+   */
   val transactionMap = collection.mutable.Map[String, mutable.ListBuffer[AbstractOrder]]()
 
   /**
@@ -47,6 +50,8 @@ class MarketState {
    * The most recent transaction price.
    */
   var lastTransactionPrice: Option[Double] = None
+
+  var volume: Long = 0
 
   val logger = Logger(classOf[MarketState])
 
@@ -90,17 +95,16 @@ class MarketState {
     book.printState()
   }
 
+  implicit def price(order: net.sourceforge.jasa.market.Order) = if (order != null) Some(order.getPrice) else None
+  def quote = new Quote(book.getHighestUnmatchedBid, book.getLowestUnmatchedAsk)
+
   def midPrice: Option[Double] = {
 
-    val quote: (Option[Double], Option[Double]) =
-      (if (book.getHighestUnmatchedBid == null) None else Some(book.getHighestUnmatchedBid.getPrice),
-       if (book.getHighestMatchedAsk==null)     None else Some(book.getHighestMatchedAsk.getPrice))
-
     quote match {
-      case (None,      None)      => None
-      case (Some(bid), None)      => Some(bid)
-      case (None,      Some(ask)) => Some(ask)
-      case (Some(bid), Some(ask)) => Some((bid + ask) / 2.0)
+      case Quote(None,      None)      => None
+      case Quote(Some(bid), None)      => Some(bid)
+      case Quote(None,      Some(ask)) => Some(ask)
+      case Quote(Some(bid), Some(ask)) => Some((bid + ask) / 2.0)
     }
   }
 
@@ -129,6 +133,7 @@ class MarketState {
 
   def process(ev: TransactionEvent): Unit = {
     this.lastTransactionPrice = Some(ev.transactionPrice.toDouble)
+    this.volume = ev.tradeSize
     if (transactionMap.contains(ev.tradeCode)) {
       val matchedOrders = transactionMap(ev.tradeCode)
       for(order <- matchedOrders) {
@@ -148,6 +153,7 @@ class MarketState {
   }
 
   def process(ev: OrderRemovedEvent): Unit = {
+    volume = 0
     val orderCode = ev.order.orderCode
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
@@ -158,6 +164,7 @@ class MarketState {
   }
 
   def process(ev: OrderFilledEvent): Unit = {
+    volume = 0
     val orderCode = ev.order.orderCode
       if (orderMap.contains(orderCode)) {
         val order = orderMap(orderCode)
@@ -169,6 +176,7 @@ class MarketState {
   }
 
   def process(ev: OrderMatchedEvent): Unit = {
+    volume = 0
     val orderCode = ev.order.orderCode
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
@@ -185,6 +193,7 @@ class MarketState {
   }
 
   def process(ev: OrderSubmittedEvent): Unit = {
+    volume = 0
     val order = ev.order
     if (orderMap.contains(order.orderCode)) {
       logger.warn("Submission using existing order code: " + order.orderCode)

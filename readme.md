@@ -57,18 +57,23 @@ The following example will replay all recorded events for the asset with given
 the order-book.
 
 	cd scripts
-	./replay.sh GB0009252882 --with-gui
+	./replay.sh -t GB0009252882 --with-gui
 
 The following will replay a subset of events over a given date-range:
 
 	cd scripts
-	./replay.sh GB0009252882 --with-gui -s 5/6/2007 -e 6/6/2007
+	./replay.sh -t GB0009252882 --with-gui --start-date 5/6/2007 --end-date 6/6/2007
 
 The following command will log the mid-price to a CSV file called hf.csv, but
 will not provide a GUI:
 
 	cd scripts
-	./replay.sh GB0009252882 -s 5/6/2007 -e 6/6/2007 -o hf.csv
+	./replay.sh -t GB0009252882 --property midPrice --start-date 5/6/2007 --end-date 6/6/2007 -o hf.csv
+
+The following command will log transaction prices to a CSV file called hf.csv:
+
+	cd scripts
+	./replay.sh -t GB0009252882 --property lastTransactionPrice -o hf.csv
 
 Documentation
 -------------

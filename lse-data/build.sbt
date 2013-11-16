@@ -4,7 +4,7 @@ assemblySettings
 
 name := "lse-data"
 
-version := "0.6"
+version := "0.7"
 
 scalaVersion := "2.10.1"
 //scalaVersion := "2.11.0-M5"
