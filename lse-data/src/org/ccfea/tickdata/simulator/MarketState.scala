@@ -87,6 +87,7 @@ class MarketState {
 //    }
 
     this.time = Some(newTime)
+    this.volume = 0
 
     process(ev)
   }
@@ -153,7 +154,6 @@ class MarketState {
   }
 
   def process(ev: OrderRemovedEvent): Unit = {
-    volume = 0
     val orderCode = ev.order.orderCode
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
@@ -164,7 +164,6 @@ class MarketState {
   }
 
   def process(ev: OrderFilledEvent): Unit = {
-    volume = 0
     val orderCode = ev.order.orderCode
       if (orderMap.contains(orderCode)) {
         val order = orderMap(orderCode)
@@ -176,7 +175,6 @@ class MarketState {
   }
 
   def process(ev: OrderMatchedEvent): Unit = {
-    volume = 0
     val orderCode = ev.order.orderCode
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
@@ -193,7 +191,6 @@ class MarketState {
   }
 
   def process(ev: OrderSubmittedEvent): Unit = {
-    volume = 0
     val order = ev.order
     if (orderMap.contains(order.orderCode)) {
       logger.warn("Submission using existing order code: " + order.orderCode)
