@@ -90,6 +90,21 @@ class MarketState {
     this.volume = 0
 
     process(ev)
+
+    checkConsistency(ev)
+  }
+
+  def checkConsistency(ev: OrderReplayEvent) = {
+    logger.debug("quote = " + quote)
+    quote match {
+      case Quote(Some(bid), Some(ask)) => {
+        if (bid > ask) {
+          logger.warn("Artificially clearing book to maintain consistency following event " + ev)
+          book.matchOrders()
+        }
+      }
+      case _ =>
+    }
   }
 
   def printState = {
@@ -139,11 +154,7 @@ class MarketState {
       val matchedOrders = transactionMap(ev.tradeCode)
       for(order <- matchedOrders) {
         if (orderMap.contains(order.orderCode)) {
-          val jasaOrder = orderMap(order.orderCode)
-          logger.debug("Adjusting qty for order based on partial match" + ev)
-          jasaOrder.setQuantity(jasaOrder.getQuantity - ev.tradeSize.toInt)
-          logger.debug("New order = " + jasaOrder)
-          assert(jasaOrder.getQuantity > 0)
+          adjustQuantity(order.orderCode, ev)
         } else {
           logger.warn("Could not find order code " + order.orderCode + " for transaction " + ev)
         }
@@ -151,6 +162,7 @@ class MarketState {
     } else {
       logger.debug("No outstanding orders corresponding to trade code- order filled? " + ev.tradeCode)
     }
+
   }
 
   def process(ev: OrderRemovedEvent): Unit = {
@@ -206,6 +218,18 @@ class MarketState {
     }
   }
 
+  def adjustQuantity(orderCode: String, ev: TransactionEvent): Unit = {
+    val jasaOrder = orderMap(orderCode)
+    logger.debug("Adjusting qty for order based on partial match" + ev)
+    jasaOrder.setQuantity(jasaOrder.getQuantity - ev.tradeSize.toInt)
+    logger.debug("New order = " + jasaOrder)
+    assert(jasaOrder.getQuantity > 0)
+//    if (jasaOrder.getQuantity < 0) {
+//      logger.warn("Negative quantity detected- adjusting")
+//      jasaOrder.setQuantity(0)
+//    }
+  }
+
 //  def startNewDay() = {
 //    book.reset()
 //  }
@@ -215,5 +239,7 @@ class MarketState {
     cal.setTime(new java.util.Date(t.getTicks))
     cal.get(java.util.Calendar.DAY_OF_MONTH)
   }
+
+  def getBook() = book
 
 }
