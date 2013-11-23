@@ -1,6 +1,5 @@
 package org.ccfea.tickdata.storage.hbase
 
-import org.ccfea.tickdata.storage.hbase.HBaseRetriever
 import java.util.Date
 
 /**
