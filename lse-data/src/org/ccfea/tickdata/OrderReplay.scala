@@ -35,23 +35,16 @@ object OrderReplay {
     case Some(dateStr) =>  Some(DateFormat.getDateInstance(DateFormat.SHORT).parse(dateStr))
   }
 
-  def simulateAndCollate( dataCollector: MarketState => Option[AnyVal])(implicit conf: ReplayConf) = {
+  def simulateAndCollate(dataCollector: MarketState => Option[AnyVal])(implicit conf: ReplayConf) = {
 
-      class HBasePriceCollector(dataCollector: MarketState => Option[AnyVal],
-                                    val selectedAsset: String, val withGui: Boolean = false,
-                                    val outFileName: Option[String] = None,
-                                    val startDate: Option[Date], val endDate: Option[Date])
+      class HBasePriceCollector(dataCollector: MarketState => Option[AnyVal] = dataCollector,
+                                    val selectedAsset: String = conf.tiCode(), val withGui: Boolean = conf.withGui(),
+                                    val outFileName: Option[String] = conf.outFileName.get,
+                                    val startDate: Option[Date] = parseDate(conf.startDate.get),
+                                    val endDate: Option[Date] = parseDate(conf.endDate.get))
         extends UnivariateTimeSeriesCollector(dataCollector) with HBaseRetriever
 
-    val startDate = parseDate(conf.startDate.get)
-    val endDate = parseDate(conf.endDate.get)
-
-    logger.debug("startDate = " + startDate)
-    logger.debug("endDate = " + endDate)
-
-    val replayer =
-      new HBasePriceCollector( dataCollector, conf.tiCode(), conf.withGui(), conf.outFileName.get,
-                                  startDate, endDate)
+    val replayer = new HBasePriceCollector()
     replayer.run()
   }
 
