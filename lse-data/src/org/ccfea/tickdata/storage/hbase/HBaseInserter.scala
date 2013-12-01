@@ -53,7 +53,7 @@ trait HBaseInserter extends HBaseEventConverter {
   }
 
   def insertData(parsedEvents: Seq[Event]): Int = {
-    eventsTable.put(parsedEvents.map(convert))
+    eventsTable.put(for(event <- parsedEvents) yield convert(event))
     parsedEvents.length
   }
 }
