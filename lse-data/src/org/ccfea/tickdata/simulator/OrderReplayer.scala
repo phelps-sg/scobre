@@ -32,7 +32,7 @@ trait OrderReplayer[T] extends Iterable[OrderReplayEvent] with Runnable {
   }
 
   def run() {
-    val data = replayEvents
+    val data = replayEvents()
     outputResult(data)
   }
 
