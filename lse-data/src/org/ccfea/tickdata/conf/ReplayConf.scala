@@ -11,7 +11,7 @@ import java.util.Date
 
 class ReplayConf(args: Seq[String]) extends ScallopConf(args) {
 
-  version("org.ccfea.tickdata.OrderReplay 0.7 (c) 2013 Steve Phelps")
+  version("org.ccfea.tickdata.OrderReplay 0.8 (c) 2013 Steve Phelps")
   banner("""Usage: OrderReplay [OPTION]...
            |Replay tick data through an order-book simulator and collect data
            |on the state of the market.

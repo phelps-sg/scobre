@@ -31,11 +31,17 @@ trait OrderReplayer[T] extends Iterable[OrderReplayEvent] with Runnable {
     case None => System.out
   }
 
+  /**
+   * Run the replay which will simulate the events and collate the resulting data.
+   */
   def run() {
-    val data = replayEvents
+    val data = replayEvents()
     outputResult(data)
   }
 
+  /**
+   * Run a single step of the simulation.
+   */
   def step() {
     simulator.step()
   }
