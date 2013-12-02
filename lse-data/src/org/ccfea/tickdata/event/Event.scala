@@ -83,8 +83,15 @@ case class Event(eventID: Option[Long],
               new MarketOrder(orderCode, aggregateSize, tradeDirection)
             case _ =>
               new OtherOrder(orderCode, marketMechanismType)
-          }
-        new OrderSubmittedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, order)
+        }
+        val date = new Date(timeStamp)
+        val orderSubmittedEvent = new OrderSubmittedEvent(date, messageSequenceNumber, tiCode, order)
+        if (broadcastUpdateAction == "F") {
+          val markerEvent = new StartOfDataMarker(date, messageSequenceNumber, tiCode)
+          new MultipleEvent(List(markerEvent, orderSubmittedEvent))
+        } else {
+          orderSubmittedEvent
+        }
       }
 
 

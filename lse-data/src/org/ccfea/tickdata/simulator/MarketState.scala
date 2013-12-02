@@ -9,7 +9,7 @@ import collection.JavaConversions._
 import net.sourceforge.jasa.market.FourHeapOrderBook
 
 import grizzled.slf4j.Logger
-import java.util.GregorianCalendar
+import java.util.{Date, GregorianCalendar}
 import org.ccfea.tickdata.event._
 import org.ccfea.tickdata.event.OrderFilledEvent
 import org.ccfea.tickdata.event.OrderMatchedEvent
@@ -52,6 +52,8 @@ class MarketState {
   var lastTransactionPrice: Option[Double] = None
 
   var volume: Long = 0
+
+  var startOfData: Boolean = false
 
   val logger = Logger(classOf[MarketState])
 
@@ -96,14 +98,16 @@ class MarketState {
 
   def checkConsistency(ev: OrderReplayEvent) = {
     logger.debug("quote = " + quote)
-    quote match {
-      case Quote(Some(bid), Some(ask)) => {
-        if (bid > ask) {
-          logger.warn("Artificially clearing book to maintain consistency following event " + ev)
-          book.matchOrders()
+    if (hour > 8) {
+      quote match {
+        case Quote(Some(bid), Some(ask)) => {
+          if (bid > ask) {
+            logger.warn("Artificially clearing book to maintain consistency following event " + ev)
+            book.matchOrders()
+          }
         }
+        case _ =>
       }
-      case _ =>
     }
   }
 
@@ -138,11 +142,22 @@ class MarketState {
 
   def process(ev: OrderReplayEvent): Unit = {
     ev match {
-      case tr: TransactionEvent           =>  process(tr)
-      case or: OrderRemovedEvent          =>  process(or)
-      case of: OrderFilledEvent           =>  process(of)
-      case om: OrderMatchedEvent          =>  process(om)
+
+      case tr: TransactionEvent           =>  startOfData = false; process(tr)
+      case or: OrderRemovedEvent          =>  startOfData = false; process(or)
+      case of: OrderFilledEvent           =>  startOfData = false; process(of)
+
       case lo: OrderSubmittedEvent        =>  process(lo)
+      case me: MultipleEvent              =>  process(me)
+
+      case om: OrderMatchedEvent          =>  startOfData = false; process(om)
+
+      case so: StartOfDataMarker          =>  if (!startOfData) {
+        logger.debug("Resetting book in response to broadcastUpdateAction=='F' event")
+        book.reset()
+        startOfData = true
+      }
+
       case _ => logger.warn("Unknown event type: " + ev)
     }
   }
@@ -162,7 +177,6 @@ class MarketState {
     } else {
       logger.debug("No outstanding orders corresponding to trade code- order filled? " + ev.tradeCode)
     }
-
   }
 
   def process(ev: OrderRemovedEvent): Unit = {
@@ -218,12 +232,27 @@ class MarketState {
     }
   }
 
+  def process(ev: MultipleEvent): Unit = {
+    ev.events match {
+      case Nil => // Do nothing
+      case head :: tail => {
+        process(head)
+        process(new MultipleEvent(tail))
+      }
+    }
+  }
+
   def adjustQuantity(orderCode: String, ev: TransactionEvent): Unit = {
     val jasaOrder = orderMap(orderCode)
     logger.debug("Adjusting qty for order based on partial match" + ev)
     jasaOrder.setQuantity(jasaOrder.getQuantity - ev.tradeSize.toInt)
     logger.debug("New order = " + jasaOrder)
-    assert(jasaOrder.getQuantity > 0)
+//    assert(jasaOrder.getQuantity >= 0)
+    if (jasaOrder.getQuantity <= 0) {
+      logger.warn("Removing order with zero or negative volume from book before full match: " + jasaOrder)
+      book.remove(jasaOrder)
+      orderMap.remove(orderCode)
+    }
 //    if (jasaOrder.getQuantity < 0) {
 //      logger.warn("Negative quantity detected- adjusting")
 //      jasaOrder.setQuantity(0)
@@ -234,10 +263,18 @@ class MarketState {
 //    book.reset()
 //  }
 
-  def getDay(t: SimulationTime) = {
+  def calendar = {
     val cal = new GregorianCalendar()
-    cal.setTime(new java.util.Date(t.getTicks))
-    cal.get(java.util.Calendar.DAY_OF_MONTH)
+    cal.setTime(new java.util.Date(time.get.getTicks))
+    cal
+  }
+
+  def day = {
+    calendar.get(java.util.Calendar.DAY_OF_MONTH)
+  }
+
+  def hour = {
+    calendar.get(java.util.Calendar.HOUR_OF_DAY)
   }
 
   def getBook() = book
