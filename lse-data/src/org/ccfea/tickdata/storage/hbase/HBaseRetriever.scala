@@ -16,7 +16,7 @@ trait HBaseRetriever extends HBaseEventConverter with Iterable[OrderReplayEvent]
 
   val logger = Logger(classOf[HBaseRetriever])
 
-  def cacheSize: Int = 500
+  def cacheSize: Int = 1000
   def selectedAsset: String
   def startDate: Option[Date]
   def endDate: Option[Date]
@@ -38,7 +38,8 @@ trait HBaseRetriever extends HBaseEventConverter with Iterable[OrderReplayEvent]
   }
 
   def retrieveEvents() = {
-    for(r <- scanner) yield toEvent(r)
+    scanner.par.map(toEvent(_)).seq
+//    for(r <- scanner) yield toEvent(r)
   }
 
 }
