@@ -35,27 +35,16 @@ trait HBaseEventConverter {
   implicit def toLong(raw: Array[Byte]): Long = Bytes.toLong(raw)
   implicit def toBigDecimal(raw: Array[Byte]): BigDecimal = Bytes.toBigDecimal(raw)
 
-  //TODO: parameterize the following to avoid duplication
-
-  implicit def toOptionString(raw: Option[Array[Byte]]): Option[String] = raw match {
-    case Some(bytes) => Some(toString(bytes))
-    case None => None
+  def toOptionAny[A](convert: Array[Byte] => A)(implicit raw: Option[Array[Byte]]) = {
+    raw match {
+      case Some(bytes) => Some(convert(bytes))
+      case None => None
+    }
   }
-
-  implicit def toOptionLong(raw: Option[Array[Byte]]): Option[Long] = raw match {
-    case Some(bytes) => Some(toLong(bytes))
-    case None => None
-  }
-
-  implicit def toOptionBigDecimal(raw: Option[Array[Byte]]): Option[BigDecimal] = raw match {
-    case Some(bytes) => Some(toBigDecimal(bytes))
-    case None => None
-  }
-
-  implicit def toOptionTradeDirection(raw: Option[Array[Byte]]): Option[TradeDirection.Value] = raw match {
-    case Some(bytes) => Some(toTradeDirection(bytes))
-    case None => None
-  }
+  implicit def toOptionString(raw: Option[Array[Byte]]) = toOptionAny(toString(_))
+  implicit def toOptionLong(raw: Option[Array[Byte]]) = toOptionAny(toLong(_))
+  implicit def toOptionBigDecimal(raw: Option[Array[Byte]]) = toOptionAny(toBigDecimal(_))
+  implicit def toOptionTradeDirection(raw: Option[Array[Byte]]) = toOptionAny(toTradeDirection(_))
 
   implicit def toEvent(r: Result) = {
     new Event(None,
