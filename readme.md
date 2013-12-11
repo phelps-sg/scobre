@@ -96,4 +96,34 @@ To generate all the files required for an IntelliJ IDEA project, use:
 
 	sbt gen-idea
 
+Importing the raw data into Apache HBase
+----------------------------------------
+
+1. Install Apache HBase 0.94 in [standalone mode](https://archanaschangale.wordpress.com/2013/08/29/installing-apache-hbase-on-ubuntu-for-standalone-mode/).
+
+2. Modify the file base-config.xml in the etc/ directory of the folder where you unpacked the lse-data distribution as follows:
+
+		<configuration>
+			<property>
+				<name>hbase.master</name>
+				<value>localhost</value>
+			</property>
+			<property>
+				<name>hbase.zookeeper.quorum</name>
+				<value>localhost</value>
+			</property>
+		</configuration>
+
+
+3. Create an empty table called "events" with column family "data" using the HBase shell:
+
+		cd /usr/local/hbase-0.94.12/bin
+		./hbase shell
+		create 'events', 'data'
+
+4. Run the shell script hbase-import.sh specifying the raw files to import:
+
+		cd ./scripts
+		./import-hbase.sh ../data/*.CSV
+
 
