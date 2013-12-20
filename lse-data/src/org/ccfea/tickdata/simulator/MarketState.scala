@@ -19,7 +19,9 @@ import org.ccfea.tickdata.order.{TradeDirection, AbstractOrder, LimitOrder}
 import scala.collection.mutable
 
 /**
- * The state of the market at a single point in time.
+ * The state of the market at a single point in time.  This class contains a mutable representation of the entire
+ * state of the market, including the order-book, which is updated as new events arrive via the process() methods.
+ * The attributes of this class are typically collated as time-series data.
  *
  * (c) Steve Phelps 2013
  */
@@ -119,7 +121,6 @@ class MarketState {
   def quote = new Quote(book.getHighestUnmatchedBid, book.getLowestUnmatchedAsk)
 
   def midPrice: Option[Double] = {
-
     quote match {
       case Quote(None,      None)      => None
       case Quote(Some(bid), None)      => Some(bid)
@@ -277,6 +278,11 @@ class MarketState {
     calendar.get(java.util.Calendar.HOUR_OF_DAY)
   }
 
+  /**
+   * Bean-compatible getter for Java clients.
+   *
+   * @return  The current state of the order-book.
+   */
   def getBook() = book
 
 }

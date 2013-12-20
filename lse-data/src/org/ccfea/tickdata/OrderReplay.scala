@@ -42,7 +42,9 @@ object OrderReplay {
                           startDate =  parseDate(conf.startDate.get),
                           endDate = parseDate(conf.endDate.get))
 
-    val replayer = new UnivariateTimeSeriesCollector(eventSource, outFileName = conf.outFileName.get, withGui = conf.withGui(), dataCollector)
+    val replayer =
+      new UnivariateTimeSeriesCollector(eventSource, outFileName = conf.outFileName.get,
+                                          withGui = conf.withGui(), dataCollector)
 
     replayer.run()
   }
