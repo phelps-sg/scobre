@@ -13,15 +13,16 @@ import java.util.Date
  * (c) Steve Phelps 2013
  */
 
-trait OrderReplayer[T] extends Iterable[OrderReplayEvent] with Runnable {
+trait OrderReplayer[T] extends Runnable {
 
   val out: java.io.PrintStream = openOutput
 
   def withGui: Boolean
   def outFileName: Option[String]
+  def eventSource: Iterable[OrderReplayEvent]
 
   val marketState = if (withGui) new MarketStateWithGUI() else new MarketState()
-  val simulator = new MarketSimulator(this, marketState)
+  val simulator = new MarketSimulator(eventSource, marketState)
 
   def openOutput() = outFileName match {
     case Some(fileName) => {

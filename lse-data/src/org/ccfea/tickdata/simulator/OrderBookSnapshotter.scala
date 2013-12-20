@@ -8,14 +8,26 @@ import collection.JavaConversions._
 import util.control.Breaks._
 import grizzled.slf4j.Logger
 import java.util
+import org.ccfea.tickdata.event.OrderReplayEvent
 
 /**
  * (C) Steve Phelps 2013
  */
-abstract class OrderBookSnapshotter extends OrderReplayer[Option[FourHeapOrderBook]] {
+class OrderBookSnapshotter(val eventSource: Iterable[OrderReplayEvent], val t: SimulationTime,
+                            val outFileName: Option[String] = None, val withGui: Boolean = false)
+    extends OrderReplayer[Option[FourHeapOrderBook]] {
 
-  def t: SimulationTime
-  def logger: Logger
+  val logger = Logger(classOf[OrderBookSnapshotter])
+
+  val targetDate = new java.util.Date(t.getTicks)
+  logger.debug("Snapshot target date = " + targetDate)
+
+  override val simulator =
+    new MarketSimulator(eventSource.takeWhile(_.timeStamp.compareTo(targetDate) >= 0), marketState)
+
+  def replayEvents: Iterable[Option[FourHeapOrderBook]] = {
+    for (state <- simulator) yield Some(state.book)
+  }
 
   def outputResult(result: Iterable[Option[FourHeapOrderBook]]) {
     logger.debug("book = " + result)
@@ -36,19 +48,6 @@ abstract class OrderBookSnapshotter extends OrderReplayer[Option[FourHeapOrderBo
       val bid = if (i < bids.size) Some(bids.get(i)) else None
       out.println(qty(ask) + "\t" + price(ask) + "\t" + qty(bid) + "\t" + price(bid))
     }
-  }
-
-  def replayEvents: Iterable[Option[FourHeapOrderBook]] = {
-    logger.debug("Snapshot target time = " + t)
-    for (state <- simulator; time = state.time; book = state.book) {
-      if (time.get.compareTo(t) >=0) {
-        logger.debug("Taking snapshot at " + new java.util.Date(time.get.getTicks))
-        return List( Some(book) )
-      } else {
-        logger.debug(new java.util.Date(time.get.getTicks))
-      }
-    }
-    return List()
   }
 
 }

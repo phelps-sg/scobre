@@ -251,7 +251,7 @@ class MarketState {
     if (jasaOrder.getQuantity <= 0) {
       logger.warn("Removing order with zero or negative volume from book before full match: " + jasaOrder)
       book.remove(jasaOrder)
-      orderMap.remove(orderCode)
+//      orderMap.remove(orderCode)
     }
 //    if (jasaOrder.getQuantity < 0) {
 //      logger.warn("Negative quantity detected- adjusting")

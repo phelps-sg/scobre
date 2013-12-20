@@ -1,6 +1,7 @@
 package org.ccfea.tickdata.simulator
 
 import net.sourceforge.jabm.SimulationTime
+import org.ccfea.tickdata.event.{OrderReplayEvent, Event}
 
 /**
  * A market-state data-collector which collates a single variable from the market as a time-series.
@@ -9,7 +10,10 @@ import net.sourceforge.jabm.SimulationTime
  *
  * (C) Steve Phelps 2013
  */
-abstract class UnivariateTimeSeriesCollector(val dataCollector: MarketState => Option[AnyVal])
+class UnivariateTimeSeriesCollector(val eventSource: Iterable[OrderReplayEvent],
+                                      val outFileName: Option[String] = None,
+                                      val withGui: Boolean = false,
+                                      val dataCollector: MarketState => Option[AnyVal])
     extends MarketStateDataCollector[(Option[SimulationTime], Option[AnyVal])]{
 
   /**

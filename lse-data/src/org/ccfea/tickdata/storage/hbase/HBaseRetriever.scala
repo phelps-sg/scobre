@@ -12,14 +12,13 @@ import grizzled.slf4j.Logger
  * Retrieve time-sorted events for a selected asset from Apache HBase.
  * (c) Steve Phelps 2013
  */
-trait HBaseRetriever extends HBaseEventConverter with Iterable[OrderReplayEvent] {
+class HBaseRetriever(val cacheSize: Int = 1000, val selectedAsset: String, val startDate: Option[Date] = None, val endDate: Option[Date] = None) extends HBaseEventConverter with Iterable[OrderReplayEvent] {
 
   val logger = Logger(classOf[HBaseRetriever])
-
-  def cacheSize: Int = 1000
-  def selectedAsset: String
-  def startDate: Option[Date]
-  def endDate: Option[Date]
+//  def cacheSize: Int = 1000
+//  def selectedAsset: String
+//  def startDate: Option[Date]
+//  def endDate: Option[Date]
 
   val keyStart = generateScanKey(selectedAsset, startDate, true)
   val keyEnd = generateScanKey(selectedAsset, endDate, false)

@@ -37,14 +37,13 @@ object OrderReplay {
 
   def simulateAndCollate(dataCollector: MarketState => Option[AnyVal])(implicit conf: ReplayConf) = {
 
-      class HBasePriceCollector(dataCollector: MarketState => Option[AnyVal] = dataCollector,
-                                    val selectedAsset: String = conf.tiCode(), val withGui: Boolean = conf.withGui(),
-                                    val outFileName: Option[String] = conf.outFileName.get,
-                                    val startDate: Option[Date] = parseDate(conf.startDate.get),
-                                    val endDate: Option[Date] = parseDate(conf.endDate.get))
-        extends UnivariateTimeSeriesCollector(dataCollector) with HBaseRetriever
+    val eventSource =
+      new HBaseRetriever(selectedAsset = conf.tiCode(),
+                          startDate =  parseDate(conf.startDate.get),
+                          endDate = parseDate(conf.endDate.get))
 
-    val replayer = new HBasePriceCollector()
+    val replayer = new UnivariateTimeSeriesCollector(eventSource, outFileName = conf.outFileName.get, withGui = conf.withGui(), dataCollector)
+
     replayer.run()
   }
 

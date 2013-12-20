@@ -14,29 +14,6 @@ object OrderBookSnapshot {
 
   val logger = Logger("org.ccfea.tickdata.OrderReplay")
 
-  class HBaseOrderBookSnapshotter(val selectedAsset: String, val withGui: Boolean = true,
-                                   val t: SimulationTime, val outFileName: Option[String])
-        extends OrderBookSnapshotter with HBaseRetriever {
-
-    def startDate = {
-      // Start date is the beginning of the day on which the snapshot is required
-      val startCal = new GregorianCalendar()
-      startCal.setTime(new Date(t.getTicks))
-      startCal.set(Calendar.HOUR, 0)
-      startCal.set(Calendar.MINUTE, 0)
-      startCal.set(Calendar.SECOND, 0)
-      Some(startCal.getTime)
-    }
-
-    def endDate = {
-      // End date is 5 minutes after the time at which the snapshot is required
-      val endCal = new GregorianCalendar()
-      endCal.setTime(new Date(t.getTicks))
-      endCal.add(Calendar.MINUTE, 5)
-      Some(endCal.getTime)
-    }
-  }
-
   def parseDate(date: Option[String]): Option[Date] = date match {
     case None => None
     case Some(dateStr) =>  Some(DateFormat.getDateInstance(DateFormat.SHORT).parse(dateStr))
@@ -46,22 +23,26 @@ object OrderBookSnapshot {
 
     val conf = new ReplayConf(args)
 
-//    val startDate = parseDate(conf.startDate.get)
-//    val endDate = parseDate(conf.endDate.get)
+    val time = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).parse(conf.startDate.get.get)
+    println(time)
 
-//    logger.debug("startDate = " + startDate)
-//    logger.debug("endDate = " + endDate)
+    val startCal = new GregorianCalendar()
+    startCal.setTime(time)
+    startCal.set(Calendar.HOUR, 0)
+    startCal.set(Calendar.MINUTE, 0)
+    startCal.set(Calendar.SECOND, 0)
+    val start = Some(startCal.getTime)
 
-//    val replayer =
-//      new HBasePriceCollector( (state: MarketState) => (state.time, state.midPrice),
-//                                  conf.tiCode(), conf.withGui(), conf.outFileName.get, startDate, endDate)
-//    replayer.run()
+    val endCal = new GregorianCalendar()
+    endCal.setTime(time)
+    endCal.add(Calendar.MINUTE, 5)
+    val end = Some(endCal.getTime)
 
-    val date = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).parse(conf.startDate.get.get)
-    println(date)
+    val eventSource =
+      new HBaseRetriever(selectedAsset = conf.tiCode(), startDate = start, endDate = end)
+
     val snapShotter =
-      new HBaseOrderBookSnapshotter(conf.tiCode(), conf.withGui(),
-                                      new SimulationTime(date.getTime), conf.outFileName.get)
+      new OrderBookSnapshotter(eventSource, new SimulationTime(time.getTime), conf.outFileName.get, conf.withGui())
     snapShotter.run
   }
 }
