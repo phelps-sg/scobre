@@ -4,8 +4,10 @@ import org.ccfea.tickdata.event.{OrderReplayEvent, Event}
 
 /**
  * A simulator which takes a sequence of events and replays them, producing some function of a
- * MarketState object for each event.  The specified function can be used to collect data of interest
- * on the market, e.g. the mid-price, as a time-series.
+ * MarketState object for each event via a map method.  The specified function can be used to collect data of interest
+ * on the market, e.g. the mid-price, as a time-series.  By implementing a map method, instances of this class
+ * can be used in for comprehensions; e.g.
+ *  simulator = new MarketSimulator(events, market); for(state <- simulator) yield(state.midPrice)
  *
  * (c) Steve Phelps 2013
  */
