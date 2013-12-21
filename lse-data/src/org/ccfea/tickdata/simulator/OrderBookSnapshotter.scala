@@ -23,10 +23,20 @@ class OrderBookSnapshotter(val eventSource: Iterable[OrderReplayEvent], val t: S
   logger.debug("Snapshot target date = " + targetDate)
 
   override val simulator =
-    new MarketSimulator(eventSource.takeWhile(_.timeStamp.compareTo(targetDate) >= 0), marketState)
+    new MarketSimulator(eventSource.takeWhile(_.timeStamp.compareTo(targetDate) >= 0).take(1), marketState)
 
   def replayEvents: Iterable[Option[FourHeapOrderBook]] = {
     for (state <- simulator) yield Some(state.book)
+  }
+
+  def qty(order: Option[net.sourceforge.jasa.market.Order]) = order match {
+    case Some(o) => o.getQuantity
+    case None => 0
+  }
+
+  def price(order: Option[net.sourceforge.jasa.market.Order]) = order match {
+    case Some(o) => o.getPrice
+    case None => Double.NaN
   }
 
   def outputResult(result: Iterable[Option[FourHeapOrderBook]]) {
@@ -35,14 +45,6 @@ class OrderBookSnapshotter(val eventSource: Iterable[OrderReplayEvent], val t: S
     val asks = book.getUnmatchedAsks
     val bids = book.getUnmatchedBids
     val levels = Math.max(asks.size, bids.size)
-    def qty(order: Option[net.sourceforge.jasa.market.Order]) = order match {
-      case Some(o) => o.getQuantity
-      case None => 0
-    }
-    def price(order: Option[net.sourceforge.jasa.market.Order]) = order match {
-      case Some(o) => o.getPrice
-      case None => Double.NaN
-    }
     for(i <- 0 to levels-1) {
       val ask = if (i < asks.size) Some(asks.get(i)) else None
       val bid = if (i < bids.size) Some(bids.get(i)) else None
