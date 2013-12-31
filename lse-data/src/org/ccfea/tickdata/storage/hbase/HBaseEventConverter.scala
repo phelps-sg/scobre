@@ -86,11 +86,6 @@ trait HBaseEventConverter {
     Bytes.add(event.tiCode + "0", event.timeStamp, event.messageSequenceNumber)
   }
 
-  def generateScanKey(tiCode: String, date: Option[Date], isStart: Boolean) = date match {
-    case Some(date) => Bytes.add(tiCode + "0", Bytes.toBytes(date.getTime), 0L)
-    case None => Bytes.toBytes(tiCode + (if (isStart) "0" else "1"))
-  }
-
   def getMessageSequenceNumber(result: Result): Long = {
     Bytes.toLong(Bytes.tail(result.getRow, 8))
   }
