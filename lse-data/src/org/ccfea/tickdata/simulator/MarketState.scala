@@ -77,7 +77,7 @@ class MarketState {
    * Update the state in response to a new incoming event.
    * @param ev  The new event
    */
-  def newEvent(ev: OrderReplayEvent) = {
+  def newEvent(ev: OrderReplayEvent): Unit = {
 
     logger.debug("Processing event " + ev)
 
@@ -98,7 +98,7 @@ class MarketState {
     checkConsistency(ev)
   }
 
-  def checkConsistency(ev: OrderReplayEvent) = {
+  def checkConsistency(ev: OrderReplayEvent): Unit = {
     logger.debug("quote = " + quote)
     if (hour > 8) {
       var consistent = false
