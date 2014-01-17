@@ -24,11 +24,11 @@
 <configuration>
     <property>
         <name>hbase.master</name>
-        <value>gamer-i5</value>
+        <value>cseesp1.essex.ac.uk</value>
     </property>
     <property>
         <name>hbase.zookeeper.quorum</name>
-        <value>gamer-i5</value>
+        <value>cseesp1.essex.ac.uk</value>
     </property>
     <property>
         <name>hbase.client.scanner.timeout.period</name>
