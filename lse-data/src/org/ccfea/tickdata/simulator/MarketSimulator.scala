@@ -9,8 +9,8 @@ import org.ccfea.tickdata.event.{OrderReplayEvent, Event}
  * can be used in for comprehensions; e.g.
  *
  * <code>
- *  simulator = new MarketSimulator(events, market)
- *  prices = for(state <- simulator) yield(state.midPrice)
+ *  val simulator = new MarketSimulator(events, market)
+ *  val prices = for(state <- simulator) yield(state.midPrice)
  * </code>
  *
  * (c) Steve Phelps 2013
