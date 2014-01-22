@@ -53,7 +53,7 @@ trait HBaseInserter extends HBaseEventConverter {
   }
 
   def toTransactionMapPut(event: Event): Put = {
-    implicit val put = new Put(event.tradeCode)
+    implicit val put = new Put(event.tradeCode.get)
     implicit val timeStamp = event.timeStamp
 
     store("event", getKey(event))
