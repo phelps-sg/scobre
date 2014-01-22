@@ -2,7 +2,7 @@ package org.ccfea.tickdata.storage.hbase
 
 import org.apache.hadoop.hbase.client.Put
 import collection.JavaConversions._
-import org.ccfea.tickdata.event.Event
+import org.ccfea.tickdata.event.{EventType, Event}
 
 /**
  * Store events in Apache HBase.
@@ -52,8 +52,26 @@ trait HBaseInserter extends HBaseEventConverter {
     put
   }
 
+  def toTransactionMapPut(event: Event): Put = {
+    implicit val put = new Put(event.tradeCode)
+    implicit val timeStamp = event.timeStamp
+
+    store("event", getKey(event))
+
+    put
+  }
+
   def insertData(parsedEvents: Seq[Event]): Int = {
-    eventsTable.put(for(event <- parsedEvents) yield convert(event))
+
+    eventsTable.put(
+      for(event <- parsedEvents) yield convert(event)
+    )
+
+    transactionsTable.put(
+        for(event <- parsedEvents; if event.eventType == EventType.Transaction)
+          yield toTransactionMapPut(event)
+    )
+
     parsedEvents.length
   }
 }

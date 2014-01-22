@@ -6,7 +6,7 @@ name := "lse-data"
 
 version := "0.9"
 
-scalaVersion := "2.10.1"
+scalaVersion := "2.10.3"
 //scalaVersion := "2.11.0-M5"
 
 scalaSource in Compile := file("src/")
@@ -36,7 +36,7 @@ resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/release
 
 // libraryDependencies += "com.gravity" % "gravity-hpaste" % "0.1.11" withSources()
 
-resolvers += "Apache HBase" at "https://repository.apache.org/content/repositories/releases"
+// resolvers += "Apache HBase" at "https://repository.apache.org/content/repositories/releases"
 
 //resolvers += "Thrift" at "http://people.apache.org/~rawson/repo/"
 

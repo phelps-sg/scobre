@@ -18,6 +18,7 @@ trait HBaseEventConverter {
   val admin = new HBaseAdmin(conf)
 
   val eventsTable = new HTable(conf, "events")
+  val transactionsTable = new HTable(conf, "transactions")
 
   val dataFamily = Bytes.toBytes("data")
 
