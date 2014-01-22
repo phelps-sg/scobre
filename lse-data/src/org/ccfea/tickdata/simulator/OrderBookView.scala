@@ -34,7 +34,7 @@ class OrderBookView(val market: MarketState, val maxLevels: Int = 12) {
       def run() = {
         orderBookView.update()
         orderBookView.notifyTableChanged()
-        timeLabel.setText(df.format(new java.util.Date(market.time.get.getTicks)))
+        timeLabel.setText(df.format(new java.util.Date(market.time.get.getTicks)) + " / " + market.auctionState)
       }
     })
   }

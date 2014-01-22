@@ -24,11 +24,11 @@
 <configuration>
     <property>
         <name>hbase.master</name>
-        <value>cseesp1.essex.ac.uk</value>
+        <value>localhost</value>
     </property>
     <property>
         <name>hbase.zookeeper.quorum</name>
-        <value>cseesp1.essex.ac.uk</value>
+        <value>localhost</value>
     </property>
     <property>
         <name>hbase.client.scanner.timeout.period</name>

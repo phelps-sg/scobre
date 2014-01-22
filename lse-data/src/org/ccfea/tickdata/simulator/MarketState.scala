@@ -55,7 +55,13 @@ class MarketState {
 
   var volume: Long = 0
 
-  var startOfData: Boolean = false
+  var auctionState = AuctionState.startOfDay
+
+  var mostRecentTransaction: Option[TransactionEvent] = None
+
+  var uncrossingPrice: Option[BigDecimal] = None
+
+//  var startOfData: Boolean = false
 
   val logger = Logger(classOf[MarketState])
 
@@ -94,8 +100,6 @@ class MarketState {
     this.volume = 0
 
     process(ev)
-
-    checkConsistency(ev)
   }
 
   def checkConsistency(ev: OrderReplayEvent): Unit = {
@@ -139,7 +143,12 @@ class MarketState {
 //    if (level < orders.length) {
 //      Some(orders.sorted.get(level).getPrice)
 //    } else {
-//      None
+//      None                                                 //      case so: StartOfDataMarker          =>  if (!startOfData) {
+//        logger.debug("Resetting book in response to broadcastUpdateAction=='F' event")
+//        book.reset()
+//        startOfData = true
+//      }
+
 //    }
 //  }
 
@@ -149,24 +158,58 @@ class MarketState {
 
   def process(ev: OrderReplayEvent): Unit = {
     ev match {
-
-      case tr: TransactionEvent           =>  startOfData = false; process(tr)
-      case or: OrderRemovedEvent          =>  startOfData = false; process(or)
-      case of: OrderFilledEvent           =>  startOfData = false; process(of)
-
+      case tr: TransactionEvent           =>  process(tr)
+      case or: OrderRemovedEvent          =>  process(or)
+      case of: OrderFilledEvent           =>  process(of)
       case lo: OrderSubmittedEvent        =>  process(lo)
       case me: MultipleEvent              =>  process(me)
-
-      case om: OrderMatchedEvent          =>  startOfData = false; process(om)
-
-      case so: StartOfDataMarker          =>  if (!startOfData) {
-        logger.debug("Resetting book in response to broadcastUpdateAction=='F' event")
-        book.reset()
-        startOfData = true
-      }
-
+      case om: OrderMatchedEvent          =>  process(om)
+//      case so: StartOfDataMarker          =>  if (!startOfData) {
+//        logger.debug("Resetting book in response to broadcastUpdateAction=='F' event")
+//        book.reset()
+//        startOfData = true
+//      }
       case _ => logger.warn("Unknown event type: " + ev)
     }
+    stateTransition(ev)
+  }
+
+  def stateTransition(ev: OrderReplayEvent) {
+    val newState: AuctionState.Value =
+      auctionState match {
+       case AuctionState.startOfDay =>
+             ev match {
+               case _:OrderSubmittedEvent =>
+                 AuctionState.batchOpen
+               case _ =>
+                 AuctionState.startOfDay
+            }
+         case AuctionState.batchOpen =>
+          ev match {
+             case tr: TransactionEvent =>
+               mostRecentTransaction match {
+                 case Some(recentTr) =>
+                   if (recentTr.timeStamp == tr.timeStamp && recentTr.transactionPrice == tr.transactionPrice) {
+                     AuctionState.uncrossing
+                   } else {
+                     AuctionState.batchOpen
+                  }
+                case _ =>
+                     mostRecentTransaction = Some(tr)
+                     AuctionState.batchOpen
+               }
+             case _ =>
+                AuctionState.batchOpen
+           }
+        case AuctionState.uncrossing =>
+           ev match {
+             case _:TransactionEvent => AuctionState.uncrossing
+             case _ => AuctionState.continuous
+           }
+        case current => current
+       }
+    logger.debug("newState = " + newState)
+    auctionState = newState
   }
 
   def process(ev: TransactionEvent): Unit = {
