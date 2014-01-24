@@ -103,23 +103,25 @@ class MarketState {
   }
 
   def checkConsistency(ev: OrderReplayEvent): Unit = {
-    logger.debug("quote = " + quote)
-    if (hour > 8) {
-      var consistent = false
-      do {
-        quote match {
-          case Quote(Some(bid), Some(ask)) => {
-            if (bid > ask) {
-              logger.warn("Artificially clearing book to maintain consistency following event " + ev)
-              book.remove(book.getHighestUnmatchedBid)
-              book.remove(book.getLowestUnmatchedAsk)
-            } else {
-              consistent = true
+    if (this.auctionState == AuctionState.continuous) {
+      logger.debug("quote = " + quote)
+      if (hour > 8) {
+        var consistent = false
+        do {
+          quote match {
+            case Quote(Some(bid), Some(ask)) => {
+              if (bid > ask) {
+                logger.warn("Artificially clearing book to maintain consistency following event " + ev)
+                book.remove(book.getHighestUnmatchedBid)
+                book.remove(book.getLowestUnmatchedAsk)
+              } else {
+                consistent = true
+              }
             }
+            case _ => consistent = true
           }
-          case _ => consistent = true
-        }
-      } while (!consistent)
+        } while (!consistent)
+      }
     }
   }
 
@@ -172,11 +174,15 @@ class MarketState {
       case _ => logger.warn("Unknown event type: " + ev)
     }
     stateTransition(ev)
+    checkConsistency(ev)
   }
 
   def stateTransition(ev: OrderReplayEvent) {
+
     val newState: AuctionState.Value =
+
       auctionState match {
+
        case AuctionState.startOfDay =>
              ev match {
                case _:OrderSubmittedEvent =>
@@ -184,8 +190,12 @@ class MarketState {
                case _ =>
                  AuctionState.startOfDay
             }
+
          case AuctionState.batchOpen =>
-          ev match {
+          if (this.hour >= 8 && this.minute > 5)
+            AuctionState.continuous
+          else
+            ev match {
              case tr: TransactionEvent =>
                mostRecentTransaction match {
                  case Some(recentTr) =>
@@ -201,13 +211,28 @@ class MarketState {
              case _ =>
                 AuctionState.batchOpen
            }
+
+       case AuctionState.continuous =>
+         if (this.hour >= 16 && this.minute >= 30)
+           AuctionState.endOfDay
+         else
+           AuctionState.continuous
+
+       case AuctionState.endOfDay =>
+         if (this.hour <8)
+           AuctionState.startOfDay
+         else
+           AuctionState.endOfDay
+
         case AuctionState.uncrossing =>
            ev match {
              case _:TransactionEvent => AuctionState.uncrossing
              case _ => AuctionState.continuous
            }
+
         case current => current
        }
+
     logger.debug("newState = " + newState)
     auctionState = newState
   }
@@ -264,6 +289,14 @@ class MarketState {
     }  else {
       logger.warn("unknown order code " + orderCode)
     }
+  }
+
+  def reset(ev: OrderSubmittedEvent): Unit = {
+    logger.info("Reseting state.")
+    book.reset()
+    orderMap.clear()
+    transactionMap.clear()
+    process(ev)
   }
 
   def process(ev: OrderSubmittedEvent): Unit = {
@@ -325,6 +358,10 @@ class MarketState {
 
   def hour = {
     calendar.get(java.util.Calendar.HOUR_OF_DAY)
+  }
+
+  def minute = {
+    calendar.get(java.util.Calendar.MINUTE)
   }
 
   /**
