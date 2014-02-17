@@ -183,55 +183,55 @@ class MarketState {
 
       auctionState match {
 
-       case AuctionState.startOfDay =>
-             ev match {
-               case _:OrderSubmittedEvent =>
-                 AuctionState.batchOpen
-               case _ =>
-                 AuctionState.startOfDay
-            }
+        case AuctionState.startOfDay =>
+          ev match {
+            case _: OrderSubmittedEvent =>
+              AuctionState.batchOpen
+            case _ =>
+              AuctionState.startOfDay
+          }
 
-         case AuctionState.batchOpen =>
+        case AuctionState.batchOpen =>
           if (this.hour >= 8 && this.minute > 5)
             AuctionState.continuous
           else
             ev match {
-             case tr: TransactionEvent =>
-               mostRecentTransaction match {
-                 case Some(recentTr) =>
-                   if (recentTr.timeStamp == tr.timeStamp && recentTr.transactionPrice == tr.transactionPrice) {
-                     AuctionState.uncrossing
-                   } else {
-                     AuctionState.batchOpen
-                  }
-                case _ =>
-                     mostRecentTransaction = Some(tr)
-                     AuctionState.batchOpen
-               }
-             case _ =>
+              case tr: TransactionEvent =>
+                mostRecentTransaction match {
+                  case Some(recentTr) =>
+                    if (recentTr.timeStamp == tr.timeStamp && recentTr.transactionPrice == tr.transactionPrice) {
+                      AuctionState.uncrossing
+                    } else {
+                      AuctionState.batchOpen
+                    }
+                  case _ =>
+                    mostRecentTransaction = Some(tr)
+                    AuctionState.batchOpen
+                }
+              case _ =>
                 AuctionState.batchOpen
-           }
+            }
 
-       case AuctionState.continuous =>
-         if (this.hour >= 16 && this.minute >= 30)
-           AuctionState.endOfDay
-         else
-           AuctionState.continuous
+        case AuctionState.continuous =>
+          if (this.hour >= 16 && this.minute >= 30)
+            AuctionState.endOfDay
+          else
+            AuctionState.continuous
 
-       case AuctionState.endOfDay =>
-         if (this.hour <8)
-           AuctionState.startOfDay
-         else
-           AuctionState.endOfDay
+        case AuctionState.endOfDay =>
+          if (this.hour < 8)
+            AuctionState.startOfDay
+          else
+            AuctionState.endOfDay
 
         case AuctionState.uncrossing =>
-           ev match {
-             case _:TransactionEvent => AuctionState.uncrossing
-             case _ => AuctionState.continuous
-           }
+          ev match {
+            case _: TransactionEvent => AuctionState.uncrossing
+            case _ => AuctionState.continuous
+          }
 
         case current => current
-       }
+      }
 
     logger.debug("newState = " + newState)
     auctionState = newState
