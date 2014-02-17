@@ -36,12 +36,11 @@ trait HBaseEventConverter {
   implicit def toLong(raw: Array[Byte]): Long = Bytes.toLong(raw)
   implicit def toBigDecimal(raw: Array[Byte]): BigDecimal = Bytes.toBigDecimal(raw)
 
-  def toOptionAny[A](convert: Array[Byte] => A, raw: Option[Array[Byte]]): Option[A] = {
+  def toOptionAny[A](convert: Array[Byte] => A, raw: Option[Array[Byte]]): Option[A] =
     raw match {
       case Some(bytes) => Some(convert(bytes))
       case None => None
     }
-  }
   implicit def toOptionString(raw: Option[Array[Byte]]) =           toOptionAny(toString(_), raw)
   implicit def toOptionLong(raw: Option[Array[Byte]]) =             toOptionAny(toLong(_), raw)
   implicit def toOptionBigDecimal(raw: Option[Array[Byte]]) =       toOptionAny(toBigDecimal(_), raw)

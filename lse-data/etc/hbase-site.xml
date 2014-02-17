@@ -24,15 +24,15 @@
 <configuration>
     <property>
         <name>hbase.master</name>
-        <value>localhost</value>
+        <value>gamer-i5</value>
     </property>
     <property>
         <name>hbase.zookeeper.quorum</name>
-        <value>localhost</value>
+        <value>gamer-i5</value>
     </property>
     <property>
         <name>hbase.client.scanner.timeout.period</name>
-        <value>600000</value>
+        <value>60000000</value>
     </property>
 </configuration>
 

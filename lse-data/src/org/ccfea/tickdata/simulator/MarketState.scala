@@ -318,6 +318,10 @@ class MarketState {
   def process(ev: MultipleEvent): Unit = {
     ev.events match {
       case Nil => // Do nothing
+      case (head:StartOfDataMarker) :: tail => {
+        logger.warn("Ignoring events tagged with broadCastUpdateAction='F'")
+        logger.warn("Ignoring events: " + tail)
+      }
       case head :: tail => {
         process(head)
         process(new MultipleEvent(tail))
