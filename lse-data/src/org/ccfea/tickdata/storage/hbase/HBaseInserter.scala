@@ -53,10 +53,11 @@ trait HBaseInserter extends HBaseEventConverter {
   }
 
   def toTransactionMapPut(event: Event): Put = {
-    implicit val put = new Put(event.tradeCode.get)
+    implicit val put = new Put(event.resultingTradeCode.get)
     implicit val timeStamp = event.timeStamp
 
-    store("event", getKey(event))
+    store("matchingOrderCode", event.matchingOrderCode)
+    store("orderCode", event.orderCode)
 
     put
   }
@@ -68,7 +69,8 @@ trait HBaseInserter extends HBaseEventConverter {
     )
 
     transactionsTable.put(
-        for(event <- parsedEvents; if event.eventType == EventType.Transaction)
+        for(event <- parsedEvents;
+            if event.eventType == EventType.OrderMatched || event.eventType == EventType.OrderFilled)
           yield toTransactionMapPut(event)
     )
 

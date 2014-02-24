@@ -9,5 +9,6 @@ import java.util.Date
  */
 case class TransactionEvent(val timeStamp: Date, val messageSequenceNumber: Long,
                             val tiCode: String, val tradeCode: String,
-                            val transactionPrice: BigDecimal, val tradeSize: Long)
+                            val transactionPrice: BigDecimal, val tradeSize: Long,
+                             val orderCode: Option[String], val matchingOrderCode: Option[String])
   extends OrderReplayEvent

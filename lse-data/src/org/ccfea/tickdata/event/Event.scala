@@ -141,13 +141,13 @@ case class Event(eventID: Option[Long],
       case Event(id, EventType.Transaction,
                   messageSequenceNumber, timeStamp,
                   tiCode, marketSegmentCode, currencyCode,
-                  None, None, None, None,
+                  None, None, None, orderCode,
                   Some(tradeSize), Some(broadcastUpdateAction),
                   None, None, Some(tradePrice), None,
-                  None, None,
+                  matchingOrderCode, None,
                   tradeCode, Some(tradeTimeInd), Some(convertedPriceInd))
 
-      => new TransactionEvent(new Date(timeStamp), messageSequenceNumber, tiCode, tradeCode.get, tradePrice, tradeSize)
+      => new TransactionEvent(new Date(timeStamp), messageSequenceNumber, tiCode, tradeCode.get, tradePrice, tradeSize, orderCode, matchingOrderCode)
 
     }
   }

@@ -41,7 +41,7 @@ class MarketState {
    *
    * Lookup table mapping each transaction code to a list of the corresponding matched orders
    */
-  val transactionMap = collection.mutable.Map[String, mutable.ListBuffer[AbstractOrder]]()
+//  val transactionMap = collection.mutable.Map[String, mutable.ListBuffer[AbstractOrder]]()
 
   /**
    * The time of the most recent event.
@@ -240,18 +240,8 @@ class MarketState {
   def process(ev: TransactionEvent): Unit = {
     this.lastTransactionPrice = Some(ev.transactionPrice.toDouble)
     this.volume = ev.tradeSize
-    if (transactionMap.contains(ev.tradeCode)) {
-      val matchedOrders = transactionMap(ev.tradeCode)
-      for(order <- matchedOrders) {
-        if (orderMap.contains(order.orderCode)) {
-          adjustQuantity(order.orderCode, ev)
-        } else {
-          logger.warn("Could not find order code " + order.orderCode + " for transaction " + ev)
-        }
-      }
-    } else {
-      logger.debug("No outstanding orders corresponding to trade code- order filled? " + ev.tradeCode)
-    }
+    adjustQuantity(ev.orderCode, ev)
+    adjustQuantity(ev.matchingOrderCode, ev)
   }
 
   def process(ev: OrderRemovedEvent): Unit = {
@@ -282,10 +272,6 @@ class MarketState {
       logger.debug("partially filled order " + order)
       val matchedOrder =
           if (orderMap.contains(ev.matchingOrder.orderCode))  Some(orderMap(ev.matchingOrder.orderCode)) else None
-      if (!transactionMap.contains(ev.resultingTradeCode)) {
-        transactionMap(ev.resultingTradeCode) = mutable.ListBuffer[AbstractOrder]()
-      }
-      transactionMap(ev.resultingTradeCode).append(ev.order)
     }  else {
       logger.warn("unknown order code " + orderCode)
     }
@@ -295,7 +281,6 @@ class MarketState {
     logger.info("Reseting state.")
     book.reset()
     orderMap.clear()
-    transactionMap.clear()
     process(ev)
   }
 
@@ -329,21 +314,31 @@ class MarketState {
     }
   }
 
-  def adjustQuantity(orderCode: String, ev: TransactionEvent): Unit = {
-    val jasaOrder = orderMap(orderCode)
-    logger.debug("Adjusting qty for order based on partial match" + ev)
-    jasaOrder.setQuantity(jasaOrder.getQuantity - ev.tradeSize.toInt)
-    logger.debug("New order = " + jasaOrder)
-//    assert(jasaOrder.getQuantity >= 0)
-    if (jasaOrder.getQuantity <= 0) {
-      logger.warn("Removing order with zero or negative volume from book before full match: " + jasaOrder)
-      book.remove(jasaOrder)
-//      orderMap.remove(orderCode)
+  def adjustQuantity(orderCode: Option[String], ev: TransactionEvent): Unit = {
+    orderCode match {
+      case Some(code) => {
+        if (orderMap.contains(orderCode)) {
+          val jasaOrder = orderMap(code)
+          logger.debug("Adjusting qty for order based on partial match" + ev)
+          jasaOrder.setQuantity(jasaOrder.getQuantity - ev.tradeSize.toInt)
+          logger.debug("New order = " + jasaOrder)
+      //    assert(jasaOrder.getQuantity >= 0)
+          if (jasaOrder.getQuantity <= 0) {
+            logger.warn("Removing order with zero or negative volume from book before full match: " + jasaOrder)
+            book.remove(jasaOrder)
+      //      orderMap.remove(orderCode)
+          }
+      //    if (jasaOrder.getQuantity < 0) {
+      //      logger.warn("Negative quantity detected- adjusting")
+      //      jasaOrder.setQuantity(0)
+      //    }
+        } else {
+          logger.warn("Order code not found for quantity adjustment when processing " + ev)
+        }
+      }
+      case None =>
+        logger.warn("Order code not recorded for quantity adjustment when processing " + ev)
     }
-//    if (jasaOrder.getQuantity < 0) {
-//      logger.warn("Negative quantity detected- adjusting")
-//      jasaOrder.setQuantity(0)
-//    }
   }
 
 //  def startNewDay() = {
