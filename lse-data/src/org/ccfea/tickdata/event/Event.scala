@@ -119,7 +119,8 @@ case class Event(eventID: Option[Long],
                   Some(matchingOrderCode), resultingTradeCode,
                   None, None, None)
 
-      => new OrderFilledEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode), new Order(matchingOrderCode))
+      => new OrderFilledEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode),
+                  new Order(matchingOrderCode))
 
       /********************************************************************
         *        Order matched events
@@ -147,7 +148,8 @@ case class Event(eventID: Option[Long],
                   matchingOrderCode, None,
                   tradeCode, Some(tradeTimeInd), Some(convertedPriceInd))
 
-      => new TransactionEvent(new Date(timeStamp), messageSequenceNumber, tiCode, tradeCode.get, tradePrice, tradeSize, orderCode, matchingOrderCode)
+      => new TransactionEvent(new Date(timeStamp), messageSequenceNumber, tiCode, tradeCode.get,
+                                  tradePrice, tradeSize, orderCode, matchingOrderCode)
 
     }
   }

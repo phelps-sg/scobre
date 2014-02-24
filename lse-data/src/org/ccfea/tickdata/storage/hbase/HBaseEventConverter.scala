@@ -17,9 +17,19 @@ trait HBaseEventConverter {
   val conf = HBaseConfiguration.create()
   val admin = new HBaseAdmin(conf)
 
+  /**
+   * The table containing the time-series of tick events.
+   */
   val eventsTable = new HTable(conf, "events")
+
+  /**
+   * A table mapping from trade codes to corresponding order codes.
+   */
   val transactionsTable = new HTable(conf, "transactions")
 
+  /**
+   * Each table contains a single column-family called 'data'.
+   */
   val dataFamily = Bytes.toBytes("data")
 
   implicit def toBytes(x: Any): Array[Byte] = x match {
@@ -46,6 +56,11 @@ trait HBaseEventConverter {
   implicit def toOptionBigDecimal(raw: Option[Array[Byte]]) =       toOptionAny(toBigDecimal(_), raw)
   implicit def toOptionTradeDirection(raw: Option[Array[Byte]]) =   toOptionAny(toTradeDirection(_), raw)
 
+  /**
+   * Convert a row from HBase into an Event object.
+   * @param r  A Result object representing an event.
+   * @return  An Event object representing the event.
+   */
   implicit def toEvent(r: Result) = {
     new Event(None,
       getColumn(r, "eventType").get,
