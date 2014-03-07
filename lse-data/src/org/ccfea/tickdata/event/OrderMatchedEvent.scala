@@ -14,6 +14,7 @@ case class OrderMatchedEvent(
                               val tiCode: String,
                               val order: AbstractOrder,
                               val matchingOrder: AbstractOrder,
-                              val resultingTradeCode: String
+                              val resultingTradeCode: String,
+                              val tradeSize: Long
                              )
   extends OrderEvent

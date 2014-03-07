@@ -129,12 +129,13 @@ case class Event(eventID: Option[Long],
                     messageSequenceNumber, timeStamp, tiCode,
                     marketSegmentCode, currencyCode, marketMechanismType, Some(aggregateSize), tradeDirection,
                     Some(orderCode),
-                    tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
+                    Some(tradeSize), broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
                     Some(matchingOrderCode), resultingTradeCode,
                     None, None, None)
 
+      //TODO: pass tradeSize here instead of via transactions table?
       => new OrderMatchedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode),
-                                 new Order(matchingOrderCode), resultingTradeCode.get)
+                                 new Order(matchingOrderCode), resultingTradeCode.get, tradeSize)
 
       /********************************************************************
         *        transaction events                            *

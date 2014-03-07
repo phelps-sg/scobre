@@ -141,23 +141,6 @@ class MarketState {
     }
   }
 
-//  def price(level: Int, orders: Seq[Order]): Option[Double] = {
-//    if (level < orders.length) {
-//      Some(orders.sorted.get(level).getPrice)
-//    } else {
-//      None                                                 //      case so: StartOfDataMarker          =>  if (!startOfData) {
-//        logger.debug("Resetting book in response to broadcastUpdateAction=='F' event")
-//        book.reset()
-//        startOfData = true
-//      }
-
-//    }
-//  }
-
-  //TODO this results in a sort
-//  def bidPrice(level: Int) = price(level, book.getUnmatchedBids)
-//  def askPrice(level: Int) = price(level, book.getUnmatchedAsks)
-
   def process(ev: OrderReplayEvent): Unit = {
     ev match {
       case tr: TransactionEvent           =>  process(tr)
@@ -166,11 +149,6 @@ class MarketState {
       case lo: OrderSubmittedEvent        =>  process(lo)
       case me: MultipleEvent              =>  process(me)
       case om: OrderMatchedEvent          =>  process(om)
-//      case so: StartOfDataMarker          =>  if (!startOfData) {
-//        logger.debug("Resetting book in response to broadcastUpdateAction=='F' event")
-//        book.reset()
-//        startOfData = true
-//      }
       case _ => logger.warn("Unknown event type: " + ev)
     }
     stateTransition(ev)
@@ -240,8 +218,6 @@ class MarketState {
   def process(ev: TransactionEvent): Unit = {
     this.lastTransactionPrice = Some(ev.transactionPrice.toDouble)
     this.volume = ev.tradeSize
-    adjustQuantity(ev.orderCode, ev)
-    adjustQuantity(ev.matchingOrderCode, ev)
   }
 
   def process(ev: OrderRemovedEvent): Unit = {
@@ -269,19 +245,13 @@ class MarketState {
     val orderCode = ev.order.orderCode
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
+      adjustQuantity(order, ev)
       logger.debug("partially filled order " + order)
       val matchedOrder =
           if (orderMap.contains(ev.matchingOrder.orderCode))  Some(orderMap(ev.matchingOrder.orderCode)) else None
     }  else {
       logger.warn("unknown order code " + orderCode)
     }
-  }
-
-  def reset(ev: OrderSubmittedEvent): Unit = {
-    logger.info("Reseting state.")
-    book.reset()
-    orderMap.clear()
-    process(ev)
   }
 
   def process(ev: OrderSubmittedEvent): Unit = {
@@ -294,7 +264,6 @@ class MarketState {
          val newOrder = toJasaOrder(order)
          if (newOrder.isAsk) book.insertUnmatchedAsk(newOrder) else book.insertUnmatchedBid(newOrder)
          orderMap(order.orderCode) = newOrder
-        //    book.add(order)
        }
        case _ =>
     }
@@ -314,36 +283,16 @@ class MarketState {
     }
   }
 
-  def adjustQuantity(orderCode: Option[String], ev: TransactionEvent): Unit = {
-    orderCode match {
-      case Some(code) => {
-        if (orderMap.contains(orderCode)) {
-          val jasaOrder = orderMap(code)
-          logger.debug("Adjusting qty for order based on partial match" + ev)
-          jasaOrder.setQuantity(jasaOrder.getQuantity - ev.tradeSize.toInt)
-          logger.debug("New order = " + jasaOrder)
-      //    assert(jasaOrder.getQuantity >= 0)
-          if (jasaOrder.getQuantity <= 0) {
-            logger.warn("Removing order with zero or negative volume from book before full match: " + jasaOrder)
-            book.remove(jasaOrder)
-      //      orderMap.remove(orderCode)
-          }
-      //    if (jasaOrder.getQuantity < 0) {
-      //      logger.warn("Negative quantity detected- adjusting")
-      //      jasaOrder.setQuantity(0)
-      //    }
-        } else {
-          logger.warn("Order code not found for quantity adjustment when processing " + ev)
-        }
-      }
-      case None =>
-        logger.warn("Order code not recorded for quantity adjustment when processing " + ev)
+  def adjustQuantity(jasaOrder: net.sourceforge.jasa.market.Order, ev: OrderMatchedEvent): Unit = {
+    logger.debug("Adjusting qty for order based on partial match" + ev)
+    jasaOrder.setQuantity(jasaOrder.getQuantity - ev.tradeSize.toInt)
+    logger.debug("New order = " + jasaOrder)
+//    assert(jasaOrder.getQuantity >= 0)
+    if (jasaOrder.getQuantity <= 0) {
+      logger.warn("Removing order with zero or negative volume from book before full match: " + jasaOrder)
+      book.remove(jasaOrder)
     }
   }
-
-//  def startNewDay() = {
-//    book.reset()
-//  }
 
   def calendar = {
     val cal = new GregorianCalendar()
