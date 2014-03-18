@@ -19,13 +19,18 @@ class MarketSimulator(val events: Iterable[OrderReplayEvent], val market: Market
 
   def map[B](f: MarketState => B): Iterable[B] = {
     events.map(ev => {
-      market.newEvent(ev)
+      process(ev)
       f(market)
     })
   }
 
+  def process(ev: OrderReplayEvent) = {
+    market.newEvent(ev)
+  }
+
   def step() = {
-    market.newEvent(events.iterator.next())
+    val ev = events.iterator.next()
+    process(ev)
   }
 
 }

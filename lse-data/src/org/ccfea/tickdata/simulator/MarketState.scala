@@ -17,6 +17,7 @@ import scala.Some
 import org.ccfea.tickdata.event.Event
 import org.ccfea.tickdata.order.{TradeDirection, AbstractOrder, LimitOrder}
 import scala.collection.mutable
+import scala.beans.BeanProperty
 
 /**
  * The state of the market at a single point in time.  This class contains a mutable representation of the entire
@@ -30,6 +31,7 @@ class MarketState {
   /**
    * The current state of the book.
    */
+  @BeanProperty
   val book = new FourHeapOrderBook()
 
   /**
@@ -317,6 +319,11 @@ class MarketState {
    *
    * @return  The current state of the order-book.
    */
-  def getBook() = book
+  def getLastTransactionPrice: Double = {
+    lastTransactionPrice match {
+      case None => 0.0
+      case Some(price) => price
+    }
+  }
 
 }

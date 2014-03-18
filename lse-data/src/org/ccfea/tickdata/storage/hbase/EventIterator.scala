@@ -24,16 +24,16 @@ class EventIterator(val scanner: ResultScanner) extends Iterator[OrderReplayEven
 
   def next(): OrderReplayEvent = {
     val rawEvent: Event = resultIterator.next()
-    val event: Event =
+//    val event: Event =
       // For transaction events we require additional information from the transactions
       // table.
-      if (rawEvent.eventType == EventType.Transaction) {
-        val (orderCode, matchedOrderCode) = lookupOrderCodes(rawEvent.tradeCode.get)
-        rawEvent.copy( orderCode = orderCode, matchingOrderCode = matchedOrderCode)
-      } else {
-        rawEvent
-      }
-    event.toOrderReplayEvent
+//      if (rawEvent.eventType == EventType.Transaction) {
+//        val (orderCode, matchedOrderCode) = lookupOrderCodes(rawEvent.tradeCode.get)
+//        rawEvent.copy( orderCode = orderCode, matchingOrderCode = matchedOrderCode)
+//      } else {
+//        rawEvent
+//      }
+    rawEvent.toOrderReplayEvent
   }
 
   /**

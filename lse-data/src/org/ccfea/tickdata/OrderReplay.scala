@@ -17,17 +17,17 @@ object OrderReplay {
     implicit val conf = new ReplayConf(args)
     val getPropertyMethod = classOf[MarketState].getMethod(conf.property())
 
-    simulateAndCollate {
-      getPropertyMethod invoke _
-    }
+//    simulateAndCollate {
+//      getPropertyMethod invoke _
+//    }
 
 //    simulateAndCollate {
 //      _.quote.bid
 //    }
 //
-//    simulateAndCollate {
-//      _.lastTransactionPrice
-//    }
+      simulateAndCollate {
+        _.lastTransactionPrice
+      }
   }
 
   def parseDate(date: Option[String]): Option[Date] = date match {

@@ -2,6 +2,7 @@ package org.ccfea.tickdata.simulator
 
 import net.sourceforge.jabm.SimulationTime
 import org.ccfea.tickdata.event.{OrderReplayEvent, Event}
+import org.ccfea.tickdata.storage.csv.CsvCollator
 
 /**
  * A market-state data-collector which collates a single variable from the market as a time-series.
@@ -14,7 +15,7 @@ class UnivariateTimeSeriesCollector(val eventSource: Iterable[OrderReplayEvent],
                                       val outFileName: Option[String] = None,
                                       val withGui: Boolean = false,
                                       val dataCollector: MarketState => Option[AnyVal])
-    extends MarketStateDataCollector[(Option[SimulationTime], Option[AnyVal])]{
+    extends MarketStateDataCollector[(Option[SimulationTime], Option[AnyVal])] with CsvCollator {
 
   /**
    * Collect data from the state of the market during the continuous trading periods.
@@ -27,23 +28,5 @@ class UnivariateTimeSeriesCollector(val eventSource: Iterable[OrderReplayEvent],
    */
   def collectData(state: MarketState) =
     (state.time, if (state.auctionState == AuctionState.continuous) dataCollector(state) else None)
-
-  /**
-   * Write the collected time-series to a CSV file separated by tabs.  Each row of the file
-   * corresponds to a different measurement.  The first column is the time value
-   * and the second column is the value of the variable that is being collected.
-   * A value of None is translated as NaN.
-   *
-   * @param data  An Iterable over the data we have collected through the dataCollector.
-   */
-  def outputResult(data: Iterable[(Option[SimulationTime], Option[AnyVal])]) = {
-    for ((t, price) <- data) {
-      out.println(t.get.getTicks + "\t" + (price match {
-        case Some(p) => p.toString()
-        case None => "NaN"
-      }))
-    }
-    Unit
-  }
 
 }

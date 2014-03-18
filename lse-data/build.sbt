@@ -6,7 +6,7 @@ name := "lse-data"
 
 version := "0.9"
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.10.2"
 //scalaVersion := "2.11.0-M5"
 
 scalaSource in Compile := file("src/")
@@ -44,6 +44,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" % "akka-actor" % "2.0.3",
   "com.typesafe.akka" % "akka-remote" % "2.0.3"
 )
+
+libraryDependencies += "com.espertech" % "esper" % "4.11.0"
 
 libraryDependencies += "org.rogach" %% "scallop" % "0.9.4"
 

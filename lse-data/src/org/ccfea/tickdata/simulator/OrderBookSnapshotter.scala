@@ -9,6 +9,7 @@ import util.control.Breaks._
 import grizzled.slf4j.Logger
 import java.util
 import org.ccfea.tickdata.event.OrderReplayEvent
+import org.ccfea.tickdata.cep.CepMarketSimulator
 
 /**
  * (C) Steve Phelps 2013
@@ -23,7 +24,7 @@ class OrderBookSnapshotter(val eventSource: Iterable[OrderReplayEvent], val t: S
   logger.debug("Snapshot target date = " + targetDate)
 
   override val simulator =
-    new MarketSimulator(eventSource.takeWhile(_.timeStamp.compareTo(targetDate) >= 0).take(1), marketState)
+    new CepMarketSimulator(eventSource.takeWhile(_.timeStamp.compareTo(targetDate) >= 0).take(1), marketState)
 
   def replayEvents: Iterable[Option[FourHeapOrderBook]] = {
     for (state <- simulator) yield Some(state.book)
