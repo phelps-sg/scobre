@@ -14,11 +14,23 @@ import org.ccfea.tickdata.cep.CepObserver
 
 trait OrderReplayer[T] extends Runnable {
 
-  val out: java.io.PrintStream = openOutput
-
+  /**
+   * If true then show a graphical user-interface as
+   * the simulation progresses.
+   */
   def withGui: Boolean
+
+  /**
+   * The filename to write data to.
+   */
   def outFileName: Option[String]
+
+  /**
+   * The source of event objects to replay.
+   */
   def eventSource: Iterable[OrderReplayEvent]
+
+  val out: java.io.PrintStream = openOutput
 
   val marketState = if (withGui) new MarketStateWithGUI() else new MarketState()
   val simulator = new MarketSimulator(eventSource, marketState)
@@ -47,6 +59,11 @@ trait OrderReplayer[T] extends Runnable {
     simulator.step()
   }
 
+  /**
+   * Replay all events through the simulator.
+   *
+   * @return  An Iterable over the data collected from the simulation.
+   */
   def replayEvents(): Iterable[T]
 
   def outputResult(data: Iterable[T])

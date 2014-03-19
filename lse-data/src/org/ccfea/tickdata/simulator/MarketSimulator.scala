@@ -10,7 +10,7 @@ import java.util.{Observable, Observer}
  * can be used in for comprehensions; e.g.
  *
  * <code>
- *  val simulator = new MarketSimulator(events, market)
+ *  val simulator = new MarketSimulator(events, market)          <br>
  *  val prices = for(state <- simulator) yield(state.midPrice)
  * </code>
  *
