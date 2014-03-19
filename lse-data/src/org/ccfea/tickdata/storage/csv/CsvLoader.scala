@@ -108,7 +108,6 @@ trait CsvLoader extends DataLoader {
       result
     }
 
-
     recordType match {
 
       case "order_history_raw" =>

@@ -1,6 +1,8 @@
 package org.ccfea.tickdata.simulator
 
 /**
+ * The state of the LSE auction.
+ *
  * (C) Steve Phelps 2014
  */
 object AuctionState extends Enumeration {

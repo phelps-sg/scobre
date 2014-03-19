@@ -5,16 +5,23 @@ import org.ccfea.tickdata.storage.sql.{SqlLoader, SqlInserter}
 import org.ccfea.tickdata.storage.hbase.HBaseInserter
 import org.ccfea.tickdata.storage.csv.CsvLoader
 
+/**
+ * The main application class for extracting the raw-data supplied by the LSE,
+ * transforming it into a canononical chronologically-ordered sequence of event objects,
+ * and loading it into a database table.
+ *
+ * (C) Steve Phelps 2014
+ */
 object ParseRawData {
-
-  class SqlToSqlImport(val batchSize: Int = 2000, val url: String, val driver: String)
-      extends SqlLoader with SqlInserter
-
-  class SqlToHBaseImport(val batchSize: Int = 20000, val url: String, val driver: String)
-      extends SqlLoader with HBaseInserter
 
   class CsvToHbaseImport(val batchSize: Int = 20000, val fileName: String, val recordType: String)
       extends CsvLoader with HBaseInserter
+
+//  class SqlToSqlImport(val batchSize: Int = 2000, val url: String, val driver: String)
+//      extends SqlLoader with SqlInserter
+//
+//  class SqlToHBaseImport(val batchSize: Int = 20000, val url: String, val driver: String)
+//      extends SqlLoader with HBaseInserter
 
   def main(args: Array[String]) {
 

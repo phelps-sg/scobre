@@ -1,41 +1,57 @@
 package org.ccfea.tickdata
 
+import scala.Some
+
 import org.ccfea.tickdata.conf.ReplayConf
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
 import org.ccfea.tickdata.simulator._
+
 import java.text.DateFormat
 import java.util. Date
 import grizzled.slf4j.Logger
-import scala.Some
 
+/**
+ * The main application for running order-book reconstruction simulations.
+ *
+ * (C) Steve Phelps 2014
+ */
 object OrderReplay {
 
   val logger = Logger("org.ccfea.tickdata.OrderReplay")
 
   def main(args: Array[String]) {
 
+    // Parse command-line options
     implicit val conf = new ReplayConf(args)
+    // The method which will fetch the datum of interest from the state of the market
     val getPropertyMethod = classOf[MarketState].getMethod(conf.property())
 
-//    simulateAndCollate {
-//      getPropertyMethod invoke _
-//    }
+    simulateAndCollate {
+      getPropertyMethod invoke _
+    }
 
-//    simulateAndCollate {
-//      _.quote.bid
-//    }
-//
-      simulateAndCollate {
-        _.lastTransactionPrice
-      }
+    // Alternatively we can hard-code the collation function as follows.
+
+    // Simulate and collate the best bid price
+//      simulateAndCollate {
+//        _.quote.bid
+//      }
+
+    // Simulate and collate transaction prices in event-time
+//      simulateAndCollate {
+//        _.lastTransactionPrice
+//      }
   }
 
-  def parseDate(date: Option[String]): Option[Date] = date match {
-    case None => None
-    case Some(dateStr) =>  Some(DateFormat.getDateInstance(DateFormat.SHORT).parse(dateStr))
-  }
-
-  def simulateAndCollate(dataCollector: MarketState => Option[AnyVal])(implicit conf: ReplayConf) = {
+  /**
+   * Simulate the matching and submission of orders to the LOB and
+   * collate properties of the market as a time-series.
+   *
+   * @param dataCollector   A function for fetching the data of interest
+   * @param conf            Command-line options
+   */
+  def simulateAndCollate(dataCollector: MarketState => Option[AnyVal])
+                          (implicit conf: ReplayConf) = {
 
     val eventSource =
       new HBaseRetriever(selectedAsset = conf.tiCode(),
@@ -47,6 +63,11 @@ object OrderReplay {
                                           withGui = conf.withGui(), dataCollector)
 
     replayer.run()
+  }
+
+  def parseDate(date: Option[String]): Option[Date] = date match {
+    case None => None
+    case Some(dateStr) =>  Some(DateFormat.getDateInstance(DateFormat.SHORT).parse(dateStr))
   }
 
   implicit def AnyRefToOptionAnyVal(x: AnyRef): Option[AnyVal] = x match {

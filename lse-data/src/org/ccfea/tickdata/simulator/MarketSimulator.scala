@@ -1,6 +1,7 @@
 package org.ccfea.tickdata.simulator
 
 import org.ccfea.tickdata.event.{OrderReplayEvent, Event}
+import java.util.{Observable, Observer}
 
 /**
  * A simulator which takes a sequence of events and replays them, producing some function of a
@@ -15,7 +16,10 @@ import org.ccfea.tickdata.event.{OrderReplayEvent, Event}
  *
  * (c) Steve Phelps 2013
  */
-class MarketSimulator(val events: Iterable[OrderReplayEvent], val market: MarketState = new MarketState()) {
+class MarketSimulator(val events: Iterable[OrderReplayEvent], val market: MarketState = new MarketState())
+    extends Observable {
+
+  this.addObserver(market)
 
   def map[B](f: MarketState => B): Iterable[B] = {
     events.map(ev => {
@@ -25,7 +29,8 @@ class MarketSimulator(val events: Iterable[OrderReplayEvent], val market: Market
   }
 
   def process(ev: OrderReplayEvent) = {
-    market.newEvent(ev)
+    setChanged()
+    notifyObservers(ev)
   }
 
   def step() = {
