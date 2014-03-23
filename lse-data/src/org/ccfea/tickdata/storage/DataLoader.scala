@@ -7,7 +7,7 @@ import org.ccfea.tickdata.storage.rawdata.{TradeReportRaw, OrderDetailRaw, Order
 import org.ccfea.tickdata.order.TradeDirection
 
 /**
- * Parse the raw data from LSE and convert it to a sequence of Events.
+ * Parse the raw data from LSE and convert it to a sequence of tick Events.
  *
  * (c) Steve Phelps 2013
  */
