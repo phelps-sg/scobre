@@ -119,7 +119,8 @@ case class Event(eventID: Option[Long],
                   Some(matchingOrderCode), resultingTradeCode,
                   None, None, None)
 
-      => new OrderFilledEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode), new Order(matchingOrderCode))
+      => new OrderFilledEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode),
+                  new Order(matchingOrderCode))
 
       /********************************************************************
         *        Order matched events
@@ -128,12 +129,13 @@ case class Event(eventID: Option[Long],
                     messageSequenceNumber, timeStamp, tiCode,
                     marketSegmentCode, currencyCode, marketMechanismType, Some(aggregateSize), tradeDirection,
                     Some(orderCode),
-                    tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
+                    Some(tradeSize), broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
                     Some(matchingOrderCode), resultingTradeCode,
                     None, None, None)
 
+      //TODO: pass tradeSize here instead of via transactions table?
       => new OrderMatchedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode),
-                                 new Order(matchingOrderCode), resultingTradeCode.get)
+                                 new Order(matchingOrderCode), resultingTradeCode.get, tradeSize)
 
       /********************************************************************
         *        transaction events                            *
@@ -141,13 +143,14 @@ case class Event(eventID: Option[Long],
       case Event(id, EventType.Transaction,
                   messageSequenceNumber, timeStamp,
                   tiCode, marketSegmentCode, currencyCode,
-                  None, None, None, None,
+                  None, None, None, orderCode,
                   Some(tradeSize), Some(broadcastUpdateAction),
                   None, None, Some(tradePrice), None,
-                  None, None,
+                  matchingOrderCode, None,
                   tradeCode, Some(tradeTimeInd), Some(convertedPriceInd))
 
-      => new TransactionEvent(new Date(timeStamp), messageSequenceNumber, tiCode, tradeCode.get, tradePrice, tradeSize)
+      => new TransactionEvent(new Date(timeStamp), messageSequenceNumber, tiCode, tradeCode.get,
+                                  tradePrice, tradeSize, orderCode, matchingOrderCode)
 
     }
   }

@@ -1,9 +1,8 @@
 package org.ccfea.tickdata.simulator
 
-import net.sourceforge.jabm.SimulationTime
 import org.ccfea.tickdata.event.OrderReplayEvent
 import java.io.PrintStream
-import java.util.Date
+import org.ccfea.tickdata.cep.CepObserver
 
 /**
  * Super-class of all order replay classes.  These classes replay events through a simulator
@@ -15,14 +14,27 @@ import java.util.Date
 
 trait OrderReplayer[T] extends Runnable {
 
-  val out: java.io.PrintStream = openOutput
-
+  /**
+   * If true then show a graphical user-interface as
+   * the simulation progresses.
+   */
   def withGui: Boolean
+
+  /**
+   * The filename to write data to.
+   */
   def outFileName: Option[String]
+
+  /**
+   * The source of event objects to replay.
+   */
   def eventSource: Iterable[OrderReplayEvent]
+
+  val out: java.io.PrintStream = openOutput
 
   val marketState = if (withGui) new MarketStateWithGUI() else new MarketState()
   val simulator = new MarketSimulator(eventSource, marketState)
+  simulator.addObserver(new CepObserver())
 
   def openOutput() = outFileName match {
     case Some(fileName) => {
@@ -47,6 +59,11 @@ trait OrderReplayer[T] extends Runnable {
     simulator.step()
   }
 
+  /**
+   * Replay all events through the simulator.
+   *
+   * @return  An Iterable over the data collected from the simulation.
+   */
   def replayEvents(): Iterable[T]
 
   def outputResult(data: Iterable[T])
