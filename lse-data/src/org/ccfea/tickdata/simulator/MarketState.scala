@@ -72,7 +72,7 @@ class MarketState {
         order.setPrice(lo.price.toDouble)
         order.setQuantity(lo.aggregateSize.toInt)
         order.setAgent(new SimpleTradingAgent())
-        order.setIsBid(lo.tradeDirectioen == TradeDirection.Buy)
+        order.setIsBid(lo.tradeDirection == TradeDirection.Buy)
       }
     }
     order.setTimeStamp(time.get)
