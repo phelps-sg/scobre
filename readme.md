@@ -67,13 +67,15 @@ the order-book.
 The following will replay a subset of events over a given date-range:
 
 	cd scripts
-	./replay.sh -t GB0009252882 --with-gui --start-date 5/6/2007 --end-date 6/6/2007
+	./replay.sh -t GB0009252882 --with-gui \
+		--start-date 5/6/2007 --end-date 6/6/2007
 
 The following command will log the mid-price to a CSV file called hf.csv, but
 will not provide a GUI:
 
 	cd scripts
-	./replay.sh -t GB0009252882 --property midPrice --start-date 5/6/2007 --end-date 6/6/2007 -o hf.csv
+	./replay.sh -t GB0009252882 --property midPrice \
+		--start-date 5/6/2007 --end-date 6/6/2007 -o hf.csv
 
 The following command will log transaction prices to a CSV file called hf.csv:
 
@@ -129,13 +131,13 @@ Importing the raw data into Apache HBase
 		</configuration>
 
 
-3. Create an empty table called "events" with column family "data" using the HBase shell:
+3. Create an empty table called `events` with column family `data` using the HBase shell:
 
 		cd /usr/local/hbase-0.94.12/bin
 		./hbase shell
 		create 'events', 'data'
 
-4. Run the shell script hbase-import.sh specifying the raw files to import:
+4. Run the shell script `hbase-import.sh` specifying the raw files to import:
 
 		cd ./scripts
 		./import-hbase.sh ../data/*.CSV

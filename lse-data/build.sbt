@@ -4,9 +4,9 @@ assemblySettings
 
 name := "lse-data"
 
-version := "0.9"
+version := "0.10"
 
-scalaVersion := "2.10.2"
+scalaVersion := "2.10.4"
 //scalaVersion := "2.11.0-M5"
 
 scalaSource in Compile := file("src/")
