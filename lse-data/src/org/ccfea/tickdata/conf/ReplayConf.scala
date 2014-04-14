@@ -6,12 +6,11 @@ import java.util.Date
 /**
  * Parser for command-line options related to order replay.
  *
- * (c) Steve Phelps 2013
+ * (c) Steve Phelps 2014
  */
-
 class ReplayConf(args: Seq[String]) extends ScallopConf(args) {
 
-  version("org.ccfea.tickdata.OrderReplay 0.8 (c) 2013 Steve Phelps")
+  version("org.ccfea.tickdata.OrderReplay 0.10 (c) 2014 Steve Phelps")
   banner("""Usage: OrderReplay [OPTION]...
            |Replay tick data through an order-book simulator and collect data
            |on the state of the market.
