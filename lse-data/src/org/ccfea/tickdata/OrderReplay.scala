@@ -1,6 +1,9 @@
 package org.ccfea.tickdata
 
+import org.ccfea.tickdata.event.OrderReplayEvent
+
 import scala.Some
+import scala.util.Random
 
 import org.ccfea.tickdata.conf.ReplayConf
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
@@ -53,10 +56,12 @@ object OrderReplay {
   def simulateAndCollate(dataCollector: MarketState => Option[AnyVal])
                           (implicit conf: ReplayConf) = {
 
-    val eventSource =
+    var eventSource: Iterable[OrderReplayEvent] =
       new HBaseRetriever(selectedAsset = conf.tiCode(),
                           startDate =  parseDate(conf.startDate.get),
                           endDate = parseDate(conf.endDate.get))
+
+    if (conf.shuffle()) eventSource = Random.shuffle(eventSource.iterator.toList)
 
     val replayer =
       new UnivariateTimeSeriesCollector(eventSource, outFileName = conf.outFileName.get,

@@ -24,15 +24,15 @@
 <configuration>
     <property>
         <name>hbase.master</name>
-        <value>hbase-server</value>
+        <value>127.0.0.1</value>
     </property>
     <property>
         <name>hbase.zookeeper.quorum</name>
-        <value>hbase-server</value>
+        <value>127.0.0.1</value>
     </property>
     <property>
         <name>hbase.client.scanner.timeout.period</name>
-        <value>60000000</value>
+        <value>600000</value>
     </property>
 </configuration>
 

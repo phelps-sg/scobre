@@ -24,5 +24,6 @@ class ReplayConf(args: Seq[String]) extends ScallopConf(args) {
   val startDate = opt[String](required = false, descr = "The earliest event to replay")
   val endDate = opt[String](required = false, descr = "The date of the last event to replay")
   val property = opt[String](default = Some("midPrice"), descr = "The data to retrieve")
+  val shuffle = opt[Boolean](default = Some(false), descr="Shuffle the order of the events prior to simulation")
 }
 
