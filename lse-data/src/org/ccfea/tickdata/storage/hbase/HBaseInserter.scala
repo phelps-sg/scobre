@@ -68,11 +68,11 @@ trait HBaseInserter extends HBaseEventConverter {
       for(event <- parsedEvents) yield convert(event)
     )
 
-    transactionsTable.put(
-        for(event <- parsedEvents;
-            if event.eventType == EventType.OrderMatched || event.eventType == EventType.OrderFilled)
-          yield toTransactionMapPut(event)
-    )
+//    transactionsTable.put(
+ //       for(event <- parsedEvents;
+  //          if event.eventType == EventType.OrderMatched || event.eventType == EventType.OrderFilled)
+   //       yield toTransactionMapPut(event)
+    //)
 
     parsedEvents.length
   }

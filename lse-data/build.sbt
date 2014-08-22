@@ -19,10 +19,16 @@ resolvers += "JABM" at "http://jabm.sourceforge.net/mvn-repo/jabm"
 
 //resolvers += "Thrift" at "http://people.apache.org/~rawson/repo/"
 
+//libraryDependencies ++= Seq(
+	//"org.apache.hbase" % "hbase-client" % "0.98.5-hadoop1",
+	//"org.apache.hbase" % "hbase-common" % "0.98.5-hadoop1",
+	//"org.apache.hadoop" % "hadoop-core" % "1.2.1"
+//)
+
 libraryDependencies ++= Seq(
-	"org.apache.hbase" % "hbase-client" % "0.98.5-hadoop1",
-	"org.apache.hbase" % "hbase-common" % "0.98.5-hadoop1",
-	"org.apache.hadoop" % "hadoop-core" % "1.2.1"
+	"org.apache.hbase" % "hbase" % "0.94.22",
+//	"org.apache.hbase" % "hbase-common" % "0.94.22",
+	"org.apache.hadoop" % "hadoop-core" % "1.0.4"
 )
 
 libraryDependencies += "net.sourceforge.jasa" % "jasa" % "1.2.1-SNAPSHOT"
@@ -56,7 +62,9 @@ libraryDependencies += "com.espertech" % "esper" % "4.11.0"
 
 libraryDependencies += "org.rogach" %% "scallop" % "0.9.4"
 
-libraryDependencies += "org.clapper" % "grizzled-slf4j_2.10" % "1.0.1"
+libraryDependencies += "org.clapper" % "grizzled-slf4j_2.10" % "1.0.2"
+
+libraryDependencies += "org.slf4j" % "slf4j-log4j12" % "1.7.7"
 
 libraryDependencies ++= List(
   "com.typesafe.slick" %% "slick" % "1.0.1",
