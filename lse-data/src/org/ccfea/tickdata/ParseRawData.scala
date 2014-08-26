@@ -1,7 +1,6 @@
 package org.ccfea.tickdata
 
 import org.ccfea.tickdata.conf.ParseConf
-import org.ccfea.tickdata.storage.sql.{SqlLoader, SqlInserter}
 import org.ccfea.tickdata.storage.hbase.HBaseInserter
 import org.ccfea.tickdata.storage.csv.CsvLoader
 

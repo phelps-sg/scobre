@@ -2,22 +2,21 @@ import AssemblyKeys._
 
 assemblySettings
 
+net.virtualvoid.sbt.graph.Plugin.graphSettings
+
 name := "lse-data"
 
-version := "0.11"
+version := "0.12"
 
-scalaVersion := "2.10.4"
-//scalaVersion := "2.11.0-M5"
+scalaVersion := "2.11.2"
 
 scalaSource in Compile := file("src/")
 
-resolvers += "Apache HBase" at "http://repository.apache.org/content/repositories/releases"
-
-resolvers += "JASA" at "http://jasa.sourceforge.net/mvn-repo/jasa"
-
-resolvers += "JABM" at "http://jabm.sourceforge.net/mvn-repo/jabm"
-
-//resolvers += "Thrift" at "http://people.apache.org/~rawson/repo/"
+resolvers ++= Seq(
+  "Apache HBase" at "http://repository.apache.org/content/repositories/releases",
+  "JASA" at "http://jasa.sourceforge.net/mvn-repo/jasa",
+  "JABM" at "http://jabm.sourceforge.net/mvn-repo/jabm"
+)
 
 //libraryDependencies ++= Seq(
 	//"org.apache.hbase" % "hbase-client" % "0.98.5-hadoop1",
@@ -27,57 +26,15 @@ resolvers += "JABM" at "http://jabm.sourceforge.net/mvn-repo/jabm"
 
 libraryDependencies ++= Seq(
 	"org.apache.hbase" % "hbase" % "0.94.22",
-//	"org.apache.hbase" % "hbase-common" % "0.94.22",
 	"org.apache.hadoop" % "hadoop-core" % "1.0.4"
 )
 
-libraryDependencies += "net.sourceforge.jasa" % "jasa" % "1.2.1-SNAPSHOT"
-
-//libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-compiler" % _)
-
-//resolvers ++= Seq(
-//  "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
-//  "Sonatype Releases" at "http://oss.sonatype.org/content/repositories/releases"
-//)
-
-//libraryDependencies ++= Seq(
- // "org.scala-saddle" %% "saddle-core" % "1.3.+"
-  // (OPTIONAL) "org.scala-saddle" %% "saddle-hdf5" % "1.3.+"
-//)
-
-resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
-
-// libraryDependencies += "com.gravity" % "gravity-hpaste" % "0.1.11" withSources()
-
-// resolvers += "Apache HBase" at "https://repository.apache.org/content/repositories/releases"
-
-//resolvers += "Thrift" at "http://people.apache.org/~rawson/repo/"
-//
-//libraryDependencies ++= Seq(
-//  "com.typesafe.akka" % "akka-actor" % "2.0.3",
-//  "com.typesafe.akka" % "akka-remote" % "2.0.3"
-//)
-
-libraryDependencies += "com.espertech" % "esper" % "4.11.0"
-
-libraryDependencies += "org.rogach" %% "scallop" % "0.9.4"
-
-libraryDependencies += "org.clapper" % "grizzled-slf4j_2.10" % "1.0.2"
-
-libraryDependencies += "org.slf4j" % "slf4j-log4j12" % "1.7.7"
-
-libraryDependencies ++= List(
-  "com.typesafe.slick" %% "slick" % "1.0.1",
-  //"org.slf4j" % "slf4j-nop" % "1.6.4",
-//  "com.h2database" % "h2" % "1.3.166",
-  "org.xerial" % "sqlite-jdbc" % "3.7.2",
-  "mysql" % "mysql-connector-java" % "5.1.23"
-/*
-  "org.apache.derby" % "derby" % "10.9.1.0",
-  "org.hsqldb" % "hsqldb" % "2.2.8",
-  "postgresql" % "postgresql" % "9.1-901.jdbc4",
-  "net.sourceforge.jtds" % "jtds" % "1.2.4" % "test"
-*/
+libraryDependencies ++= Seq(
+  "net.sourceforge.jasa" % "jasa" % "1.2.1-SNAPSHOT",
+  "com.espertech" % "esper" % "4.11.0",
+  "org.rogach" %% "scallop" % "0.9.5",
+  "org.clapper" % "grizzled-slf4j_2.10" % "1.0.2",
+  "org.slf4j" % "slf4j-log4j12" % "1.7.7"
 )
 
 mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
@@ -96,4 +53,3 @@ mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
   }
 }
 
-net.virtualvoid.sbt.graph.Plugin.graphSettings

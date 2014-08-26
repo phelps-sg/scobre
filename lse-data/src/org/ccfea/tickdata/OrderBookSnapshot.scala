@@ -1,13 +1,16 @@
 package org.ccfea.tickdata
 
-import scala.slick.driver.MySQLDriver.simple._
 import org.ccfea.tickdata.conf.ReplayConf
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
 import org.ccfea.tickdata.simulator._
+
 import java.text.DateFormat
 import java.util.{Calendar, GregorianCalendar, Date}
+
 import grizzled.slf4j.Logger
+
 import net.sourceforge.jabm.SimulationTime
+
 import scala.Some
 
 object OrderBookSnapshot {

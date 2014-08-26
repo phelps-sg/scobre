@@ -78,7 +78,6 @@ object OrderReplay {
   implicit def AnyRefToOptionAnyVal(x: AnyRef): Option[AnyVal] = x match {
     case Some(double: Double) => Some(double)
     case Some(long: Long) => Some(long)
-    case l: java.lang.Long => Some(l)
     case None => None
   }
 

@@ -104,7 +104,7 @@ class MarketState extends Observer {
   }
 
   /**
-   * Recieve events from any Observable objects the state is listening to.
+   * Receive events from any Observable objects the state is listening to.
    * Typically this will be an instance of MarketSimulator.
    *
    * @param o       The sending object.
