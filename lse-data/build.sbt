@@ -6,7 +6,7 @@ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
 name := "lse-data"
 
-version := "0.12"
+version := "0.13"
 
 scalaVersion := "2.11.2"
 
