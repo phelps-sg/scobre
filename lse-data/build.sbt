@@ -45,10 +45,12 @@ mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
     case PathList("org", "apache", "commons", xs @ _*) => MergeStrategy.first
     case PathList("javax", "xml", xs @ _*)   => MergeStrategy.first
     case PathList("javax", "servlet", xs @ _*)         => MergeStrategy.first
+    case PathList("net", "sf", "cglib", xs @ _*)         => MergeStrategy.first
     case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
     case PathList(ps @ _*) if ps.last endsWith "pom.xml" => MergeStrategy.concat
     case PathList(ps @ _*) if ps.last endsWith "pom.properties" => MergeStrategy.concat
     case PathList(ps @ _*) if ps.last endsWith "spring.tooling" => MergeStrategy.first
+    case PathList(ps @ _*) if ps.last endsWith "package-info.class" => MergeStrategy.first
     case "log4j.xml" => MergeStrategy.first
     case "pom.xml" => MergeStrategy.concat
     case x => old(x)

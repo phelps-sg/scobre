@@ -81,7 +81,7 @@ The following command will log transaction prices to a CSV file called hf.csv:
 ## Documentation
 
 - The [data description](file:./lse-data/doc/data.pdf) provided by the LSE
-- The [API documentation](file:./lse-data/target/scala-2.12/api/index.html)
+- The [API documentation](file:./lse-data/target/scala-2.11/api/index.html)
 
 ## Compiling and modifying the code
 
