@@ -18,16 +18,18 @@ resolvers ++= Seq(
   "JABM" at "http://jabm.sourceforge.net/mvn-repo/jabm"
 )
 
-//libraryDependencies ++= Seq(
-	//"org.apache.hbase" % "hbase-client" % "0.98.5-hadoop1",
-	//"org.apache.hbase" % "hbase-common" % "0.98.5-hadoop1",
-	//"org.apache.hadoop" % "hadoop-core" % "1.2.1"
-//)
-
 libraryDependencies ++= Seq(
-	"org.apache.hbase" % "hbase" % "0.94.22",
-	"org.apache.hadoop" % "hadoop-core" % "1.0.4"
+	"org.apache.hbase" % "hbase-client" % "0.98.5-hadoop2",
+	"org.apache.hbase" % "hbase-common" % "0.98.5-hadoop2",
+//	"org.apache.hadoop" % "hadoop-core" % "1.2.1"
+  "org.apache.hadoop" % "hadoop-client" % "2.2.0",
+  "org.apache.hadoop" % "hadoop-common" % "2.2.0"
 )
+
+//libraryDependencies ++= Seq(
+//	"org.apache.hbase" % "hbase" % "0.94.22",
+//	"org.apache.hadoop" % "hadoop-core" % "1.0.4"
+//)
 
 libraryDependencies ++= Seq(
   "net.sourceforge.jasa" % "jasa" % "1.2.1-SNAPSHOT",
