@@ -2,7 +2,7 @@
 BASEDIR=`dirname $0`
 export BASEDIR=$BASEDIR/..
 
-export LSEDATA_VERSION=0.12
+export LSEDATA_VERSION=0.13
 export SCALA_VERSION=2.11
 
 # Configure Java class path
