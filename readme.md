@@ -54,7 +54,7 @@ replace `cseesp1.essex.ac.uk` with `localhost`.
 
 ## Running the reconstructor
 
-The script replay.sh in the scripts directory can then be used retreive a
+The script `replay.sh` in the `scripts/` directory can then be used retreive a
 time-series of the mid-price.  
 
 The following example will replay all recorded events for the asset with given
@@ -81,6 +81,12 @@ The following command will log transaction prices to a CSV file called hf.csv:
 
 	cd scripts
 	./replay.sh -t GB0009252882 --property lastTransactionPrice -o hf.csv
+	
+To get the full list of options use the built-in help:
+
+    cd scripts
+    ./replay.sh --help
+    
 
 ## Documentation
 
