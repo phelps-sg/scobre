@@ -22,10 +22,9 @@ process.
 
 - (Optional) In order to build the software from source, you will need the scala build tool (sbt); see the [sbt documentation](http://www.scala-sbt.org/release/docs/Getting-Started/Setup.html).
 
-- (Optional) In order to host the data, you will need to install [Apache HBase version 0.94](https://www.apache.org/dyn/closer.cgi/hbase/).  
-The software can optionally connect to an existing server which already hosts 
-the data.  Note that, currently, the software does not work with the latest 
-version of HBase, so you will need to install the earlier 0.94 version.
+- (Optional) In order to host the data, you will need to install [Apache HBase
+  version 0.98 for Hadoop 2](https://www.apache.org/dyn/closer.cgi/hbase/).  The software
+can optionally connect to an existing server which already hosts the data.
 
 - (Optional) The best Integrated Development Environment (IDE) to use for 
 working on the project is [IntelliJ IDEA](https://www.jetbrains.com/idea/) with 
@@ -86,7 +85,7 @@ The following command will log transaction prices to a CSV file called hf.csv:
 ## Documentation
 
 - The [data description](file:./lse-data/doc/data.pdf) provided by the LSE
-- The [API documentation](file:./lse-data/target/scala-2.10/api/index.html)
+- The [API documentation](file:./lse-data/target/scala-2.11/api/index.html)
 
 ## Compiling and modifying the code
 
@@ -98,12 +97,11 @@ To compile to a single JAR file use:
 
 	sbt assembly
 
-You can import the file `build.sbt` into IntellijIDEA by importing it directly
-as a project.
+To import the project as an IntelliJ IDEA project you can directly import the `build.sbt` file as a new project.
 
 ## Importing the raw data into Apache HBase
 
-1. Install Apache HBase 0.94 in [standalone mode](https://archanaschangale.wordpress.com/2013/08/29/installing-apache-hbase-on-ubuntu-for-standalone-mode/).
+1. Install Apache HBase 0.98 for Hadoop 2 in [standalone mode](https://hbase.apache.org/book/quickstart.html).
 
 2. Modify the file base-config.xml in the etc/ directory of the folder where you unpacked the lse-data distribution as follows:
 
@@ -121,7 +119,7 @@ as a project.
 
 3. Create an empty table called `events` with column family `data` using the HBase shell:
 
-		cd /usr/local/hbase-0.94.12/bin
+		cd /opt/hbase-0.98.5-hadoop2/bin
 		./hbase shell
 		create 'events', 'data'
 
