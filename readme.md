@@ -103,7 +103,9 @@ To compile to a single JAR file use:
 
 	sbt assembly
 
-To import the project as an IntelliJ IDEA project you can directly import the `build.sbt` file as a new project.
+To import the project as an IntelliJ IDEA project, first install the [Scala 
+plugin](http://confluence.jetbrains.com/display/SCA/Scala+Plugin+for+IntelliJ+
+IDEA), and then directly import the `build.sbt` file as a new project.
 
 ## Importing the raw data into Apache HBase
 
