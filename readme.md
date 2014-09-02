@@ -26,7 +26,11 @@ process.
   version 0.98 for Hadoop 2](https://www.apache.org/dyn/closer.cgi/hbase/).  The software
 can optionally connect to an existing server which already hosts the data.
 
-- (Optional) The best Integrated Development Environment (IDE) to use for working on the project is [IntelliJ IDEA](https://www.jetbrains.com/idea/) with the [Scala plugin](http://confluence.jetbrains.com/display/SCA/Scala+Plugin+for+IntelliJ+IDEA) installed.
+- (Optional) The best Integrated Development Environment (IDE) to use for 
+working on the project is [IntelliJ IDEA](https://www.jetbrains.com/idea/) with 
+the [Scala 
+plugin](http://confluence.jetbrains.com/display/SCA/Scala+Plugin+for+IntelliJ+
+IDEA) installed.
 
 ## Installation
 
@@ -50,7 +54,7 @@ replace `cseesp1.essex.ac.uk` with `localhost`.
 
 ## Running the reconstructor
 
-The script replay.sh in the scripts directory can then be used retreive a
+The script `replay.sh` in the `scripts/` directory can then be used retreive a
 time-series of the mid-price.  
 
 The following example will replay all recorded events for the asset with given
@@ -77,6 +81,12 @@ The following command will log transaction prices to a CSV file called hf.csv:
 
 	cd scripts
 	./replay.sh -t GB0009252882 --property lastTransactionPrice -o hf.csv
+	
+To get the full list of options use the built-in help:
+
+    cd scripts
+    ./replay.sh --help
+    
 
 ## Documentation
 
@@ -93,7 +103,9 @@ To compile to a single JAR file use:
 
 	sbt assembly
 
-To import the project as an IntelliJ IDEA project you can directly import the `build.sbt` file as a new project.
+To import the project as an IntelliJ IDEA project, first install the [Scala 
+plugin](http://confluence.jetbrains.com/display/SCA/Scala+Plugin+for+IntelliJ+
+IDEA), and then directly import the `build.sbt` file as a new project.
 
 ## Importing the raw data into Apache HBase
 

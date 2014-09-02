@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="SBT: net.sourceforge.jabm:jabm:0.9.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/net.sourceforge.jabm/jabm/jars/jabm-0.9.0-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
