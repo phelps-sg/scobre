@@ -3,7 +3,7 @@ package org.ccfea.tickdata.storage
 import rawdata._
 import grizzled.slf4j.Logger
 import org.ccfea.tickdata.event.{EventType, Event}
-import org.ccfea.tickdata.storage.rawdata.{TradeReportRaw, OrderDetailRaw, OrderHistoryRaw}
+import org.ccfea.tickdata.storage.rawdata.lse.{OrderDetailRaw, OrderHistoryRaw, TradeReportRaw}
 import org.ccfea.tickdata.order.TradeDirection
 
 /**
@@ -18,7 +18,7 @@ trait DataLoader {
 
   val batchSize: Int
 
-  def run: Unit
+  def run(): Unit
 
   def insertData(parsedEvents: Seq[Event]): Int
 

@@ -1,4 +1,6 @@
-package org.ccfea.tickdata.storage.rawdata
+package org.ccfea.tickdata.storage.rawdata.lse
+
+import org.ccfea.tickdata.storage.rawdata.HasDateTime
 
 /**
  * Class representing data records in original format as supplied by LSE.

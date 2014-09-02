@@ -1,4 +1,6 @@
-package org.ccfea.tickdata.storage.rawdata
+package org.ccfea.tickdata.storage.rawdata.lse
+
+import org.ccfea.tickdata.storage.rawdata.HasDateTime
 
 /**
  * Object representing original order-revision records in original format supplied by LSE.
