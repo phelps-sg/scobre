@@ -8,5 +8,5 @@
 
 source config.sh
 
-java org.ccfea.tickdata.OrderReplay $@
-#java org.ccfea.tickdata.OrderReplay -t GB0009252882 --with-gui
+java org.ccfea.tickdata.OrderReplayer $@
+#java org.ccfea.tickdata.OrderReplayer -t GB0009252882 --with-gui

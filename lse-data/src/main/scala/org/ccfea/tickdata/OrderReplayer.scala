@@ -1,6 +1,7 @@
 package org.ccfea.tickdata
 
 import org.ccfea.tickdata.event.OrderReplayEvent
+import org.ccfea.tickdata.storage.csv.CsvCollator
 
 import scala.Some
 import scala.util.Random
@@ -18,9 +19,9 @@ import grizzled.slf4j.Logger
  *
  * (C) Steve Phelps 2014
  */
-object OrderReplay {
+object OrderReplayer extends ReplayApplication {
 
-  val logger = Logger("org.ccfea.tickdata.OrderReplay")
+  val logger = Logger("org.ccfea.tickdata.OrderReplayer")
 
   def main(args: Array[String]) {
 
@@ -63,45 +64,16 @@ object OrderReplay {
 
     if (conf.shuffle()) eventSource = Random.shuffle(eventSource.iterator.toList)
 
-    val replayer =
-      new UnivariateTimeSeriesCollector(eventSource, outFileName = conf.outFileName.get,
-                                          withGui = conf.withGui(), dataCollector)
+    class Replayer(val eventSource: Iterable[OrderReplayEvent],
+                    val outFileName: Option[String], val withGui: Boolean,
+                    val dataCollector: MarketState => Option[AnyVal])
+        extends UnivariateTimeSeriesCollector with CsvCollator
 
-    replayer.run()
+    new Replayer(eventSource,outFileName = conf.outFileName.get,
+                                          withGui = conf.withGui(), dataCollector).run()
   }
 
-  def parseDate(date: Option[String]): Option[Date] = date match {
-    case None => None
-    case Some(dateStr) =>  Some(DateFormat.getDateInstance(DateFormat.SHORT).parse(dateStr))
-  }
-
-  implicit def AnyRefToOptionAnyVal(x: AnyRef): Option[AnyVal] = x match {
-    case Some(double: Double) => Some(double)
-    case Some(long: Long) => Some(long)
-    case None => None
-  }
 
 }
-
-//
-//object StartServer {
-//
-//  def main(args: Array[String]) {
-//
-//    val conf = new DbConf(args)
-//    val server = new OrderReplayServer(conf.url(), conf.driver())
-//  }
-//}
-
-
-
-//
-//class OrderReplayServer(val url: String, val driver: String) extends Actor {
-//
-//  def receive = {
-//      case cmd @ OrderReplay(_, _, _, _, _) =>
-//        cmd.run
-//    }
-//}
 
 

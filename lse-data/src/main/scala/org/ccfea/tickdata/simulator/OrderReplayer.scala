@@ -23,26 +23,19 @@ trait OrderReplayer[T] extends Runnable {
   /**
    * The filename to write data to.
    */
-  def outFileName: Option[String]
+//  def outFileName: Option[String]
 
   /**
    * The source of event objects to replay.
    */
   def eventSource: Iterable[OrderReplayEvent]
 
-  val out: java.io.PrintStream = openOutput
+//  val out: java.io.PrintStream = openOutput
 
   val marketState = if (withGui) new MarketStateWithGUI() else new MarketState()
   val simulator = new MarketSimulator(eventSource, marketState)
   simulator.addObserver(new CepObserver())
 
-  def openOutput() = outFileName match {
-    case Some(fileName) => {
-      val outFile = new java.io.FileOutputStream(outFileName.get)
-      new PrintStream(outFile)
-    }
-    case None => System.out
-  }
 
   /**
    * Run the replay which will simulate the events and collate the resulting data.

@@ -3,6 +3,7 @@ package org.ccfea.tickdata.simulator
 import net.sourceforge.jabm.SimulationTime
 import java.util.Date
 import net.sourceforge.jasa.market.FourHeapOrderBook
+import org.ccfea.tickdata.storage.csv.{PrintStreamOutputer, CsvCollator}
 
 import collection.JavaConversions._
 import util.control.Breaks._
@@ -15,7 +16,7 @@ import org.ccfea.tickdata.event.OrderReplayEvent
  */
 class OrderBookSnapshotter(val eventSource: Iterable[OrderReplayEvent], val t: SimulationTime,
                             val outFileName: Option[String] = None, val withGui: Boolean = false)
-    extends OrderReplayer[Option[FourHeapOrderBook]] {
+    extends OrderReplayer[Option[FourHeapOrderBook]] with PrintStreamOutputer {
 
   val logger = Logger(classOf[OrderBookSnapshotter])
 
@@ -40,6 +41,7 @@ class OrderBookSnapshotter(val eventSource: Iterable[OrderReplayEvent], val t: S
   }
 
   def outputResult(result: Iterable[Option[FourHeapOrderBook]]) {
+    val out = openOutput()
     logger.debug("book = " + result)
     val book = result.iterator.next().get
     val asks = book.getUnmatchedAsks
@@ -50,6 +52,7 @@ class OrderBookSnapshotter(val eventSource: Iterable[OrderReplayEvent], val t: S
       val bid = if (i < bids.size) Some(bids.get(i)) else None
       out.println(qty(ask) + "\t" + price(ask) + "\t" + qty(bid) + "\t" + price(bid))
     }
+    out.close()
   }
 
 }

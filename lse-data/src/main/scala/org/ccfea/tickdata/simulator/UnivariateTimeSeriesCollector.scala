@@ -11,11 +11,10 @@ import org.ccfea.tickdata.storage.csv.CsvCollator
  *
  * (C) Steve Phelps 2013
  */
-class UnivariateTimeSeriesCollector(val eventSource: Iterable[OrderReplayEvent],
-                                      val outFileName: Option[String] = None,
-                                      val withGui: Boolean = false,
-                                      val dataCollector: MarketState => Option[AnyVal])
-    extends MarketStateDataCollector[(Option[SimulationTime], Option[AnyVal])] with CsvCollator {
+trait UnivariateTimeSeriesCollector
+    extends MarketStateDataCollector[(Option[SimulationTime], Option[AnyVal])] {
+
+  def dataCollector: MarketState => Option[AnyVal]
 
   /**
    * Collect data from the state of the market during the continuous trading periods.

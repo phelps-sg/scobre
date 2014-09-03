@@ -13,14 +13,9 @@ import net.sourceforge.jabm.SimulationTime
 
 import scala.Some
 
-object OrderBookSnapshot {
+object OrderBookSnapshot extends ReplayApplication {
 
   val logger = Logger("org.ccfea.tickdata.OrderReplay")
-
-  def parseDate(date: Option[String]): Option[Date] = date match {
-    case None => None
-    case Some(dateStr) =>  Some(DateFormat.getDateInstance(DateFormat.SHORT).parse(dateStr))
-  }
 
   def main(args: Array[String]) {
 
@@ -44,9 +39,9 @@ object OrderBookSnapshot {
     val eventSource =
       new HBaseRetriever(selectedAsset = conf.tiCode(), startDate = start, endDate = end)
 
-    val snapShotter =
+    val snapshotter =
       new OrderBookSnapshotter(eventSource, new SimulationTime(time.getTime), conf.outFileName.get, conf.withGui())
-    snapShotter.run
+    snapshotter.run
   }
 }
 

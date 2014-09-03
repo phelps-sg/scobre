@@ -19,7 +19,8 @@ version := "0.14-SNAPSHOT"
 
 scalaVersion := "2.11.2"
 
-scalaSource in Compile := file("src/")
+//scalaSource in Compile := file("src/")
+javaSource in Compile := file("src/main/thrift/gen-java")
 
 resolvers ++= Seq(
   "Apache HBase" at "http://repository.apache.org/content/repositories/releases",
@@ -32,7 +33,8 @@ libraryDependencies ++= Seq(
 	"org.apache.hbase" % "hbase-common" % "0.98.5-hadoop2",
 //	"org.apache.hadoop" % "hadoop-core" % "1.2.1"
   "org.apache.hadoop" % "hadoop-client" % "2.2.0",
-  "org.apache.hadoop" % "hadoop-common" % "2.2.0"
+  "org.apache.hadoop" % "hadoop-common" % "2.2.0",
+  "org.apache.thrift" % "libthrift" % "0.9.1"
 )
 
 //libraryDependencies ++= Seq(
