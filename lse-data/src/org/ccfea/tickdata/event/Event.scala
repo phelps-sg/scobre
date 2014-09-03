@@ -30,7 +30,7 @@ case class Event(eventID: Option[Long],
 //                 countryOfRegister: String,
                  currencyCode: String,
 
-                 marketMechanismType: Option[String],
+                 marketMechanismType: Option[MarketMechanismType.Value],
                  aggregateSize: Option[Long],
                  tradeDirection: Option[TradeDirection.Value],
                  orderCode: Option[String],
@@ -77,9 +77,9 @@ case class Event(eventID: Option[Long],
 
       => {
         val order = marketMechanismType match {
-            case "LO" =>
+            case MarketMechanismType.LimitOrder =>
               new LimitOrder(orderCode, aggregateSize, tradeDirection, price)
-            case "MO" =>
+            case MarketMechanismType.MarketOrder =>
               new MarketOrder(orderCode, aggregateSize, tradeDirection)
             case _ =>
               new OtherOrder(orderCode, marketMechanismType)

@@ -5,7 +5,7 @@ import org.apache.hadoop.hbase.client.{Result, HTable, HBaseAdmin}
 import org.apache.hadoop.hbase.util.Bytes
 import collection.JavaConversions._
 import org.ccfea.tickdata.event.{EventType, Event}
-import org.ccfea.tickdata.order.TradeDirection
+import org.ccfea.tickdata.order.{MarketMechanismType, TradeDirection}
 import java.util.Date
 
 /**
@@ -36,12 +36,15 @@ trait HBaseEventConverter {
     case s: String => Bytes.toBytes(s)
     case evType: EventType.Value => Bytes.toBytes(evType.id)
     case td: TradeDirection.Value => Bytes.toBytes(td.id)
+    case mmt: MarketMechanismType.Value => Bytes.toBytes(mmt.id)
     case p: BigDecimal => Bytes.toBytes(new java.math.BigDecimal(p.toString()))
     case l: Long => Bytes.toBytes(l)
   }
 
   implicit def toEventType(raw: Array[Byte]): EventType.Value = EventType(Bytes.toInt(raw))
   implicit def toTradeDirection(raw: Array[Byte]): TradeDirection.Value = TradeDirection(Bytes.toInt(raw))
+  implicit def toMarketMechanismType(raw: Array[Byte]): MarketMechanismType.Value =
+                                                                    MarketMechanismType(Bytes.toInt(raw))
   implicit def toString(raw: Array[Byte]): String = Bytes.toString(raw)
   implicit def toLong(raw: Array[Byte]): Long = Bytes.toLong(raw)
   implicit def toBigDecimal(raw: Array[Byte]): BigDecimal = Bytes.toBigDecimal(raw)
@@ -51,10 +54,11 @@ trait HBaseEventConverter {
       case Some(bytes) => Some(convert(bytes))
       case None => None
     }
-  implicit def toOptionString(raw: Option[Array[Byte]]) =           toOptionAny(toString(_), raw)
-  implicit def toOptionLong(raw: Option[Array[Byte]]) =             toOptionAny(toLong(_), raw)
-  implicit def toOptionBigDecimal(raw: Option[Array[Byte]]) =       toOptionAny(toBigDecimal(_), raw)
-  implicit def toOptionTradeDirection(raw: Option[Array[Byte]]) =   toOptionAny(toTradeDirection(_), raw)
+  implicit def toOptionString(raw: Option[Array[Byte]]) =                 toOptionAny(toString, raw)
+  implicit def toOptionLong(raw: Option[Array[Byte]]) =                   toOptionAny(toLong, raw)
+  implicit def toOptionBigDecimal(raw: Option[Array[Byte]]) =             toOptionAny(toBigDecimal, raw)
+  implicit def toOptionTradeDirection(raw: Option[Array[Byte]]) =         toOptionAny(toTradeDirection, raw)
+  implicit def toOptionMarketMechanismType(raw: Option[Array[Byte]]) =    toOptionAny(toMarketMechanismType, raw)
 
   /**
    * Convert a row from HBase into an Event object.

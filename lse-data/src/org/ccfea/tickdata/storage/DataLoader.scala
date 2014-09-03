@@ -4,10 +4,10 @@ import rawdata._
 import grizzled.slf4j.Logger
 import org.ccfea.tickdata.event.{EventType, Event}
 import org.ccfea.tickdata.storage.rawdata.lse.{OrderDetailRaw, OrderHistoryRaw, TradeReportRaw}
-import org.ccfea.tickdata.order.TradeDirection
+import org.ccfea.tickdata.order.{MarketMechanismType, TradeDirection}
 
 /**
- * Parse the raw data from LSE and convert it to a sequence of tick Events.
+ * Parse the raw data and convert it to a sequence of tick Events.
  *
  * (c) Steve Phelps 2013
  */
@@ -22,9 +22,24 @@ trait DataLoader {
 
   def insertData(parsedEvents: Seq[Event]): Int
 
+  /**
+   * Convert a row of one of the three LSE tables (order_history, order_detail, trade_reports)
+   * into an Event object which represents a tick.
+   *
+   * @param rawEvent  A tuple representation of the raw data in the current row being parsed.
+   * @return  A tick whose eventType represents the type of event that has occurred.
+   */
   def parseEvent(rawEvent: HasDateTime): Event = {
 
     logger.debug("Raw event = " + rawEvent)
+
+    implicit def marketMechanismTypeToEnum(marketMechanismType: String): MarketMechanismType.Value = {
+      marketMechanismType match {
+        case "LO" => MarketMechanismType.LimitOrder
+        case "MO" => MarketMechanismType.MarketOrder
+        case _ =>    MarketMechanismType.Other
+      }
+    }
 
     implicit def orderActionTypeToEventType(orderActionType: String): EventType.Value = {
       orderActionType match {
