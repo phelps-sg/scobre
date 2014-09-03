@@ -1,12 +1,21 @@
 import AssemblyKeys._
+import sbtbuildinfo.Plugin._
 
 assemblySettings
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
+buildInfoSettings
+
+sourceGenerators in Compile <+= buildInfo
+
+buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion)
+
+buildInfoPackage := "org.ccfea.tickdata.conf"
+
 name := "lse-data"
 
-version := "0.13"
+version := "0.14-SNAPSHOT"
 
 scalaVersion := "2.11.2"
 
