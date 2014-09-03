@@ -1,6 +1,6 @@
 package org.ccfea.tickdata.storage.hbase
 
-import org.apache.hadoop.hbase.HBaseConfiguration
+import org.apache.hadoop.hbase.{CellUtil, HBaseConfiguration}
 import org.apache.hadoop.hbase.client.{Result, HTable, HBaseAdmin}
 import org.apache.hadoop.hbase.util.Bytes
 import collection.JavaConversions._
@@ -114,16 +114,16 @@ trait HBaseEventConverter {
   }
 
   def getColumn(result: Result, name: String): Option[Array[Byte]] = {
-    val column =  result.getColumn(dataFamily, name)
+    val column =  result.getColumnCells(dataFamily, name)
     column.size match {
       case 0 => None
-      case 1 => Some(column(0).getValue)
+      case 1 => Some(CellUtil.cloneValue(column(0)))
       case _ => throw new IllegalArgumentException("More than one result in column " + name)
     }
   }
 
   def getTimeStamp(result: Result): Long = {
-    val column = result.getColumn(dataFamily, "eventType")
+    val column = result.getColumnCells(dataFamily, "eventType")
     assert(column.size == 1)
     column(0).getTimestamp
   }
