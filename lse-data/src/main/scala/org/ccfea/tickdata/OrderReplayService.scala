@@ -9,7 +9,7 @@ import org.ccfea.tickdata.conf.{BuildInfo, ServerConf}
 import org.ccfea.tickdata.event.OrderReplayEvent
 import org.ccfea.tickdata.simulator.MarketState
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
-import org.ccfea.tickdata.storage.thrift.MultivariateThriftCollector
+import org.ccfea.tickdata.storage.thrift.MultivariateThriftCollator
 import org.ccfea.tickdata.thrift.OrderReplay
 
 import collection.JavaConversions._
@@ -45,7 +45,7 @@ object OrderReplayService extends ReplayApplication {
         class Replayer(val eventSource: Iterable[OrderReplayEvent] = hbaseSource,
                        val withGui: Boolean = false,
                        val dataCollectors: Map[String, MarketState => Option[AnyVal]])
-          extends MultivariateTimeSeriesCollector with MultivariateThriftCollector
+          extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
 
         // Take the list of variables, use reflection to find the method to retrieve the
         //  data for each variable (a function of MarketState),

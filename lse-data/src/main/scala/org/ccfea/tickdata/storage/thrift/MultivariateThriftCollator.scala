@@ -8,7 +8,7 @@ import collection.JavaConversions._
 /**
  * (C) Steve Phelps 2014
  */
-trait MultivariateThriftCollector
+trait MultivariateThriftCollator
     extends MarketStateDataCollector[(Option[SimulationTime], Map[String,Option[AnyVal]])] {
 
   val result: java.util.List[java.util.Map[java.lang.String, java.lang.Double]] = new java.util.LinkedList()

@@ -6,7 +6,7 @@ import org.ccfea.tickdata.collector.MarketStateDataCollector
 /**
  * Created by sphelps on 04/09/14.
  */
-trait MultivariateCsvDataCollector
+trait MultivariateCsvDataCollator
     extends MarketStateDataCollector[(Option[SimulationTime], Map[String,Option[AnyVal]])] with PrintStreamOutputer {
 
   def outputResult(data: Iterable[(Option[SimulationTime], Map[String,Option[AnyVal]])]) = {

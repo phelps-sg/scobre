@@ -9,7 +9,7 @@ import org.ccfea.tickdata.collector.MarketStateDataCollector
  *
  * (C) Steve Phelps 2014
  */
-trait UnivariateCsvDataCollector
+trait UnivariateCsvDataCollator
     extends MarketStateDataCollector[(Option[SimulationTime], Option[AnyVal])] with PrintStreamOutputer {
 
   /**
