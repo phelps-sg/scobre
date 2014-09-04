@@ -1,9 +1,9 @@
 package org.ccfea.tickdata
 
 import grizzled.slf4j.Logger
-import org.apache.thrift.server.{TThreadPoolServer, TSimpleServer}
+import org.apache.thrift.server.TThreadPoolServer
 import org.apache.thrift.transport.TServerSocket
-import org.ccfea.tickdata.collector.{MultivariateTimeSeriesCollector, UnivariateTimeSeriesCollector}
+import org.ccfea.tickdata.collector.MultivariateTimeSeriesCollector
 import org.ccfea.tickdata.conf.{BuildInfo, ServerConf}
 
 import org.ccfea.tickdata.event.OrderReplayEvent
@@ -11,11 +11,8 @@ import org.ccfea.tickdata.simulator.MarketState
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
 import org.ccfea.tickdata.storage.thrift.MultivariateThriftCollector
 import org.ccfea.tickdata.thrift.OrderReplay
-import org.ccfea.tickdata.thrift.TimeSeriesDatum
 
 import collection.JavaConversions._
-
-import scala.collection.mutable.ArrayBuilder
 
 /**
  * A server that provides order-replay simulation results over the network.
@@ -42,9 +39,8 @@ object OrderReplayService extends ReplayApplication {
         logger.info("Starting simulation... ")
 
         val hbaseSource: Iterable[OrderReplayEvent] =
-          new HBaseRetriever(selectedAsset = assetId,
-            startDate =  parseDate(Some(startDate)),
-            endDate = parseDate(Some(endDate)))
+          new HBaseRetriever(selectedAsset = assetId, startDate = parseDate(Some(startDate)),
+                                                        endDate = parseDate(Some(endDate)))
 
         class Replayer(val eventSource: Iterable[OrderReplayEvent] = hbaseSource,
                        val withGui: Boolean = false,
@@ -57,12 +53,12 @@ object OrderReplayService extends ReplayApplication {
 
         def variableToMethod(variable: String): MarketState => Option[AnyVal] =
           classOf[MarketState].getMethod(variable) invoke _
-
         val collectors: Seq[(String, MarketState => Option[AnyVal])] =
           for(variable <- variables) yield (variable, variableToMethod(variable))
 
         val replayer =
           new Replayer(dataCollectors = Map() ++ collectors)
+        replayer.run()
 
         logger.info("done.")
 
