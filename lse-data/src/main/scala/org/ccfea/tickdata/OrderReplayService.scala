@@ -51,20 +51,18 @@ object OrderReplayService extends ReplayApplication {
                        val dataCollectors: Map[String, MarketState => Option[AnyVal]])
           extends MultivariateTimeSeriesCollector with MultivariateThriftCollector
 
-        // Take the list of variables, find the method to retrieve the
+        // Take the list of variables, use reflection to find the method to retrieve the
         //  data for each variable (a function of MarketState),
         //  and then produce a map of variables and methods, i.e. the collectors for the simulation.
-        def variableToMethod(variable: String): MarketState => Option[AnyVal] = {
-          // Use reflection to convert a variable name into a method
+
+        def variableToMethod(variable: String): MarketState => Option[AnyVal] =
           classOf[MarketState].getMethod(variable) invoke _
-        }
+
         val collectors: Seq[(String, MarketState => Option[AnyVal])] =
           for(variable <- variables) yield (variable, variableToMethod(variable))
 
         val replayer =
           new Replayer(dataCollectors = Map() ++ collectors)
-
-        replayer.run()
 
         logger.info("done.")
 

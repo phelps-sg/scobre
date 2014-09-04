@@ -7,6 +7,8 @@ from orderreplay import *
 from thrift.protocol import TBinaryProtocol
 from thrift.transport import TSocket
 
+from numpy import log
+from numpy import diff
 
 DEFAULT_SERVER = 'localhost'
 DEFAULT_PORT = 9090
@@ -18,9 +20,14 @@ def get_hf_data(asset, start_date, end_date,
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
     client = OrderReplay.Client(protocol)
     transport.open()
-    return pd.DataFrame(client.replay(asset, variables, start_date, end_date))
+    df = pd.DataFrame(client.replay(asset, variables, start_date, end_date))
+    timestamps = [datetime.datetime.fromtimestamp(t) for t in df.t]
+    for variable in variables:
+        df[variable].index = timestamps
+    return df   
 
 dataset = get_hf_data('GB0009252882', '2/3/2007', '3/3/2007')
-plt.plot(dataset.midPrice)
-plt.show()
-
+prices_1min = \
+    dataset.midPrice['2007-03-02 08:00':'2007-03-02 16:00'].resample('1min')
+rets_1min = diff(log(prices_1min))
+prices_1min.plot()
