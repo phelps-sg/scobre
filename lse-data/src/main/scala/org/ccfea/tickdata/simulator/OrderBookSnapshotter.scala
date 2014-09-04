@@ -26,7 +26,7 @@ class OrderBookSnapshotter(val eventSource: Iterable[OrderReplayEvent], val t: S
   override val simulator =
     new MarketSimulator(eventSource.takeWhile(_.timeStamp.compareTo(targetDate) >= 0).take(1), marketState)
 
-  def replayEvents: Iterable[Option[FourHeapOrderBook]] = {
+  def replayEvents(): Iterable[Option[FourHeapOrderBook]] = {
     for (state <- simulator) yield Some(state.book)
   }
 

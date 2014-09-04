@@ -17,7 +17,7 @@ trait MultivariateTimeSeriesCollector
 
   def collectData(state: MarketState): (Option[SimulationTime], Map[String, Option[AnyVal]]) = {
     val tuples = for((name, fn) <- dataCollectors) yield name -> fn(state)
-    return (state.time, Map() ++ tuples)
+    (state.time, Map() ++ tuples)
   }
 
 }

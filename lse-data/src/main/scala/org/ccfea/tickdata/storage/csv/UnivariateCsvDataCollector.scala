@@ -24,7 +24,7 @@ trait UnivariateCsvDataCollector
     val out = openOutput()
     for ((t, price) <- data) {
       out.println(t.get.getTicks + "\t" + (price match {
-        case Some(p) => p.toString()
+        case Some(p) => p.toString
         case None => "NaN"
       }))
     }

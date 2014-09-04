@@ -92,12 +92,11 @@ class MarketState extends Observer {
   def toJasaOrder(o: AbstractOrder): net.sourceforge.jasa.market.Order = {
     val order = new net.sourceforge.jasa.market.Order()
     o match {
-      case lo:LimitOrder => {
+      case lo:LimitOrder =>
         order.setPrice(lo.price.toDouble)
         order.setQuantity(lo.aggregateSize.toInt)
         order.setAgent(new SimpleTradingAgent())
         order.setIsBid(lo.tradeDirection == TradeDirection.Buy)
-      }
     }
     order.setTimeStamp(time.get)
     order
@@ -287,14 +286,13 @@ class MarketState extends Observer {
       logger.warn("Submission using existing order code: " + order.orderCode)
     }
     order match {
-       case lo: LimitOrder => {
+       case lo: LimitOrder =>
          val newOrder = toJasaOrder(order)
          if (newOrder.isAsk)
            book.insertUnmatchedAsk(newOrder)
          else
            book.insertUnmatchedBid(newOrder)
          orderMap(order.orderCode) = newOrder
-       }
        case _ =>
     }
   }
@@ -302,14 +300,12 @@ class MarketState extends Observer {
   def process(ev: MultipleEvent): Unit = {
     ev.events match {
       case Nil => // Do nothing
-      case (head:StartOfDataMarker) :: tail => {
+      case (head:StartOfDataMarker) :: tail =>
         logger.warn("Ignoring events tagged with broadCastUpdateAction='F'")
         logger.warn("Ignoring events: " + tail)
-      }
-      case head :: tail => {
+      case head :: tail =>
         process(head)
         process(new MultipleEvent(tail))
-      }
     }
   }
 
@@ -339,7 +335,7 @@ class MarketState extends Observer {
         var consistent = false
         do {
           quote match {
-            case Quote(Some(bid), Some(ask)) => {
+            case Quote(Some(bid), Some(ask)) =>
               if (bid > ask) {
                 logger.warn("Artificially clearing book to maintain consistency following event " + ev)
                 book.remove(book.getHighestUnmatchedBid)
@@ -347,7 +343,6 @@ class MarketState extends Observer {
               } else {
                 consistent = true
               }
-            }
             case _ => consistent = true
           }
         } while (!consistent)
@@ -355,7 +350,7 @@ class MarketState extends Observer {
     }
   }
 
-  def printState = {
+  def printState() = {
     book.printState()
   }
 
