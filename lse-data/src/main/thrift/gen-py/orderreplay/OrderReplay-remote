@@ -23,7 +23,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print 'Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] function [arg1 [arg2...]]'
   print ''
   print 'Functions:'
-  print '   replay(string assetId, string property, string startDate, string endDate)'
+  print '   replay(string assetId,  variables, string startDate, string endDate)'
   print ''
   sys.exit(0)
 
@@ -79,7 +79,7 @@ if cmd == 'replay':
   if len(args) != 4:
     print 'replay requires 4 args'
     sys.exit(1)
-  pp.pprint(client.replay(args[0],args[1],args[2],args[3],))
+  pp.pprint(client.replay(args[0],eval(args[1]),args[2],args[3],))
 
 else:
   print 'Unrecognized method %s' % cmd

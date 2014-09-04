@@ -1,7 +1,8 @@
 package org.ccfea.tickdata
 
+import org.ccfea.tickdata.collector.UnivariateTimeSeriesCollector
 import org.ccfea.tickdata.event.OrderReplayEvent
-import org.ccfea.tickdata.storage.csv.CsvCollator
+import org.ccfea.tickdata.storage.csv.UnivariateCsvDataCollector
 
 import scala.Some
 import scala.util.Random
@@ -67,7 +68,7 @@ object OrderReplayer extends ReplayApplication {
     class Replayer(val eventSource: Iterable[OrderReplayEvent],
                     val outFileName: Option[String], val withGui: Boolean,
                     val dataCollector: MarketState => Option[AnyVal])
-        extends UnivariateTimeSeriesCollector with CsvCollator
+        extends UnivariateTimeSeriesCollector with UnivariateCsvDataCollector
 
     new Replayer(eventSource,outFileName = conf.outFileName.get,
                                           withGui = conf.withGui(), dataCollector).run()

@@ -1,7 +1,7 @@
 package org.ccfea.tickdata.storage.memory
 
 import net.sourceforge.jabm.SimulationTime
-import org.ccfea.tickdata.simulator.MarketStateDataCollector
+import org.ccfea.tickdata.collector.MarketStateDataCollector
 
 /**
  * (C) Steve Phelps 2014

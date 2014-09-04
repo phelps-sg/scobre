@@ -1,4 +1,6 @@
-package org.ccfea.tickdata.simulator
+package org.ccfea.tickdata.collector
+
+import org.ccfea.tickdata.simulator.{MarketState, OrderReplayer}
 
 /**
  * Collect data on the state of the market by replaying events.

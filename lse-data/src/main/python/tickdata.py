@@ -4,22 +4,23 @@ import matplotlib.pyplot as plt
 import datetime
 
 from orderreplay import *
-from thrift.protocol import *
-from thrift.transport import *
+from thrift.protocol import TBinaryProtocol
+from thrift.transport import TSocket
 
 
 DEFAULT_SERVER = 'localhost'
 DEFAULT_PORT = 9090
 
-def get_hf_data(asset, start_date, end_date, property = 'midPrice', server = DEFAULT_SERVER, port = DEFAULT_PORT):
+def get_hf_data(asset, start_date, end_date, 
+                variables = ['midPrice', 'lastTransactionPrice', 'volume'], 
+                server = DEFAULT_SERVER, port = DEFAULT_PORT):
     transport = TSocket.TSocket(server, port)
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
     client = OrderReplay.Client(protocol)
     transport.open()
-    data = client.replay(asset, property, start_date, end_date)
-    return pd.DataFrame({'t': [datetime.datetime.fromtimestamp(tsd.time / 1000) for tsd in data], 'price': [tsd.price for tsd in data]})
+    return pd.DataFrame(client.replay(asset, variables, start_date, end_date))
 
-dataset = get_hf_data('GB0009252882', '1/1/2007', '1/1/2009')
-plt.plot(dataset.price)
+dataset = get_hf_data('GB0009252882', '2/3/2007', '3/3/2007')
+plt.plot(dataset.midPrice)
 plt.show()
 

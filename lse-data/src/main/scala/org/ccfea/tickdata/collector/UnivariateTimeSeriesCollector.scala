@@ -1,7 +1,7 @@
-package org.ccfea.tickdata.simulator
+package org.ccfea.tickdata.collector
 
 import net.sourceforge.jabm.SimulationTime
-import org.ccfea.tickdata.event.{OrderReplayEvent, Event}
+import org.ccfea.tickdata.simulator.{AuctionState, MarketState}
 
 /**
  * A market-state data-collector which collates a single variable from the market as a time-series.

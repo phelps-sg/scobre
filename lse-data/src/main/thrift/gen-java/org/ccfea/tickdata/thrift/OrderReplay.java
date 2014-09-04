@@ -44,17 +44,17 @@ public class OrderReplay {
      * 
      * 
      * @param assetId
-     * @param property
+     * @param variables
      * @param startDate
      * @param endDate
      */
-    public List<TimeSeriesDatum> replay(String assetId, String property, String startDate, String endDate) throws org.apache.thrift.TException;
+    public List<Map<String,Double>> replay(String assetId, List<String> variables, String startDate, String endDate) throws org.apache.thrift.TException;
 
   }
 
   public interface AsyncIface {
 
-    public void replay(String assetId, String property, String startDate, String endDate, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
+    public void replay(String assetId, List<String> variables, String startDate, String endDate, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -78,23 +78,23 @@ public class OrderReplay {
       super(iprot, oprot);
     }
 
-    public List<TimeSeriesDatum> replay(String assetId, String property, String startDate, String endDate) throws org.apache.thrift.TException
+    public List<Map<String,Double>> replay(String assetId, List<String> variables, String startDate, String endDate) throws org.apache.thrift.TException
     {
-      send_replay(assetId, property, startDate, endDate);
+      send_replay(assetId, variables, startDate, endDate);
       return recv_replay();
     }
 
-    public void send_replay(String assetId, String property, String startDate, String endDate) throws org.apache.thrift.TException
+    public void send_replay(String assetId, List<String> variables, String startDate, String endDate) throws org.apache.thrift.TException
     {
       replay_args args = new replay_args();
       args.setAssetId(assetId);
-      args.setProperty(property);
+      args.setVariables(variables);
       args.setStartDate(startDate);
       args.setEndDate(endDate);
       sendBase("replay", args);
     }
 
-    public List<TimeSeriesDatum> recv_replay() throws org.apache.thrift.TException
+    public List<Map<String,Double>> recv_replay() throws org.apache.thrift.TException
     {
       replay_result result = new replay_result();
       receiveBase(result, "replay");
@@ -122,22 +122,22 @@ public class OrderReplay {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void replay(String assetId, String property, String startDate, String endDate, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException {
+    public void replay(String assetId, List<String> variables, String startDate, String endDate, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      replay_call method_call = new replay_call(assetId, property, startDate, endDate, resultHandler, this, ___protocolFactory, ___transport);
+      replay_call method_call = new replay_call(assetId, variables, startDate, endDate, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class replay_call extends org.apache.thrift.async.TAsyncMethodCall {
       private String assetId;
-      private String property;
+      private List<String> variables;
       private String startDate;
       private String endDate;
-      public replay_call(String assetId, String property, String startDate, String endDate, org.apache.thrift.async.AsyncMethodCallback resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      public replay_call(String assetId, List<String> variables, String startDate, String endDate, org.apache.thrift.async.AsyncMethodCallback resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.assetId = assetId;
-        this.property = property;
+        this.variables = variables;
         this.startDate = startDate;
         this.endDate = endDate;
       }
@@ -146,14 +146,14 @@ public class OrderReplay {
         prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("replay", org.apache.thrift.protocol.TMessageType.CALL, 0));
         replay_args args = new replay_args();
         args.setAssetId(assetId);
-        args.setProperty(property);
+        args.setVariables(variables);
         args.setStartDate(startDate);
         args.setEndDate(endDate);
         args.write(prot);
         prot.writeMessageEnd();
       }
 
-      public List<TimeSeriesDatum> getResult() throws org.apache.thrift.TException {
+      public List<Map<String,Double>> getResult() throws org.apache.thrift.TException {
         if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
           throw new IllegalStateException("Method call not finished!");
         }
@@ -195,7 +195,7 @@ public class OrderReplay {
 
       public replay_result getResult(I iface, replay_args args) throws org.apache.thrift.TException {
         replay_result result = new replay_result();
-        result.success = iface.replay(args.assetId, args.property, args.startDate, args.endDate);
+        result.success = iface.replay(args.assetId, args.variables, args.startDate, args.endDate);
         return result;
       }
     }
@@ -217,7 +217,7 @@ public class OrderReplay {
       return processMap;
     }
 
-    public static class replay<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, replay_args, List<TimeSeriesDatum>> {
+    public static class replay<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, replay_args, List<Map<String,Double>>> {
       public replay() {
         super("replay");
       }
@@ -226,10 +226,10 @@ public class OrderReplay {
         return new replay_args();
       }
 
-      public AsyncMethodCallback<List<TimeSeriesDatum>> getResultHandler(final AsyncFrameBuffer fb, final int seqid) {
+      public AsyncMethodCallback<List<Map<String,Double>>> getResultHandler(final AsyncFrameBuffer fb, final int seqid) {
         final org.apache.thrift.AsyncProcessFunction fcall = this;
-        return new AsyncMethodCallback<List<TimeSeriesDatum>>() { 
-          public void onComplete(List<TimeSeriesDatum> o) {
+        return new AsyncMethodCallback<List<Map<String,Double>>>() { 
+          public void onComplete(List<Map<String,Double>> o) {
             replay_result result = new replay_result();
             result.success = o;
             try {
@@ -263,8 +263,8 @@ public class OrderReplay {
         return false;
       }
 
-      public void start(I iface, replay_args args, org.apache.thrift.async.AsyncMethodCallback<List<TimeSeriesDatum>> resultHandler) throws TException {
-        iface.replay(args.assetId, args.property, args.startDate, args.endDate,resultHandler);
+      public void start(I iface, replay_args args, org.apache.thrift.async.AsyncMethodCallback<List<Map<String,Double>>> resultHandler) throws TException {
+        iface.replay(args.assetId, args.variables, args.startDate, args.endDate,resultHandler);
       }
     }
 
@@ -274,7 +274,7 @@ public class OrderReplay {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("replay_args");
 
     private static final org.apache.thrift.protocol.TField ASSET_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("assetId", org.apache.thrift.protocol.TType.STRING, (short)1);
-    private static final org.apache.thrift.protocol.TField PROPERTY_FIELD_DESC = new org.apache.thrift.protocol.TField("property", org.apache.thrift.protocol.TType.STRING, (short)2);
+    private static final org.apache.thrift.protocol.TField VARIABLES_FIELD_DESC = new org.apache.thrift.protocol.TField("variables", org.apache.thrift.protocol.TType.LIST, (short)2);
     private static final org.apache.thrift.protocol.TField START_DATE_FIELD_DESC = new org.apache.thrift.protocol.TField("startDate", org.apache.thrift.protocol.TType.STRING, (short)3);
     private static final org.apache.thrift.protocol.TField END_DATE_FIELD_DESC = new org.apache.thrift.protocol.TField("endDate", org.apache.thrift.protocol.TType.STRING, (short)4);
 
@@ -285,14 +285,14 @@ public class OrderReplay {
     }
 
     public String assetId; // required
-    public String property; // required
+    public List<String> variables; // required
     public String startDate; // required
     public String endDate; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
       ASSET_ID((short)1, "assetId"),
-      PROPERTY((short)2, "property"),
+      VARIABLES((short)2, "variables"),
       START_DATE((short)3, "startDate"),
       END_DATE((short)4, "endDate");
 
@@ -311,8 +311,8 @@ public class OrderReplay {
         switch(fieldId) {
           case 1: // ASSET_ID
             return ASSET_ID;
-          case 2: // PROPERTY
-            return PROPERTY;
+          case 2: // VARIABLES
+            return VARIABLES;
           case 3: // START_DATE
             return START_DATE;
           case 4: // END_DATE
@@ -362,8 +362,9 @@ public class OrderReplay {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.ASSET_ID, new org.apache.thrift.meta_data.FieldMetaData("assetId", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
-      tmpMap.put(_Fields.PROPERTY, new org.apache.thrift.meta_data.FieldMetaData("property", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.VARIABLES, new org.apache.thrift.meta_data.FieldMetaData("variables", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
+              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
       tmpMap.put(_Fields.START_DATE, new org.apache.thrift.meta_data.FieldMetaData("startDate", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
       tmpMap.put(_Fields.END_DATE, new org.apache.thrift.meta_data.FieldMetaData("endDate", org.apache.thrift.TFieldRequirementType.DEFAULT, 
@@ -377,13 +378,13 @@ public class OrderReplay {
 
     public replay_args(
       String assetId,
-      String property,
+      List<String> variables,
       String startDate,
       String endDate)
     {
       this();
       this.assetId = assetId;
-      this.property = property;
+      this.variables = variables;
       this.startDate = startDate;
       this.endDate = endDate;
     }
@@ -395,8 +396,9 @@ public class OrderReplay {
       if (other.isSetAssetId()) {
         this.assetId = other.assetId;
       }
-      if (other.isSetProperty()) {
-        this.property = other.property;
+      if (other.isSetVariables()) {
+        List<String> __this__variables = new ArrayList<String>(other.variables);
+        this.variables = __this__variables;
       }
       if (other.isSetStartDate()) {
         this.startDate = other.startDate;
@@ -413,7 +415,7 @@ public class OrderReplay {
     @Override
     public void clear() {
       this.assetId = null;
-      this.property = null;
+      this.variables = null;
       this.startDate = null;
       this.endDate = null;
     }
@@ -442,27 +444,42 @@ public class OrderReplay {
       }
     }
 
-    public String getProperty() {
-      return this.property;
+    public int getVariablesSize() {
+      return (this.variables == null) ? 0 : this.variables.size();
     }
 
-    public replay_args setProperty(String property) {
-      this.property = property;
+    public java.util.Iterator<String> getVariablesIterator() {
+      return (this.variables == null) ? null : this.variables.iterator();
+    }
+
+    public void addToVariables(String elem) {
+      if (this.variables == null) {
+        this.variables = new ArrayList<String>();
+      }
+      this.variables.add(elem);
+    }
+
+    public List<String> getVariables() {
+      return this.variables;
+    }
+
+    public replay_args setVariables(List<String> variables) {
+      this.variables = variables;
       return this;
     }
 
-    public void unsetProperty() {
-      this.property = null;
+    public void unsetVariables() {
+      this.variables = null;
     }
 
-    /** Returns true if field property is set (has been assigned a value) and false otherwise */
-    public boolean isSetProperty() {
-      return this.property != null;
+    /** Returns true if field variables is set (has been assigned a value) and false otherwise */
+    public boolean isSetVariables() {
+      return this.variables != null;
     }
 
-    public void setPropertyIsSet(boolean value) {
+    public void setVariablesIsSet(boolean value) {
       if (!value) {
-        this.property = null;
+        this.variables = null;
       }
     }
 
@@ -524,11 +541,11 @@ public class OrderReplay {
         }
         break;
 
-      case PROPERTY:
+      case VARIABLES:
         if (value == null) {
-          unsetProperty();
+          unsetVariables();
         } else {
-          setProperty((String)value);
+          setVariables((List<String>)value);
         }
         break;
 
@@ -556,8 +573,8 @@ public class OrderReplay {
       case ASSET_ID:
         return getAssetId();
 
-      case PROPERTY:
-        return getProperty();
+      case VARIABLES:
+        return getVariables();
 
       case START_DATE:
         return getStartDate();
@@ -578,8 +595,8 @@ public class OrderReplay {
       switch (field) {
       case ASSET_ID:
         return isSetAssetId();
-      case PROPERTY:
-        return isSetProperty();
+      case VARIABLES:
+        return isSetVariables();
       case START_DATE:
         return isSetStartDate();
       case END_DATE:
@@ -610,12 +627,12 @@ public class OrderReplay {
           return false;
       }
 
-      boolean this_present_property = true && this.isSetProperty();
-      boolean that_present_property = true && that.isSetProperty();
-      if (this_present_property || that_present_property) {
-        if (!(this_present_property && that_present_property))
+      boolean this_present_variables = true && this.isSetVariables();
+      boolean that_present_variables = true && that.isSetVariables();
+      if (this_present_variables || that_present_variables) {
+        if (!(this_present_variables && that_present_variables))
           return false;
-        if (!this.property.equals(that.property))
+        if (!this.variables.equals(that.variables))
           return false;
       }
 
@@ -663,12 +680,12 @@ public class OrderReplay {
           return lastComparison;
         }
       }
-      lastComparison = Boolean.valueOf(isSetProperty()).compareTo(other.isSetProperty());
+      lastComparison = Boolean.valueOf(isSetVariables()).compareTo(other.isSetVariables());
       if (lastComparison != 0) {
         return lastComparison;
       }
-      if (isSetProperty()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.property, other.property);
+      if (isSetVariables()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.variables, other.variables);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -721,11 +738,11 @@ public class OrderReplay {
       }
       first = false;
       if (!first) sb.append(", ");
-      sb.append("property:");
-      if (this.property == null) {
+      sb.append("variables:");
+      if (this.variables == null) {
         sb.append("null");
       } else {
-        sb.append(this.property);
+        sb.append(this.variables);
       }
       first = false;
       if (!first) sb.append(", ");
@@ -795,10 +812,20 @@ public class OrderReplay {
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
-            case 2: // PROPERTY
-              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-                struct.property = iprot.readString();
-                struct.setPropertyIsSet(true);
+            case 2: // VARIABLES
+              if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
+                {
+                  org.apache.thrift.protocol.TList _list0 = iprot.readListBegin();
+                  struct.variables = new ArrayList<String>(_list0.size);
+                  for (int _i1 = 0; _i1 < _list0.size; ++_i1)
+                  {
+                    String _elem2;
+                    _elem2 = iprot.readString();
+                    struct.variables.add(_elem2);
+                  }
+                  iprot.readListEnd();
+                }
+                struct.setVariablesIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
@@ -839,9 +866,16 @@ public class OrderReplay {
           oprot.writeString(struct.assetId);
           oprot.writeFieldEnd();
         }
-        if (struct.property != null) {
-          oprot.writeFieldBegin(PROPERTY_FIELD_DESC);
-          oprot.writeString(struct.property);
+        if (struct.variables != null) {
+          oprot.writeFieldBegin(VARIABLES_FIELD_DESC);
+          {
+            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.variables.size()));
+            for (String _iter3 : struct.variables)
+            {
+              oprot.writeString(_iter3);
+            }
+            oprot.writeListEnd();
+          }
           oprot.writeFieldEnd();
         }
         if (struct.startDate != null) {
@@ -875,7 +909,7 @@ public class OrderReplay {
         if (struct.isSetAssetId()) {
           optionals.set(0);
         }
-        if (struct.isSetProperty()) {
+        if (struct.isSetVariables()) {
           optionals.set(1);
         }
         if (struct.isSetStartDate()) {
@@ -888,8 +922,14 @@ public class OrderReplay {
         if (struct.isSetAssetId()) {
           oprot.writeString(struct.assetId);
         }
-        if (struct.isSetProperty()) {
-          oprot.writeString(struct.property);
+        if (struct.isSetVariables()) {
+          {
+            oprot.writeI32(struct.variables.size());
+            for (String _iter4 : struct.variables)
+            {
+              oprot.writeString(_iter4);
+            }
+          }
         }
         if (struct.isSetStartDate()) {
           oprot.writeString(struct.startDate);
@@ -908,8 +948,17 @@ public class OrderReplay {
           struct.setAssetIdIsSet(true);
         }
         if (incoming.get(1)) {
-          struct.property = iprot.readString();
-          struct.setPropertyIsSet(true);
+          {
+            org.apache.thrift.protocol.TList _list5 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+            struct.variables = new ArrayList<String>(_list5.size);
+            for (int _i6 = 0; _i6 < _list5.size; ++_i6)
+            {
+              String _elem7;
+              _elem7 = iprot.readString();
+              struct.variables.add(_elem7);
+            }
+          }
+          struct.setVariablesIsSet(true);
         }
         if (incoming.get(2)) {
           struct.startDate = iprot.readString();
@@ -935,7 +984,7 @@ public class OrderReplay {
       schemes.put(TupleScheme.class, new replay_resultTupleSchemeFactory());
     }
 
-    public List<TimeSeriesDatum> success; // required
+    public List<Map<String,Double>> success; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -1001,7 +1050,9 @@ public class OrderReplay {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
-              new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, TimeSeriesDatum.class))));
+              new org.apache.thrift.meta_data.MapMetaData(org.apache.thrift.protocol.TType.MAP, 
+                  new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING), 
+                  new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.DOUBLE)))));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(replay_result.class, metaDataMap);
     }
@@ -1010,7 +1061,7 @@ public class OrderReplay {
     }
 
     public replay_result(
-      List<TimeSeriesDatum> success)
+      List<Map<String,Double>> success)
     {
       this();
       this.success = success;
@@ -1021,9 +1072,10 @@ public class OrderReplay {
      */
     public replay_result(replay_result other) {
       if (other.isSetSuccess()) {
-        List<TimeSeriesDatum> __this__success = new ArrayList<TimeSeriesDatum>(other.success.size());
-        for (TimeSeriesDatum other_element : other.success) {
-          __this__success.add(new TimeSeriesDatum(other_element));
+        List<Map<String,Double>> __this__success = new ArrayList<Map<String,Double>>(other.success.size());
+        for (Map<String,Double> other_element : other.success) {
+          Map<String,Double> __this__success_copy = new HashMap<String,Double>(other_element);
+          __this__success.add(__this__success_copy);
         }
         this.success = __this__success;
       }
@@ -1042,22 +1094,22 @@ public class OrderReplay {
       return (this.success == null) ? 0 : this.success.size();
     }
 
-    public java.util.Iterator<TimeSeriesDatum> getSuccessIterator() {
+    public java.util.Iterator<Map<String,Double>> getSuccessIterator() {
       return (this.success == null) ? null : this.success.iterator();
     }
 
-    public void addToSuccess(TimeSeriesDatum elem) {
+    public void addToSuccess(Map<String,Double> elem) {
       if (this.success == null) {
-        this.success = new ArrayList<TimeSeriesDatum>();
+        this.success = new ArrayList<Map<String,Double>>();
       }
       this.success.add(elem);
     }
 
-    public List<TimeSeriesDatum> getSuccess() {
+    public List<Map<String,Double>> getSuccess() {
       return this.success;
     }
 
-    public replay_result setSuccess(List<TimeSeriesDatum> success) {
+    public replay_result setSuccess(List<Map<String,Double>> success) {
       this.success = success;
       return this;
     }
@@ -1083,7 +1135,7 @@ public class OrderReplay {
         if (value == null) {
           unsetSuccess();
         } else {
-          setSuccess((List<TimeSeriesDatum>)value);
+          setSuccess((List<Map<String,Double>>)value);
         }
         break;
 
@@ -1233,14 +1285,25 @@ public class OrderReplay {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list0 = iprot.readListBegin();
-                  struct.success = new ArrayList<TimeSeriesDatum>(_list0.size);
-                  for (int _i1 = 0; _i1 < _list0.size; ++_i1)
+                  org.apache.thrift.protocol.TList _list8 = iprot.readListBegin();
+                  struct.success = new ArrayList<Map<String,Double>>(_list8.size);
+                  for (int _i9 = 0; _i9 < _list8.size; ++_i9)
                   {
-                    TimeSeriesDatum _elem2;
-                    _elem2 = new TimeSeriesDatum();
-                    _elem2.read(iprot);
-                    struct.success.add(_elem2);
+                    Map<String,Double> _elem10;
+                    {
+                      org.apache.thrift.protocol.TMap _map11 = iprot.readMapBegin();
+                      _elem10 = new HashMap<String,Double>(2*_map11.size);
+                      for (int _i12 = 0; _i12 < _map11.size; ++_i12)
+                      {
+                        String _key13;
+                        double _val14;
+                        _key13 = iprot.readString();
+                        _val14 = iprot.readDouble();
+                        _elem10.put(_key13, _val14);
+                      }
+                      iprot.readMapEnd();
+                    }
+                    struct.success.add(_elem10);
                   }
                   iprot.readListEnd();
                 }
@@ -1267,10 +1330,18 @@ public class OrderReplay {
         if (struct.success != null) {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
-            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
-            for (TimeSeriesDatum _iter3 : struct.success)
+            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.MAP, struct.success.size()));
+            for (Map<String,Double> _iter15 : struct.success)
             {
-              _iter3.write(oprot);
+              {
+                oprot.writeMapBegin(new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.DOUBLE, _iter15.size()));
+                for (Map.Entry<String, Double> _iter16 : _iter15.entrySet())
+                {
+                  oprot.writeString(_iter16.getKey());
+                  oprot.writeDouble(_iter16.getValue());
+                }
+                oprot.writeMapEnd();
+              }
             }
             oprot.writeListEnd();
           }
@@ -1301,9 +1372,16 @@ public class OrderReplay {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (TimeSeriesDatum _iter4 : struct.success)
+            for (Map<String,Double> _iter17 : struct.success)
             {
-              _iter4.write(oprot);
+              {
+                oprot.writeI32(_iter17.size());
+                for (Map.Entry<String, Double> _iter18 : _iter17.entrySet())
+                {
+                  oprot.writeString(_iter18.getKey());
+                  oprot.writeDouble(_iter18.getValue());
+                }
+              }
             }
           }
         }
@@ -1315,14 +1393,24 @@ public class OrderReplay {
         BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list5 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.success = new ArrayList<TimeSeriesDatum>(_list5.size);
-            for (int _i6 = 0; _i6 < _list5.size; ++_i6)
+            org.apache.thrift.protocol.TList _list19 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.MAP, iprot.readI32());
+            struct.success = new ArrayList<Map<String,Double>>(_list19.size);
+            for (int _i20 = 0; _i20 < _list19.size; ++_i20)
             {
-              TimeSeriesDatum _elem7;
-              _elem7 = new TimeSeriesDatum();
-              _elem7.read(iprot);
-              struct.success.add(_elem7);
+              Map<String,Double> _elem21;
+              {
+                org.apache.thrift.protocol.TMap _map22 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.DOUBLE, iprot.readI32());
+                _elem21 = new HashMap<String,Double>(2*_map22.size);
+                for (int _i23 = 0; _i23 < _map22.size; ++_i23)
+                {
+                  String _key24;
+                  double _val25;
+                  _key24 = iprot.readString();
+                  _val25 = iprot.readDouble();
+                  _elem21.put(_key24, _val25);
+                }
+              }
+              struct.success.add(_elem21);
             }
           }
           struct.setSuccessIsSet(true);

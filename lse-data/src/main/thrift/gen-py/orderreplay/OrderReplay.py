@@ -21,14 +21,14 @@ class Iface:
   """
   Order-book replay service
   """
-  def replay(self, assetId, property, startDate, endDate):
+  def replay(self, assetId, variables, startDate, endDate):
     """
     Replay tick events
 
 
     Parameters:
      - assetId
-     - property
+     - variables
      - startDate
      - endDate
     """
@@ -45,25 +45,25 @@ class Client(Iface):
       self._oprot = oprot
     self._seqid = 0
 
-  def replay(self, assetId, property, startDate, endDate):
+  def replay(self, assetId, variables, startDate, endDate):
     """
     Replay tick events
 
 
     Parameters:
      - assetId
-     - property
+     - variables
      - startDate
      - endDate
     """
-    self.send_replay(assetId, property, startDate, endDate)
+    self.send_replay(assetId, variables, startDate, endDate)
     return self.recv_replay()
 
-  def send_replay(self, assetId, property, startDate, endDate):
+  def send_replay(self, assetId, variables, startDate, endDate):
     self._oprot.writeMessageBegin('replay', TMessageType.CALL, self._seqid)
     args = replay_args()
     args.assetId = assetId
-    args.property = property
+    args.variables = variables
     args.startDate = startDate
     args.endDate = endDate
     args.write(self._oprot)
@@ -111,7 +111,7 @@ class Processor(Iface, TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = replay_result()
-    result.success = self._handler.replay(args.assetId, args.property, args.startDate, args.endDate)
+    result.success = self._handler.replay(args.assetId, args.variables, args.startDate, args.endDate)
     oprot.writeMessageBegin("replay", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
@@ -124,7 +124,7 @@ class replay_args:
   """
   Attributes:
    - assetId
-   - property
+   - variables
    - startDate
    - endDate
   """
@@ -132,14 +132,14 @@ class replay_args:
   thrift_spec = (
     None, # 0
     (1, TType.STRING, 'assetId', None, None, ), # 1
-    (2, TType.STRING, 'property', None, None, ), # 2
+    (2, TType.LIST, 'variables', (TType.STRING,None), None, ), # 2
     (3, TType.STRING, 'startDate', None, None, ), # 3
     (4, TType.STRING, 'endDate', None, None, ), # 4
   )
 
-  def __init__(self, assetId=None, property=None, startDate=None, endDate=None,):
+  def __init__(self, assetId=None, variables=None, startDate=None, endDate=None,):
     self.assetId = assetId
-    self.property = property
+    self.variables = variables
     self.startDate = startDate
     self.endDate = endDate
 
@@ -158,8 +158,13 @@ class replay_args:
         else:
           iprot.skip(ftype)
       elif fid == 2:
-        if ftype == TType.STRING:
-          self.property = iprot.readString();
+        if ftype == TType.LIST:
+          self.variables = []
+          (_etype3, _size0) = iprot.readListBegin()
+          for _i4 in xrange(_size0):
+            _elem5 = iprot.readString();
+            self.variables.append(_elem5)
+          iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 3:
@@ -186,9 +191,12 @@ class replay_args:
       oprot.writeFieldBegin('assetId', TType.STRING, 1)
       oprot.writeString(self.assetId)
       oprot.writeFieldEnd()
-    if self.property is not None:
-      oprot.writeFieldBegin('property', TType.STRING, 2)
-      oprot.writeString(self.property)
+    if self.variables is not None:
+      oprot.writeFieldBegin('variables', TType.LIST, 2)
+      oprot.writeListBegin(TType.STRING, len(self.variables))
+      for iter6 in self.variables:
+        oprot.writeString(iter6)
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.startDate is not None:
       oprot.writeFieldBegin('startDate', TType.STRING, 3)
@@ -223,7 +231,7 @@ class replay_result:
   """
 
   thrift_spec = (
-    (0, TType.LIST, 'success', (TType.STRUCT,(TimeSeriesDatum, TimeSeriesDatum.thrift_spec)), None, ), # 0
+    (0, TType.LIST, 'success', (TType.MAP,(TType.STRING,None,TType.DOUBLE,None)), None, ), # 0
   )
 
   def __init__(self, success=None,):
@@ -241,11 +249,16 @@ class replay_result:
       if fid == 0:
         if ftype == TType.LIST:
           self.success = []
-          (_etype3, _size0) = iprot.readListBegin()
-          for _i4 in xrange(_size0):
-            _elem5 = TimeSeriesDatum()
-            _elem5.read(iprot)
-            self.success.append(_elem5)
+          (_etype10, _size7) = iprot.readListBegin()
+          for _i11 in xrange(_size7):
+            _elem12 = {}
+            (_ktype14, _vtype15, _size13 ) = iprot.readMapBegin()
+            for _i17 in xrange(_size13):
+              _key18 = iprot.readString();
+              _val19 = iprot.readDouble();
+              _elem12[_key18] = _val19
+            iprot.readMapEnd()
+            self.success.append(_elem12)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -261,9 +274,13 @@ class replay_result:
     oprot.writeStructBegin('replay_result')
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.LIST, 0)
-      oprot.writeListBegin(TType.STRUCT, len(self.success))
-      for iter6 in self.success:
-        iter6.write(oprot)
+      oprot.writeListBegin(TType.MAP, len(self.success))
+      for iter20 in self.success:
+        oprot.writeMapBegin(TType.STRING, TType.DOUBLE, len(iter20))
+        for kiter21,viter22 in iter20.items():
+          oprot.writeString(kiter21)
+          oprot.writeDouble(viter22)
+        oprot.writeMapEnd()
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()

@@ -3,7 +3,7 @@ package org.ccfea.tickdata.simulator
 import net.sourceforge.jabm.SimulationTime
 import java.util.Date
 import net.sourceforge.jasa.market.FourHeapOrderBook
-import org.ccfea.tickdata.storage.csv.{PrintStreamOutputer, CsvCollator}
+import org.ccfea.tickdata.storage.csv.{PrintStreamOutputer, UnivariateCsvDataCollector}
 
 import collection.JavaConversions._
 import util.control.Breaks._

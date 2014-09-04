@@ -62,7 +62,7 @@ class MarketState extends Observer {
   /**
    * The current volume.
    */
-  var volume: Long = 0
+  var volume: Option[Long] = None
 
   /**
    * The current state of the auction.  Typically market variables
@@ -131,7 +131,7 @@ class MarketState extends Observer {
     assert(ev.timeStamp.getTime >= (time match { case None => 0; case Some(t) => t.getTicks}))
     val newTime = new SimulationTime(ev.timeStamp.getTime)
     this.time = Some(newTime)
-    this.volume = 0
+    this.volume = Some(0)
 
     // Event-specific processing
     process(ev)
@@ -242,7 +242,7 @@ class MarketState extends Observer {
 
   def process(ev: TransactionEvent): Unit = {
     this.lastTransactionPrice = Some(ev.transactionPrice.toDouble)
-    this.volume = ev.tradeSize
+    this.volume = Some(ev.tradeSize)
   }
 
   def process(ev: OrderRemovedEvent): Unit = {
