@@ -15,6 +15,8 @@ buildInfoPackage := "org.ccfea.tickdata.conf"
 
 name := "lse-data"
 
+organization := "net.sourceforge.jasa"
+
 version := "0.14-SNAPSHOT"
 
 scalaVersion := "2.11.2"
