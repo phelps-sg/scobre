@@ -19,6 +19,10 @@ version := "0.14-SNAPSHOT"
 
 scalaVersion := "2.11.2"
 
+publishMavenStyle := true
+
+publishTo:= Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository"))) 
+
 //scalaSource in Compile := file("src/")
 javaSource in Compile := file("src/main/thrift/gen-java")
 
