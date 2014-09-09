@@ -3,11 +3,12 @@ package org.ccfea.tickdata.conf
 import org.rogach.scallop.ScallopConf
 
 /**
- * Created by sphelps on 04/09/14.
+ * (C) Steve Phelps 2014
  */
 class ServerConf(args: Seq[String]) extends ScallopConf(args) {
 
-  version("org.ccfea.tickdata.OrderReplayService" + BuildInfo.version + " (c) 2014 Steve Phelps")
+  version("org.ccfea.tickdata.OrderReplayService" + BuildInfo.version + "-b" + BuildInfo.buildinfoBuildnumber +
+            " (c) 2014 Steve Phelps")
   banner("""Usage: OrderReplayService [OPTION]...
            |Start the order-replay server.
            |Options:
