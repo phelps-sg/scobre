@@ -41,7 +41,8 @@ trait CsvLoader extends DataLoader {
             case e: Exception =>
               logger.error("Parse error at line number " + lineNumber + ":")
               logger.error(line)
-              logger.error(e.getMessage())
+              logger.error(e.getMessage)
+              throw new IllegalArgumentException(e)
           }
           if (events.size > batchSize) {
             parseAndInsert(events)

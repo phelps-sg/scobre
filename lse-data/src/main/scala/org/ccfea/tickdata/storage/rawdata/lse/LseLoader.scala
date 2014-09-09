@@ -25,6 +25,11 @@ trait LseLoader {
       }
     }
     implicit def optionToLong(x: Option[String]): Long = x.get.toLongExact
+    implicit def optionToOptionLong(x: Option[String]): Option[Long] =
+      x match {
+        case Some(y:String) => Some(optionToLong(x))
+        case None => None
+      }
     implicit def toLong(x: String): Long = x.toLongExact
     implicit def toBigDecimal(x: String): BigDecimal = BigDecimal(x)
 
@@ -105,7 +110,7 @@ trait LseLoader {
         throw new IllegalArgumentException("Could not parse record: missing field in column " + i)
       case e: Exception =>
         e.printStackTrace()
-        throw new IllegalArgumentException(e.getMessage())
+        throw new IllegalArgumentException(e.getMessage)
     }
   }
 

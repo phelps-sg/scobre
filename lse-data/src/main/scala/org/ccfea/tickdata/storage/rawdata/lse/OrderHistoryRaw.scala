@@ -10,7 +10,7 @@ import org.ccfea.tickdata.storage.rawdata.HasDateTime
 case class OrderHistoryRaw(orderCode: String,
                            orderActionType: String,
                            matchingOrderCode: Option[String],
-                           tradeSize: Long,
+                           tradeSize: Option[Long],
                            tradeCode: Option[String],
                            tiCode: String,
                            countryofRegister: String,

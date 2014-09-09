@@ -75,7 +75,7 @@ case class Event(eventID: Option[Long],
                   Some(singleFillInd),
                   None, None, None, None, None)
 
-      => {
+      =>
         val order = marketMechanismType match {
             case MarketMechanismType.LimitOrder =>
               new LimitOrder(orderCode, aggregateSize, tradeDirection, price)
@@ -92,7 +92,6 @@ case class Event(eventID: Option[Long],
         } else {
           orderSubmittedEvent
         }
-      }
 
 
       /********************************************************************
@@ -149,6 +148,7 @@ case class Event(eventID: Option[Long],
                   matchingOrderCode, None,
                   tradeCode, Some(tradeTimeInd), Some(convertedPriceInd))
 
+        //TODO: tradeSize not always defined
       => new TransactionEvent(new Date(timeStamp), messageSequenceNumber, tiCode, tradeCode.get,
                                   tradePrice, tradeSize, orderCode, matchingOrderCode)
 
