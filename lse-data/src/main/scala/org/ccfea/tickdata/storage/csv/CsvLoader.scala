@@ -29,16 +29,26 @@ trait CsvLoader extends DataLoader {
     val events = new ListBuffer[HasDateTime]
     try {
       var next = true
+      var lineNumber = 0
       while (next) {
         val line = reader.readLine()
+        lineNumber = lineNumber + 1
         if (line != null) {
-          val event = toRecord(parse(line))
-          events += event
+          try {
+            val event = toRecord(parse(line))
+            events += event
+          } catch {
+            case e: Exception =>
+              logger.error("Parse error at line number " + lineNumber + ":")
+              logger.error(line)
+              logger.error(e.getMessage())
+          }
           if (events.size > batchSize) {
             parseAndInsert(events)
           }
+        } else {
+          next = false
         }
-        else next = false
       }
     } finally {
       // Parse remaining events in buffer

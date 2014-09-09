@@ -1,7 +1,10 @@
 import AssemblyKeys._
+
 import sbtbuildinfo.Plugin._
 
 assemblySettings
+
+//publishMavenStyle := true
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
