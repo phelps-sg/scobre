@@ -18,9 +18,15 @@ buildInfoPackage := "org.ccfea.tickdata.conf"
 
 name := "lse-data"
 
+organization := "net.sourceforge.jasa"
+
 version := "0.14-SNAPSHOT"
 
 scalaVersion := "2.11.2"
+
+publishMavenStyle := true
+
+publishTo:= Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository"))) 
 
 //scalaSource in Compile := file("src/")
 javaSource in Compile := file("src/main/thrift/gen-java")
@@ -37,7 +43,7 @@ libraryDependencies ++= Seq(
   "org.apache.hadoop" % "hadoop-client" % "2.2.0",
   "org.apache.hadoop" % "hadoop-common" % "2.2.0",
   "org.apache.thrift" % "libthrift" % "0.9.1",
-  "net.sourceforge.jasa" % "jasa" % "1.2.1-SNAPSHOT",
+  "net.sourceforge.jasa" % "jasa" % "1.2.2-SNAPSHOT",
   "com.espertech" % "esper" % "4.11.0",
   "org.rogach" %% "scallop" % "0.9.5",
   "org.clapper" % "grizzled-slf4j_2.10" % "1.0.2",
