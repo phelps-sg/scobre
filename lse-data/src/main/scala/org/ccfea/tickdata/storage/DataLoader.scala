@@ -70,7 +70,7 @@ trait DataLoader {
           Event(None, orderActionType, messageSequenceNumber,
             rawEvent.timeStamp, tiCode, marketSegmentCode, currencyCode,
             Some(marketMechanismType), Some(aggregateSize), Some(buySellInd),
-            Some(orderCode), Some(tradeSize), None, None, None, None, None,
+            Some(orderCode), tradeSize, None, None, None, None, None,
             matchingOrderCode, tradeCode,
             None, None, None)
 

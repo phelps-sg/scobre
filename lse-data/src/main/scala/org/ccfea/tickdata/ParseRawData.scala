@@ -1,5 +1,6 @@
 package org.ccfea.tickdata
 
+import grizzled.slf4j.Logger
 import org.ccfea.tickdata.conf.ParseConf
 import org.ccfea.tickdata.storage.hbase.HBaseInserter
 import org.ccfea.tickdata.storage.csv.CsvLoader
@@ -14,7 +15,8 @@ import org.ccfea.tickdata.storage.rawdata.lse.LseLoader
  */
 object ParseRawData {
 
-  class CsvToHbaseImport(val batchSize: Int = 20000, val fileName: String, val recordType: String)
+  class CsvToHbaseImport(val batchSize: Int = 20000, val fileName: String, val recordType: String,
+                            override val logger: Logger = Logger("CsvtoHbaseImport"))
       extends CsvLoader with LseLoader with HBaseInserter
 
   def main(args: Array[String]) {

@@ -34,17 +34,17 @@ trait HBaseEventConverter {
 
   implicit def toBytes(x: Any): Array[Byte] = x match {
     case s: String => Bytes.toBytes(s)
-    case evType: EventType.Value => Bytes.toBytes(evType.id)
-    case td: TradeDirection.Value => Bytes.toBytes(td.id)
-    case mmt: MarketMechanismType.Value => Bytes.toBytes(mmt.id)
+    case evType: EventType.Value => Bytes.toBytes(evType.id.toShort)
+    case td: TradeDirection.Value => Bytes.toBytes(td.id.toShort)
+    case mmt: MarketMechanismType.Value => Bytes.toBytes(mmt.id.toShort)
     case p: BigDecimal => Bytes.toBytes(new java.math.BigDecimal(p.toString()))
     case l: Long => Bytes.toBytes(l)
   }
 
-  implicit def toEventType(raw: Array[Byte]): EventType.Value = EventType(Bytes.toInt(raw))
-  implicit def toTradeDirection(raw: Array[Byte]): TradeDirection.Value = TradeDirection(Bytes.toInt(raw))
+  implicit def toEventType(raw: Array[Byte]): EventType.Value = EventType(Bytes.toShort(raw))
+  implicit def toTradeDirection(raw: Array[Byte]): TradeDirection.Value = TradeDirection(Bytes.toShort(raw))
   implicit def toMarketMechanismType(raw: Array[Byte]): MarketMechanismType.Value =
-                                                                    MarketMechanismType(Bytes.toInt(raw))
+                                                                    MarketMechanismType(Bytes.toShort(raw))
   implicit def toString(raw: Array[Byte]): String = Bytes.toString(raw)
   implicit def toLong(raw: Array[Byte]): Long = Bytes.toLong(raw)
   implicit def toBigDecimal(raw: Array[Byte]): BigDecimal = Bytes.toBigDecimal(raw)

@@ -1,7 +1,10 @@
 import AssemblyKeys._
+
 import sbtbuildinfo.Plugin._
 
 assemblySettings
+
+//publishMavenStyle := true
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
@@ -9,7 +12,7 @@ buildInfoSettings
 
 sourceGenerators in Compile <+= buildInfo
 
-buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion)
+buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, buildInfoBuildNumber)
 
 buildInfoPackage := "org.ccfea.tickdata.conf"
 
