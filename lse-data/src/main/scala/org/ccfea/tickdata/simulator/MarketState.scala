@@ -124,7 +124,7 @@ class MarketState extends Observer {
    */
   def newEvent(ev: OrderReplayEvent): Unit = {
 
-    logger.debug("Processing event " + ev)
+//    logger.debug("Processing event " + ev)
 
     // Processing general to all event types
     assert(ev.timeStamp.getTime >= (time match { case None => 0; case Some(t) => t.getTicks}))
@@ -217,7 +217,7 @@ class MarketState extends Observer {
         case current => current
       }
 
-    logger.debug("newState = " + newState)
+//    logger.debug("newState = " + newState)
     this.auctionState = newState
   }
 
@@ -330,7 +330,7 @@ class MarketState extends Observer {
    */
   def checkConsistency(ev: OrderReplayEvent): Unit = {
     if (this.auctionState == AuctionState.continuous) {
-      logger.debug("quote = " + quote)
+//      logger.debug("quote = " + quote)
       if (hour > 8) {
         var consistent = false
         do {
