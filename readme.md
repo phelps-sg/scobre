@@ -16,7 +16,8 @@ process.
 
 ## Pre-requisites
 
-- [Oracle Java JVM 1.7.0 or higher](http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html)
+- [Oracle Java JVM 1.7.0 or
+  higher](http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html).  Note that the default JVM installed on MacOS or Linux needs to be replaced by the Oracle version in order for the software to work correctly.
 
 - If running on Windows you will need to install [Cygwin](http://cygwin.com) in order to execute the shell scripts.
 
@@ -70,7 +71,7 @@ The following will replay a subset of events over a given date-range:
 	./replay.sh -t GB0009252882 --with-gui \
 		--start-date 5/6/2007 --end-date 6/6/2007
 
-The following command will log the mid-price to a CSV file called hf.csv, but
+The following command will log the mid-price to a CSV file called `hf.csv`, but
 will not provide a GUI:
 
 	cd scripts
@@ -111,7 +112,7 @@ IDEA), and then directly import the `build.sbt` file as a new project.
 
 1. Install Apache HBase 0.98.5 for Hadoop 2 in [standalone mode](https://hbase.apache.org/book/quickstart.html).
 
-2. Modify the file base-config.xml in the etc/ directory of the folder where you unpacked the lse-data distribution as follows:
+2. Modify the file `base-config.xml` in the `etc/` directory of the folder where you unpacked the lse-data distribution as follows:
 
 		<configuration>
 			<property>
@@ -134,8 +135,7 @@ IDEA), and then directly import the `build.sbt` file as a new project.
 4. Run the shell script `hbase-import.sh` specifying the raw files to import:
 
 		cd ./scripts
-		./import-hbase.sh ../data/*.CSV
-
+		./import-hbase.sh ../data/*.CSV.gz
 
 
 ## Contact
