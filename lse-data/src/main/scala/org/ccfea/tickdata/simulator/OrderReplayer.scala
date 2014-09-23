@@ -34,7 +34,7 @@ trait OrderReplayer[T] extends Runnable {
 
   val marketState = if (withGui) new MarketStateWithGUI() else new MarketState()
   val simulator = new MarketSimulator(eventSource, marketState)
-  simulator.addObserver(new CepObserver())
+//  simulator.addObserver(new CepObserver())
 
 
   /**
