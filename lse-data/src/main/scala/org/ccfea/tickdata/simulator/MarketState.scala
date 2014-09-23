@@ -331,22 +331,22 @@ class MarketState extends Observer {
   def checkConsistency(ev: OrderReplayEvent): Unit = {
     if (this.auctionState == AuctionState.continuous) {
 //      logger.debug("quote = " + quote)
-      if (hour > 8) {
-        var consistent = false
-        do {
-          quote match {
-            case Quote(Some(bid), Some(ask)) =>
-              if (bid > ask) {
-                logger.warn("Artificially clearing book to maintain consistency following event " + ev)
-                book.remove(book.getHighestUnmatchedBid)
-                book.remove(book.getLowestUnmatchedAsk)
-              } else {
-                consistent = true
-              }
-            case _ => consistent = true
-          }
-        } while (!consistent)
-      }
+//      if (hour > 8) {
+//        var consistent = false
+//        do {
+//          quote match {
+//            case Quote(Some(bid), Some(ask)) =>
+//              if (bid > ask) {
+//                logger.warn("Artificially clearing book to maintain consistency following event " + ev)
+//                book.remove(book.getHighestUnmatchedBid)
+//                book.remove(book.getLowestUnmatchedAsk)
+//              } else {
+//                consistent = true
+//              }
+//            case _ => consistent = true
+//          }
+//        } while (!consistent)
+//      }
     }
   }
 
