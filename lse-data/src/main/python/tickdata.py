@@ -35,6 +35,9 @@ def get_hf_data(asset, start_date, end_date,
     client = OrderReplay.Client(protocol)
     transport.open()
     df = pd.DataFrame(client.replay(asset, variables, start_date, end_date))
+    if len(df) == 0:
+        raise Exception("No data available for " + asset + " between " + \
+                            start_date + " and " + end_date)
     timestamps = [datetime.datetime.fromtimestamp(t) for t in df.t]
     for variable in variables:
         df[variable].index = timestamps
