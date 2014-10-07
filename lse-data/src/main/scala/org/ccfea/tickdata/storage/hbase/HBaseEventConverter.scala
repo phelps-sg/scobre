@@ -54,11 +54,11 @@ trait HBaseEventConverter {
       case Some(bytes) => Some(convert(bytes))
       case None => None
     }
-  implicit def toOptionString(raw: Option[Array[Byte]]) =                 toOptionAny(toString, raw)
-  implicit def toOptionLong(raw: Option[Array[Byte]]) =                   toOptionAny(toLong, raw)
-  implicit def toOptionBigDecimal(raw: Option[Array[Byte]]) =             toOptionAny(toBigDecimal, raw)
-  implicit def toOptionTradeDirection(raw: Option[Array[Byte]]) =         toOptionAny(toTradeDirection, raw)
-  implicit def toOptionMarketMechanismType(raw: Option[Array[Byte]]) =    toOptionAny(toMarketMechanismType, raw)
+  implicit def toOptionStringB(raw: Option[Array[Byte]]) =                 toOptionAny(toString, raw)
+  implicit def toOptionLongB(raw: Option[Array[Byte]]) =                   toOptionAny(toLong, raw)
+  implicit def toOptionBigDecimalB(raw: Option[Array[Byte]]) =             toOptionAny(toBigDecimal, raw)
+  implicit def toOptionTradeDirectionB(raw: Option[Array[Byte]]) =         toOptionAny(toTradeDirection, raw)
+  implicit def toOptionMarketMechanismTypeB(raw: Option[Array[Byte]]) =    toOptionAny(toMarketMechanismType, raw)
 
   /**
    * Convert a row from HBase into an Event object.

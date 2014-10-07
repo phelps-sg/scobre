@@ -1,6 +1,7 @@
 package org.ccfea.tickdata.storage.csv
 
 import java.io.{BufferedReader, InputStreamReader, FileInputStream}
+import grizzled.slf4j.Logger
 import org.ccfea.tickdata.storage.rawdata.lse.{TradeReportRaw, OrderHistoryRaw, OrderDetailRaw}
 
 import scala.collection.mutable
@@ -24,6 +25,8 @@ trait CsvLoader extends DataLoader {
   val quote: Char = '"'
   val escape: Char = '\\'
 
+  override val logger: Logger = Logger("org.ccfea.tickdata.storage.csv.CsvLoader")
+
   def run = {
     val reader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName) ))
     val events = new ListBuffer[HasDateTime]
@@ -34,18 +37,21 @@ trait CsvLoader extends DataLoader {
         val line = reader.readLine()
         lineNumber = lineNumber + 1
         if (line != null) {
-          try {
-            val event = toRecord(parse(line))
-            events += event
-          } catch {
-            case e: Exception =>
-              logger.error("Parse error at line number " + lineNumber + ":")
-              logger.error(line)
-              logger.error(e.getMessage)
-              throw new IllegalArgumentException(e)
-          }
-          if (events.size > batchSize) {
-            parseAndInsert(events)
+          if (!(line.charAt(0) == '#')) {
+            try {
+              val event = toRecord(parse(line), lineNumber)
+              events += event
+            } catch {
+              case e: Exception =>
+                logger.error("Parse error at line number " + lineNumber + ":")
+                logger.error(line)
+//                logger.error(e.getMessage)
+                e.printStackTrace()
+                throw new IllegalArgumentException(e)
+            }
+            if (events.size > batchSize) {
+              parseAndInsert(events)
+            }
           }
         } else {
           next = false
@@ -96,6 +102,6 @@ trait CsvLoader extends DataLoader {
     }
   }
 
-  def toRecord(values: Array[Option[String]]): HasDateTime
+  def toRecord(values: Array[Option[String]], lineNumber: Long): HasDateTime
 
 }

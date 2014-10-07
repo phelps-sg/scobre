@@ -4,7 +4,9 @@ import grizzled.slf4j.Logger
 import org.ccfea.tickdata.conf.ParseConf
 import org.ccfea.tickdata.storage.hbase.HBaseInserter
 import org.ccfea.tickdata.storage.csv.CsvLoader
+import org.ccfea.tickdata.storage.rawdata.asx.AsxLoader
 import org.ccfea.tickdata.storage.rawdata.lse.LseLoader
+import org.ccfea.tickdata.storage.test.TestInserter
 
 /**
  * The main application class for extracting the raw-data supplied by the LSE,
@@ -19,12 +21,19 @@ object ParseRawData {
                             override val logger: Logger = Logger("CsvtoHbaseImport"))
       extends CsvLoader with LseLoader with HBaseInserter
 
+  class AsxCsvToTestImport(val batchSize: Int = 20000, val fileName: String = "data/asx/BHPJuly2007_RawData_CLEAN.csv")
+      extends CsvLoader with AsxLoader with TestInserter
+
   def main(args: Array[String]) {
 
     val conf = new ParseConf(args)
     val loader = new CsvToHbaseImport(batchSize = conf.bufferSize(),
                                         fileName = conf.fileName(),
                                           recordType = conf.recordType())
+
+//    val loader = new AsxCsvToTestImport(batchSize = conf.bufferSize(),
+//                                        fileName = conf.fileName())
+
     loader.run
   }
 }

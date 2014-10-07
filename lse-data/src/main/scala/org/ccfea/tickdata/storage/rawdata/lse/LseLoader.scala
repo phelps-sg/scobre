@@ -3,14 +3,15 @@ package org.ccfea.tickdata.storage.rawdata.lse
 import grizzled.slf4j.Logger
 import org.ccfea.tickdata.event.{EventType, Event}
 import org.ccfea.tickdata.order.{TradeDirection, MarketMechanismType}
+import org.ccfea.tickdata.storage.DataLoader
 import org.ccfea.tickdata.storage.rawdata.HasDateTime
 
 /**
  * (C) Steve Phelps 2014
  */
-trait LseLoader {
+trait LseLoader extends DataLoader {
 
-  val logger = Logger("org.ccfea.tickdata.storage.rawdata.lse.LseLoader")
+  override val logger = Logger("org.ccfea.tickdata.storage.rawdata.lse.LseLoader")
 
   /**
    * One of "order_history_raw", "order_detail_raw" or "trade_reports_raw" to indicate the
@@ -18,22 +19,7 @@ trait LseLoader {
    */
   val recordType: String
 
-  def toRecord(values: Array[Option[String]]): HasDateTime = {
-
-    implicit def toOptionBigDecimal(x: Option[String]): Option[BigDecimal] = {
-      x match {
-        case Some(x) => Some(BigDecimal(x))
-        case None => None
-      }
-    }
-    implicit def optionToLong(x: Option[String]): Long = x.get.toLongExact
-    implicit def optionToOptionLong(x: Option[String]): Option[Long] =
-      x match {
-        case Some(y:String) => Some(optionToLong(x))
-        case None => None
-      }
-    implicit def toLong(x: String): Long = x.toLongExact
-    implicit def toBigDecimal(x: String): BigDecimal = BigDecimal(x)
+  def toRecord(values: Array[Option[String]], lineNumber: Long): HasDateTime = {
 
     var i = 0
     def next: Option[String] = {
