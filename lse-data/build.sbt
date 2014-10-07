@@ -38,8 +38,8 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-	"org.apache.hbase" % "hbase-client" % "0.98.5-hadoop2",
-	"org.apache.hbase" % "hbase-common" % "0.98.5-hadoop2",
+	"org.apache.hbase" % "hbase-client" % "0.98.6-hadoop2",
+	"org.apache.hbase" % "hbase-common" % "0.98.6-hadoop2",
   "org.apache.hadoop" % "hadoop-client" % "2.2.0",
   "org.apache.hadoop" % "hadoop-common" % "2.2.0",
   "org.apache.thrift" % "libthrift" % "0.9.1",

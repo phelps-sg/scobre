@@ -12,53 +12,31 @@ import org.ccfea.tickdata.event.{EventType, Event}
 
 trait HBaseInserter extends HBaseEventConverter {
 
+  val fields: List[String] = List("eventType", "marketSegmentCode", "currencyCode", "marketMechanismType",
+    "aggregateSize", "tradeDirection", "orderCode", "tradeSize", "broadcastUpdateAction", "marketSectorCode",
+    "marketMechanismGroup", "price", "singleFillInd", "matchingOrderCode", "resultingTradeCode", "tradeCode",
+    "tradeTimeInd", "convertedPriceInd" )
+
   def store(field: String, data: Array[Byte])(implicit put: Put, timeStamp: Long) {
     put.add(dataFamily, toBytes(field), timeStamp, data)
   }
 
-  def store(field: String, data: Option[Any])(implicit put: Put, timeStamp: Long) {
+  def store(field: String, data: AnyRef)(implicit put: Put, timeStamp: Long) {
     data match {
       case Some(data) =>
         store(field, toBytes(data))
       case None =>
       // no need to store
+      case data =>
+        store(field, toBytes(data))
     }
   }
 
   implicit def convert(event: Event): Put = {
-
     implicit val timeStamp = event.timeStamp
     implicit val put: Put = new Put(getKey(event))
-
-    store("eventType", event.eventType)
-    store("marketSegmentCode", event.marketSegmentCode)
-    store("currencyCode", event.currencyCode)
-    store("marketMechanismType", event.marketMechanismType)
-    store("aggregateSize", event.aggregateSize)
-    store("tradeDirection", event.tradeDirection)
-    store("orderCode", event.orderCode)
-    store("tradeSize", event.tradeSize)
-    store("broadcastUpdateAction", event.broadcastUpdateAction)
-    store("marketSectorCode", event.marketSectorCode)
-    store("marketMechanismGroup", event.marketMechanismGroup)
-    store("price", event.price)
-    store("singleFillInd", event.singleFillInd)
-    store("matchingOrderCode", event.matchingOrderCode)
-    store("resultingTradeCode", event.resultingTradeCode)
-    store("tradeCode", event.tradeCode)
-    store("tradeTimeInd", event.tradeTimeInd)
-    store("convertedPriceInd", event.convertedPriceInd)
-
-    put
-  }
-
-  def toTransactionMapPut(event: Event): Put = {
-    implicit val put = new Put(event.resultingTradeCode.get)
-    implicit val timeStamp = event.timeStamp
-
-    store("matchingOrderCode", event.matchingOrderCode)
-    store("orderCode", event.orderCode)
-
+    def getField(f: String): AnyRef = classOf[Event].getMethod(f).invoke(event)
+    for(field <- fields) store(field, getField(field))
     put
   }
 
@@ -67,12 +45,6 @@ trait HBaseInserter extends HBaseEventConverter {
     eventsTable.put(
       for(event <- parsedEvents) yield convert(event)
     )
-
-//    transactionsTable.put(
- //       for(event <- parsedEvents;
-  //          if event.eventType == EventType.OrderMatched || event.eventType == EventType.OrderFilled)
-   //       yield toTransactionMapPut(event)
-    //)
 
     parsedEvents.length
   }
