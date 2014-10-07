@@ -9,7 +9,6 @@ import org.ccfea.tickdata.event.{EventType, Event}
  *
  * (c) Steve Phelps 2013
  */
-
 trait HBaseInserter extends HBaseEventConverter {
 
   val fields: List[String] = List("eventType", "marketSegmentCode", "currencyCode", "marketMechanismType",
