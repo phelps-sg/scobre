@@ -141,51 +141,35 @@ trait LseLoader extends DataLoader {
 
     rawEvent match {
 
-      case OrderHistoryRaw(orderCode, orderActionType, matchingOrderCode,
-                              tradeSize, tradeCode, tiCode, countryOfRegister,
-                              currencyCode, marketSegmentCode,
-                              aggregateSize, buySellInd,
-                              marketMechanismType,
-                              messageSequenceNumber, date, time) =>
+      case oh: OrderHistoryRaw =>
 
-          Event(None, orderActionType, messageSequenceNumber,
-            rawEvent.timeStamp, tiCode, marketSegmentCode, currencyCode,
-            Some(marketMechanismType), Some(aggregateSize), Some(buySellInd),
-            Some(orderCode), tradeSize, None, None, None, None, None,
-            matchingOrderCode, tradeCode,
+          Event(None, oh.orderActionType, oh.messageSequenceNumber,
+            oh.timeStamp, oh.tiCode, oh.marketSegmentCode, oh.currencyCode,
+            Some(oh.marketMechanismType), Some(oh.aggregateSize), Some(oh.buySellInd),
+            Some(oh.orderCode), oh.tradeSize, None, None, None, None, None,
+            oh.matchingOrderCode, oh.tradeCode,
             None, None, None)
 
+      case od: OrderDetailRaw  =>
 
-      case OrderDetailRaw(orderCode, marketSegmentCode, marketSectorCode,
-                          tiCode, countryOfRegister, currencyCode,
-                          participantCode, buySellInd, marketMechanismGroup,
-                          marketMechanismType, price, aggregateSize,
-                          singleFillInd, broadcastUpdateAction, date, time,
-                          messageSequenceNumber) =>
-
-          Event(None, EventType.OrderSubmitted, messageSequenceNumber,
-            rawEvent.timeStamp, tiCode, marketSegmentCode, currencyCode,
-            Some(marketMechanismType), Some(aggregateSize), Some(buySellInd),
-            Some(orderCode), None, Some(broadcastUpdateAction),
-            Some(marketSectorCode), Some(marketMechanismGroup), Some(price), Some(singleFillInd),
+          Event(None, EventType.OrderSubmitted, od.messageSequenceNumber,
+            od.timeStamp, od.tiCode, od.marketSegmentCode, od.currencyCode,
+            Some(od.marketMechanismType), Some(od.aggregateSize), Some(od.buySellInd),
+            Some(od.orderCode), None, Some(od.broadcastUpdateAction),
+            Some(od.marketSectorCode), Some(od.marketMechanismGroup), Some(od.price), Some(od.singleFillInd),
             None, None,
             None, None, None)
 
-      case TradeReportRaw(messageSequenceNumber, tiCode, marketSegmentCode,
-                          countryOfRegister, currencyCode, tradeCode,
-                          tradePrice, tradeSize, date, time,
-                          broadcastUpdateAction, tradeTypeInd,
-                          tradeTimeInd, bargainConditions, convertedPriceInd,
-                          publicationDate, publicationTime) =>
+      case tr: TradeReportRaw =>
 
           Event(None, EventType.Transaction,
-            messageSequenceNumber, rawEvent.timeStamp,
-            tiCode, marketSegmentCode, currencyCode,
+            tr.messageSequenceNumber, tr.timeStamp,
+            tr.tiCode, tr.marketSegmentCode, tr.currencyCode,
             None, None, None, None,
-            Some(tradeSize), Some(broadcastUpdateAction),
-            None, None, tradePrice, None,
+            Some(tr.tradeSize), Some(tr.broadcastUpdateAction),
+            None, None, tr.tradePrice, None,
             None, None,
-            tradeCode, Some(tradeTimeInd), Some(convertedPriceInd))
+            tr.tradeCode, Some(tr.tradeTimeInd), Some(tr.convertedPriceInd))
     }
 
   }
