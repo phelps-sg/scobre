@@ -14,6 +14,8 @@ import java.util.Date
  */
 trait HBaseEventConverter {
 
+  val TI_LEN = 12
+
   val conf = HBaseConfiguration.create()
   val admin = new HBaseAdmin(conf)
 
@@ -102,7 +104,15 @@ trait HBaseEventConverter {
    * @return       An array of bytes representing the HBase key.
    */
   def getKey(event: Event): Array[Byte] = {
-    Bytes.add(event.tiCode + "0", event.timeStamp, event.messageSequenceNumber)
+    Bytes.add(pad(event.tiCode) + "0", event.timeStamp, event.messageSequenceNumber)
+  }
+
+  def pad(s: String, len: Int = TI_LEN) = {
+    var result = s
+    while (result.length < len) {
+      result = result + " "
+    }
+    result
   }
 
   def getMessageSequenceNumber(result: Result): Long = {
@@ -110,7 +120,7 @@ trait HBaseEventConverter {
   }
 
   def getTiCode(result: Result): String = {
-    Bytes.head(result.getRow, 12)
+    Bytes.head(result.getRow, TI_LEN)
   }
 
   def getColumn(result: Result, name: String): Option[Array[Byte]] = {

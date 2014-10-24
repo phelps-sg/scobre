@@ -18,4 +18,4 @@ case class OrderDetailRaw(orderCode: String, marketSegmentCode: String,
                           broadcastUpdateAction: String,
                           date: String,
                           time: String,
-                          messageSequenceNumber: Long) extends HasDateTime
+                          messageSequenceNumber: Long) extends LseHasDateTime

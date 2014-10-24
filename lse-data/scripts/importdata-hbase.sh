@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PIPE=/tmp/tickdata.pipe
+
 # Import CSV files into Apache HBase.
 
 if [ $# -lt 1 ]; then
@@ -12,7 +14,7 @@ import_pipe() {
 	
 	echo "Importing $TABLE"
 
-	java org.ccfea.tickdata.ParseRawData -b 2600 -r $TABLE -f /tmp/lsedata.txt
+	java org.ccfea.tickdata.ImportLseData -b 2600 -r $TABLE -f $PIPE
 }
 
 cat_data() {
@@ -29,7 +31,7 @@ cat_data() {
 import() {
 	FILE=$1
 
-	cat_data $FILE > /tmp/lsedata.txt &
+	cat_data $FILE > $PIPE &
 	
 	case $FILE in
 		*[Tt]rade[Rr]eport*) 	import_pipe trade_reports_raw;;
@@ -46,10 +48,10 @@ import() {
 source config.sh
 
 # Remove previous named pipe
-rm -f /tmp/lsedata.txt
+rm -f $PIPE
 
 # Create a named pipe to the importing process
-mkfifo /tmp/lsedata.txt
+mkfifo $PIPE
 
 for filename in $*
 do
@@ -59,5 +61,5 @@ do
 done
 
 # Clean up
-rm /tmp/lsedata.txt
+rm $PIPE
 

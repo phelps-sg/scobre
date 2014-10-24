@@ -62,27 +62,17 @@ case class Event(eventID: Option[Long],
 
   def toOrderReplayEvent: OrderReplayEvent = {
 
-    this match {
+    this.eventType match {
 
-      /********************************************************************
-        *        order submitted events                          *
-        ********************************************************************/
-      case Event(id, EventType.OrderSubmitted,
-                  messageSequenceNumber, timeStamp, tiCode, marketSegmentCode, currencyCode,
-                  Some(marketMechanismType), Some(aggregateSize), Some(tradeDirection), Some(orderCode),
-                  None,
-                  Some(broadcastUpdateAction), Some(marketSectorCode), Some(marketMechanismGroup), Some(price),
-                  Some(singleFillInd),
-                  None, None, None, None, None)
+      case EventType.OrderSubmitted  =>
 
-      =>
-        val order = marketMechanismType match {
+        val order = marketMechanismType.get match {
             case MarketMechanismType.LimitOrder =>
-              new LimitOrder(orderCode, aggregateSize, tradeDirection, price)
+              new LimitOrder(orderCode.get, aggregateSize.get, tradeDirection.get, price.get)
             case MarketMechanismType.MarketOrder =>
-              new MarketOrder(orderCode, aggregateSize, tradeDirection)
+              new MarketOrder(orderCode.get, aggregateSize.get, tradeDirection.get)
             case _ =>
-              new OtherOrder(orderCode, marketMechanismType)
+              new OtherOrder(orderCode.get, marketMechanismType.get)
         }
         val date = new Date(timeStamp)
         val orderSubmittedEvent = new OrderSubmittedEvent(date, messageSequenceNumber, tiCode, order)
@@ -93,65 +83,23 @@ case class Event(eventID: Option[Long],
           orderSubmittedEvent
         }
 
+      case EventType.OrderDeleted | EventType.OrderExpired | EventType.TransactionLimit  =>
+        new OrderRemovedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode.get))
 
-      /********************************************************************
-        *        Order deleted (and related) events              *
-        ********************************************************************/
-      case Event(id, EventType.OrderDeleted | EventType.OrderExpired | EventType.TransactionLimit,
-                  messageSequenceNumber, timeStamp,
-                  tiCode, marketSegmentCode, marketMechanismType, currencyCode, aggregateSize, tradeDirection,
-                  Some(orderCode),
-                  tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
-                  None, None, None, None, None)
+      case EventType.OrderFilled =>
+        new OrderFilledEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode.get),
+                              new Order(matchingOrderCode.get))
 
-      => new OrderRemovedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode))
+      case EventType.OrderMatched =>
+        new OrderMatchedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode.get),
+                                 new Order(matchingOrderCode.get), resultingTradeCode.get, tradeSize.get)
 
+      case EventType.Transaction =>
+        new TransactionEvent(new Date(timeStamp), messageSequenceNumber, tiCode, tradeCode.get, price.get,
+                                  tradeSize.get, orderCode, matchingOrderCode)
 
-      /********************************************************************
-        *        Logic for order filled events                             *
-        ********************************************************************/
-      case Event(id, EventType.OrderFilled,
-                  messageSequenceNumber, timeStamp, tiCode,
-                  marketSegmentCode, currencyCode, marketMechanismType, aggregateSize, tradeDirection,
-                  Some(orderCode),
-                  tradeSize, broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
-                  Some(matchingOrderCode), resultingTradeCode,
-                  None, None, None)
-
-      => new OrderFilledEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode),
-                  new Order(matchingOrderCode))
-
-      /********************************************************************
-        *        Order matched events
-        ********************************************************************/
-      case Event(id, EventType.OrderMatched,
-                    messageSequenceNumber, timeStamp, tiCode,
-                    marketSegmentCode, currencyCode, marketMechanismType, Some(aggregateSize), tradeDirection,
-                    Some(orderCode),
-                    Some(tradeSize), broadcastUpdateAction, marketSectorCode, marketMechanismGroup, price, singleFillInd,
-                    Some(matchingOrderCode), resultingTradeCode,
-                    None, None, None)
-
-      //TODO: pass tradeSize here instead of via transactions table?
-      => new OrderMatchedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode),
-                                 new Order(matchingOrderCode), resultingTradeCode.get, tradeSize)
-
-      /********************************************************************
-        *        transaction events                            *
-        ********************************************************************/
-      case Event(id, EventType.Transaction,
-                  messageSequenceNumber, timeStamp,
-                  tiCode, marketSegmentCode, currencyCode,
-                  None, None, None, orderCode,
-                  Some(tradeSize), Some(broadcastUpdateAction),
-                  None, None, Some(tradePrice), None,
-                  matchingOrderCode, None,
-                  tradeCode, Some(tradeTimeInd), Some(convertedPriceInd))
-
-        //TODO: tradeSize not always defined
-      => new TransactionEvent(new Date(timeStamp), messageSequenceNumber, tiCode, tradeCode.get,
-                                  tradePrice, tradeSize, orderCode, matchingOrderCode)
-
+      case EventType.OrderRevised =>
+        new OrderRevisedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode.get))
     }
   }
 

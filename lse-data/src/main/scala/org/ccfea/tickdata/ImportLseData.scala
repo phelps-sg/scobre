@@ -15,25 +15,13 @@ import org.ccfea.tickdata.storage.test.TestInserter
  *
  * (C) Steve Phelps 2014
  */
-object ParseRawData {
+object ImportLseData extends ImportApplication {
 
   class CsvToHbaseImport(val batchSize: Int = 20000, val fileName: String, val recordType: String,
                             override val logger: Logger = Logger("CsvtoHbaseImport"))
       extends CsvLoader with LseLoader with HBaseInserter
 
-  class AsxCsvToTestImport(val batchSize: Int = 20000, val fileName: String = "data/asx/BHPJuly2007_RawData_CLEAN.csv")
-      extends CsvLoader with AsxLoader with TestInserter
-
-  def main(args: Array[String]) {
-
-    val conf = new ParseConf(args)
-    val loader = new CsvToHbaseImport(batchSize = conf.bufferSize(),
+  def loader(conf: ParseConf) = new CsvToHbaseImport(batchSize = conf.bufferSize(),
                                         fileName = conf.fileName(),
                                           recordType = conf.recordType())
-
-//    val loader = new AsxCsvToTestImport(batchSize = conf.bufferSize(),
-//                                        fileName = conf.fileName())
-
-    loader.run
-  }
 }

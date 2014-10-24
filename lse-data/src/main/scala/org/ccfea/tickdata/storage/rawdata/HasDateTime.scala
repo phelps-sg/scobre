@@ -8,25 +8,14 @@ import java.text.SimpleDateFormat
  *
  * (c) Steve Phelps 2013
  */
-
 trait HasDateTime {
 
-  // without milliseconds
-  val dfShort = new SimpleDateFormat("ddMMyyyy HH:mm:ss")
-
-  // Time stamp format with milliseconds
-  val df = new SimpleDateFormat("ddMMyyyy HH:mm:ss.SSS")
+  val df = new SimpleDateFormat("ddMMyyyy HH:mm:ss")
 
   def date: String
   def time: String
 
-  def timeStamp: Long = {
-    val dateTime = date + " " + time;
-    if (time.length > 8 && time.contains(".")) {
-      df.parse(dateTime).getTime()
-    } else {
-      dfShort.parse(dateTime).getTime()
-    }
-  }
+  def timeStamp: Long =  df.parse(date + " " + time).getTime
+
 }
 

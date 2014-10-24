@@ -20,7 +20,7 @@ class DateKeyRange(val tiCode: String, val startDate: Option[Date], val endDate:
   val scanner = eventsTable.getScanner(scan)
 
   def generateScanKey(date: Option[Date], isStart: Boolean) = date match {
-    case Some(date) => Bytes.add(tiCode + "0", Bytes.toBytes(date.getTime), 0L)
-    case None => Bytes.toBytes(tiCode + (if (isStart) "0" else "1"))
+    case Some(date) => Bytes.add(pad(tiCode) + "0", Bytes.toBytes(date.getTime), 0L)
+    case None => Bytes.toBytes(pad(tiCode) + (if (isStart) "0" else "1"))
   }
 }

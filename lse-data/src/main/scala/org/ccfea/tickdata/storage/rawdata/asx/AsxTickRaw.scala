@@ -12,4 +12,4 @@ case class AsxTickRaw (
   assetId: String, date:String, time: String, recordType: String, price:Option[BigDecimal], volume:Option[Long],
   bidId: Option[String], askId: Option[String],
   direction:String,
-  sameOffset: Option[BigDecimal], oppOffset: Option[BigDecimal], midOffset:Option[BigDecimal]) extends HasDateTime
+  sameOffset: Option[BigDecimal], oppOffset: Option[BigDecimal], midOffset:Option[BigDecimal]) extends AsxHasDateTime

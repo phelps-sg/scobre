@@ -21,5 +21,5 @@ case class OrderHistoryRaw(orderCode: String,
                            marketMechanismType: String,
                            messageSequenceNumber: Long,
                            date: String,
-                           time: String) extends HasDateTime
+                           time: String) extends LseHasDateTime
 

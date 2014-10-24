@@ -23,4 +23,4 @@ case class TradeReportRaw(messageSequenceNumber: Long,
                           bargainConditions: String,
                           convertedPriceInd: String,
                           publicationDate: String,
-                          publicationTime: String) extends HasDateTime
+                          publicationTime: String) extends LseHasDateTime
