@@ -24,7 +24,7 @@ process.
 - (Optional) In order to build the software from source, you will need the scala build tool (sbt); see the [sbt documentation](http://www.scala-sbt.org/release/docs/Getting-Started/Setup.html).
 
 - (Optional) In order to host the data, you will need to install [Apache HBase
-  version 0.98.6 for Hadoop 2](https://www.apache.org/dyn/closer.cgi/hbase/).  The software
+  version 0.98.7 for Hadoop 2](https://www.apache.org/dyn/closer.cgi/hbase/).  The software
 can optionally connect to an existing server which already hosts the data.
 
 - (Optional) The best Integrated Development Environment (IDE) to use for 
@@ -55,7 +55,7 @@ replace `cseesp1.essex.ac.uk` with `localhost`.
 
 ## Running the reconstructor
 
-The script `replay.sh` in the `scripts/` directory can then be used retreive a
+The script `replay.sh` in the `scripts/` directory can then be used retrieve a
 time-series of the mid-price.  
 
 The following example will replay all recorded events for the asset with given
@@ -110,7 +110,7 @@ IDEA), and then directly import the `build.sbt` file as a new project.
 
 ## Importing the raw data into Apache HBase
 
-1. Install Apache HBase 0.98.6 for Hadoop 2 in [standalone mode](https://hbase.apache.org/book/quickstart.html).
+1. Install Apache HBase 0.98.7 for Hadoop 2 in [standalone mode](https://hbase.apache.org/book/quickstart.html).
 
 2. Modify the file `base-config.xml` in the `etc/` directory of the folder where you unpacked the lse-data distribution as follows:
 
