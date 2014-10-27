@@ -100,7 +100,7 @@ case class Event(eventID: Option[Long],
 
       case EventType.OrderRevised =>
         new OrderRevisedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode.get), price.get,
-                                aggregateSize.get)
+                                aggregateSize.get, tradeDirection.get)
     }
   }
 

@@ -220,6 +220,7 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
    * @param ev  The subsequent event in the replay sequence.
    */
   def process(ev: OrderReplayEvent): Unit = {
+    logger.debug("Processing " + ev)
     ev match {
       case tr: TransactionEvent           =>  process(tr)
       case or: OrderRemovedEvent          =>  process(or)
@@ -236,8 +237,15 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
     val orderCode = ev.order.orderCode
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
+      book.remove(order)
       order.setPrice(ev.newPrice.doubleValue())
       order.setQuantity(ev.newVolume.toInt)
+      insertOrder(order)
+    } else {
+      logger.warn("Unknown order code when amending existing order: " + ev.order.orderCode)
+      logger.warn("Converting OrderRevisedEvent to OrderSubmittedEvent")
+      val newOrder = new LimitOrder(ev.order.orderCode, ev.newVolume, ev.newDirection, ev.newPrice)
+      process(new OrderSubmittedEvent(ev.timeStamp, ev.messageSequenceNumber, ev.tiCode, newOrder))
     }
   }
 
@@ -250,6 +258,7 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
     val orderCode = ev.order.orderCode
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
+      logger.debug("Removing from book: " + order)
       book.remove(order)
     } else {
       logger.warn("Unknown order code when removing order: " + orderCode)
@@ -286,14 +295,12 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
     val order = ev.order
     if (orderMap.contains(order.orderCode)) {
       logger.warn("Submission using existing order code: " + order.orderCode)
+      book.remove(orderMap(order.orderCode))
     }
     order match {
        case lo: LimitOrder =>
          val newOrder = toJasaOrder(order)
-         if (newOrder.isAsk)
-           book.insertUnmatchedAsk(newOrder)
-         else
-           book.insertUnmatchedBid(newOrder)
+         insertOrder(newOrder)
          orderMap(order.orderCode) = newOrder
        case _ =>
     }
@@ -349,6 +356,14 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
 //          }
 //        } while (!consistent)
 //      }
+    }
+  }
+
+  def insertOrder(order: net.sourceforge.jasa.market.Order) = {
+    if (order.isBid) {
+      book.insertUnmatchedBid(order)
+    } else {
+      book.insertUnmatchedAsk(order)
     }
   }
 

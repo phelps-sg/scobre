@@ -1,5 +1,6 @@
 package org.ccfea.tickdata.simulator
 
+import net.sourceforge.jasa.market.Order
 import org.ccfea.tickdata.event.OrderReplayEvent
 
 /**
@@ -12,4 +13,7 @@ class ClearingMarketState extends MarketState {
     auctionState = AuctionState.continuous
   }
 
+  override def insertOrder(order: Order): Unit = {
+    book.add(order)
+  }
 }
