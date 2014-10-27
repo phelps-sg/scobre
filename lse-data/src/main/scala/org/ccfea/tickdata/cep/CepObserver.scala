@@ -7,12 +7,14 @@ import org.ccfea.tickdata.event.MarketStateEvent
 import java.util.{Observable, Observer}
 import net.sourceforge.jasa.market.MarketSimulation
 
+import scala.collection.mutable
+
 /**
  * Dispatch events to the Complex Event Processing (CEP) service.
  *
  * (C) Steve Phelps 2014
  */
-class CepObserver extends Observer { // with UpdateListener {
+class CepObserver extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher[OrderReplayEvent]] {
 
   val query =
     "select avg(state.lastTransactionPrice) from org.ccfea.tickdata.event.MarketStateEvent.win:time(100 sec)"
@@ -21,8 +23,8 @@ class CepObserver extends Observer { // with UpdateListener {
 //  val statement = epService.getEPAdministrator.createEPL(query)
 //  statement.addListener(this)
 
-  def update(o: Observable, arg: scala.Any): Unit = {
-    o match {
+  override def notify(pub: mutable.Publisher[OrderReplayEvent], ev: OrderReplayEvent): Unit = {
+    pub match {
       case simulator: MarketSimulator =>
         epService.getEPRuntime.sendEvent(new MarketStateEvent(simulator.market))
     }

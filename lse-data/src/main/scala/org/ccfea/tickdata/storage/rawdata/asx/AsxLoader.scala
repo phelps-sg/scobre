@@ -27,13 +27,13 @@ trait AsxLoader extends DataLoader {
 
   def parseEvent(rawEvent: HasDateTime): Event = {
 
-    implicit def toTradeDirection(buySellInd: String) = {
+    implicit def toTradeDirection(buySellInd: String): TradeDirection.Value = {
       buySellInd match {
         case "B" => TradeDirection.Buy
         case "A" => TradeDirection.Sell
       }
     }
-    implicit def recordTypeToOrderAction(recordType: String) = {
+    implicit def recordTypeToOrderAction(recordType: String): EventType.Value = {
       recordType match {
         case "DELETE" => EventType.OrderDeleted
         case "AMEND" => EventType.OrderRevised
@@ -43,13 +43,11 @@ trait AsxLoader extends DataLoader {
 
     rawEvent match {
       case ev: AsxTickRaw =>
-        Event(None, ev.recordType, ev.messageSequenceNumber,
-          ev.timeStamp, ev.assetId, "ASX", "AUD",
-          if (ev.recordType == EventType.OrderSubmitted) Some(MarketMechanismType.LimitOrder) else None,
-          ev.volume, Some(ev.direction),
-          ev.bidId, ev.volume, None, None, None, ev.price, None,
-          ev.askId, None,
-          None, None, None)
+        val result = Event(None, ev.recordType, ev.messageSequenceNumber,
+          ev.timeStamp, ev.assetId, "ASX", "AUD", Some(MarketMechanismType.LimitOrder),  ev.volume, Some(ev.direction),
+          if (ev.direction == "B") ev.bidId else ev.askId,
+          ev.volume, None, None, None, ev.price, None, ev.askId, None, None, None, None)
+        result
 
     }
   }

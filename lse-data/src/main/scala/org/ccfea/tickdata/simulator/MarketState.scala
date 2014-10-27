@@ -21,6 +21,7 @@ import scala.Some
 import org.ccfea.tickdata.order.{TradeDirection, AbstractOrder, LimitOrder}
 
 import scala.beans.BeanProperty
+import scala.collection.mutable
 
 /**
  * The state of the market at a single point in time.  This class contains a mutable
@@ -30,7 +31,8 @@ import scala.beans.BeanProperty
  *
  * (c) Steve Phelps 2013
  */
-class MarketState extends Observer {
+class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher[OrderReplayEvent]]
+    with mutable.Publisher[OrderReplayEvent] {
 
   /**
    * The current state of the book.
@@ -102,19 +104,8 @@ class MarketState extends Observer {
     order
   }
 
-  /**
-   * Receive events from any Observable objects the state is listening to.
-   * Typically this will be an instance of MarketSimulator.
-   *
-   * @param o       The sending object.
-   * @param arg     The event to be processed.
-   */
-  @Override
-  def update(o: Observable, arg: scala.Any): Unit = {
-    arg match {
-      case ev: OrderReplayEvent => newEvent(ev)
-      case  _ => logger.warn("Unknown event type: " + arg)
-    }
+  override def notify(pub: mutable.Publisher[OrderReplayEvent], event: OrderReplayEvent): Unit = {
+    newEvent(event)
   }
 
   /**
@@ -123,19 +114,20 @@ class MarketState extends Observer {
    * @param ev  The next event in the replay sequence.
    */
   def newEvent(ev: OrderReplayEvent): Unit = {
+    preProcessing(ev)
+    process(ev)
+    postProcessing(ev)
+    publish(ev)
+  }
 
-//    logger.debug("Processing event " + ev)
-
-    // Processing general to all event types
+  def preProcessing(ev: OrderReplayEvent): Unit = {
     assert(ev.timeStamp.getTime >= (time match { case None => 0; case Some(t) => t.getTicks}))
     val newTime = new SimulationTime(ev.timeStamp.getTime)
     this.time = Some(newTime)
     this.volume = Some(0)
+  }
 
-    // Event-specific processing
-    process(ev)
-
-    // Post-processing and consistency checks
+  def postProcessing(ev: OrderReplayEvent): Unit = {
     stateTransition(ev)
     checkConsistency(ev)
   }
@@ -235,7 +227,17 @@ class MarketState extends Observer {
       case lo: OrderSubmittedEvent        =>  process(lo)
       case me: MultipleEvent              =>  process(me)
       case om: OrderMatchedEvent          =>  process(om)
+      case or: OrderRevisedEvent          =>  process(or)
       case _ => logger.warn("Unknown event type: " + ev)
+    }
+  }
+
+  def process(ev: OrderRevisedEvent): Unit = {
+    val orderCode = ev.order.orderCode
+    if (orderMap.contains(orderCode)) {
+      val order = orderMap(orderCode)
+      order.setPrice(ev.newPrice.doubleValue())
+      order.setQuantity(ev.newVolume.toInt)
     }
   }
 

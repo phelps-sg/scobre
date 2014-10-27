@@ -3,6 +3,8 @@ package org.ccfea.tickdata.simulator
 import org.ccfea.tickdata.event.{OrderReplayEvent, Event}
 import java.util.{Observable, Observer}
 
+import scala.collection.mutable
+
 /**
  * A simulator which takes a sequence of events and replays them, producing some function of a
  * MarketState object for each event via a map method.  The specified function can be used to collect data of interest
@@ -17,9 +19,9 @@ import java.util.{Observable, Observer}
  * (c) Steve Phelps 2013
  */
 class MarketSimulator(val events: Iterable[OrderReplayEvent], val market: MarketState = new MarketState())
-    extends Observable {
+    extends mutable.Publisher[OrderReplayEvent] {
 
-  this.addObserver(market)
+  subscribe(market)
 
   def map[B](f: MarketState => B): Iterable[B] = {
     events.map(ev => {
@@ -29,8 +31,7 @@ class MarketSimulator(val events: Iterable[OrderReplayEvent], val market: Market
   }
 
   def process(ev: OrderReplayEvent) = {
-    setChanged()
-    notifyObservers(ev)
+    publish(ev)
   }
 
   def step() = {

@@ -18,7 +18,7 @@ trait OrderReplayer[T] extends Runnable {
    * If true then show a graphical user-interface as
    * the simulation progresses.
    */
-  def withGui: Boolean
+//  def withGui: Boolean
 
   /**
    * The filename to write data to.
@@ -32,9 +32,12 @@ trait OrderReplayer[T] extends Runnable {
 
 //  val out: java.io.PrintStream = openOutput
 
-  val marketState = if (withGui) new MarketStateWithGUI() else new MarketState()
+  def marketState: MarketState
+
   val simulator = new MarketSimulator(eventSource, marketState)
 //  simulator.addObserver(new CepObserver())
+
+//  val orderBookView = if (withGui) new OrderBookView(marketState) else None
 
 
   /**

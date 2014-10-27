@@ -5,14 +5,19 @@ import java.text.SimpleDateFormat
 import net.sourceforge.jasa.market.auctioneer.ContinuousDoubleAuctioneer
 import java.awt.BorderLayout
 
+import org.ccfea.tickdata.event.OrderReplayEvent
+
+import scala.collection.mutable
+
 /**
  * A visualisation of the current state of the order book.
  *
  * (c) Steve Phelps 2013
  */
-class OrderBookView(val market: MarketState, val maxLevels: Int = 12) {
-  //TODO: migrate to scala Swing swing wrappers
+class OrderBookView(val market: MarketState, val maxLevels: Int = 12)
+    extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher[OrderReplayEvent]] {
 
+  market.subscribe(this)
 
   val df = new SimpleDateFormat("HH:mm:ss:SSSS dd/MM yyyy")
   val auctioneer = new ContinuousDoubleAuctioneer()
@@ -29,7 +34,7 @@ class OrderBookView(val market: MarketState, val maxLevels: Int = 12) {
   myFrame.pack()
   myFrame.setVisible(true)
 
-  def update = {
+  def notify(pub: mutable.Publisher[OrderReplayEvent], ev: OrderReplayEvent) = {
     SwingUtilities.invokeAndWait(new Runnable() {
       def run() = {
         orderBookView.update()

@@ -15,7 +15,8 @@ import org.ccfea.tickdata.event.OrderReplayEvent
  * (C) Steve Phelps 2013
  */
 class OrderBookSnapshotter(val eventSource: Iterable[OrderReplayEvent], val t: SimulationTime,
-                            val outFileName: Option[String] = None, val withGui: Boolean = false)
+                            val outFileName: Option[String] = None, val withGui: Boolean = false,
+                            val marketState: MarketState = new MarketState())
     extends OrderReplayer[Option[FourHeapOrderBook]] with PrintStreamOutputer {
 
   val logger = Logger(classOf[OrderBookSnapshotter])

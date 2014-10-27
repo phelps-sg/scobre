@@ -66,12 +66,15 @@ object OrderReplayer extends ReplayApplication {
     if (conf.shuffle()) eventSource = Random.shuffle(eventSource.iterator.toList)
 
     class Replayer(val eventSource: Iterable[OrderReplayEvent],
-                    val outFileName: Option[String], val withGui: Boolean,
-                    val dataCollector: MarketState => Option[AnyVal])
+                    val outFileName: Option[String],
+                    val dataCollector: MarketState => Option[AnyVal],
+                    val marketState: MarketState)
         extends UnivariateTimeSeriesCollector with UnivariateCsvDataCollator
 
-    new Replayer(eventSource,outFileName = conf.outFileName.get,
-                                          withGui = conf.withGui(), dataCollector).run()
+    val marketState: MarketState = new MarketState()
+    val orderBookView = if (conf.withGui()) new OrderBookView(marketState) else None
+    val replayer =  new Replayer(eventSource, outFileName = conf.outFileName.get, dataCollector, marketState)
+    replayer.run()
   }
 
 

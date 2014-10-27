@@ -44,7 +44,8 @@ object OrderReplayService extends ReplayApplication {
 
         class Replayer(val eventSource: Iterable[OrderReplayEvent] = hbaseSource,
                        val withGui: Boolean = false,
-                       val dataCollectors: Map[String, MarketState => Option[AnyVal]])
+                       val dataCollectors: Map[String, MarketState => Option[AnyVal]],
+                        val marketState: MarketState = new MarketState())
           extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
 
         // Take the list of variables, use reflection to find the method to retrieve the
