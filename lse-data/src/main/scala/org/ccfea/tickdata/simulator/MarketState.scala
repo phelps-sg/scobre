@@ -229,7 +229,7 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
       case me: MultipleEvent              =>  process(me)
       case om: OrderMatchedEvent          =>  process(om)
       case or: OrderRevisedEvent          =>  process(or)
-      case _ => logger.warn("Unknown event type: " + ev)
+      case _ => logger.error("Unknown event type: " + ev)
     }
   }
 
