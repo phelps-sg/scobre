@@ -9,5 +9,7 @@ class ClearingMarketState extends MarketState {
 
   override def postProcessing(ev: OrderReplayEvent): Unit = {
     book.matchOrders()
+    auctionState = AuctionState.continuous
   }
+
 }

@@ -1,6 +1,6 @@
 package org.ccfea.tickdata
 
-import org.ccfea.tickdata.conf.ReplayConf
+import org.ccfea.tickdata.conf.{ReplayerConf, ReplayConf}
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
 import org.ccfea.tickdata.simulator._
 
@@ -19,7 +19,7 @@ object OrderBookSnapshot extends ReplayApplication {
 
   def main(args: Array[String]) {
 
-    val conf = new ReplayConf(args)
+    val conf = new ReplayerConf(args)
 
     val time = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).parse(conf.startDate.get.get)
     println(time)

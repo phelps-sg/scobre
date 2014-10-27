@@ -5,7 +5,7 @@ import org.rogach.scallop.ScallopConf
 /**
  * (C) Steve Phelps 2014
  */
-class ServerConf(args: Seq[String]) extends ScallopConf(args) {
+class ServerConf(args: Seq[String]) extends ReplayConf(args) {
 
   version("org.ccfea.tickdata.OrderReplayService" + BuildInfo.version + "b-" + BuildInfo.buildinfoBuildnumber +
             " (c) 2014 Steve Phelps")

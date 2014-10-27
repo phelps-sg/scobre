@@ -7,7 +7,7 @@ import org.ccfea.tickdata.storage.csv.UnivariateCsvDataCollator
 import scala.Some
 import scala.util.Random
 
-import org.ccfea.tickdata.conf.ReplayConf
+import org.ccfea.tickdata.conf.{ReplayerConf, ReplayConf}
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
 import org.ccfea.tickdata.simulator._
 
@@ -27,7 +27,7 @@ object OrderReplayer extends ReplayApplication {
   def main(args: Array[String]) {
 
     // Parse command-line options
-    implicit val conf = new ReplayConf(args)
+    implicit val conf = new ReplayerConf(args)
     // The method which will fetch the datum of interest from the state of the market
     val getPropertyMethod = classOf[MarketState].getMethod(conf.property())
 
@@ -56,7 +56,7 @@ object OrderReplayer extends ReplayApplication {
    * @param conf            Command-line options
    */
   def simulateAndCollate(dataCollector: MarketState => Option[AnyVal])
-                          (implicit conf: ReplayConf) = {
+                          (implicit conf: ReplayerConf) = {
 
     var eventSource: Iterable[OrderReplayEvent] =
       new HBaseRetriever(selectedAsset = conf.tiCode(),
@@ -71,8 +71,8 @@ object OrderReplayer extends ReplayApplication {
                     val marketState: MarketState)
         extends UnivariateTimeSeriesCollector with UnivariateCsvDataCollator
 
-    val marketState: MarketState = new MarketState()
-    val orderBookView = if (conf.withGui()) new OrderBookView(marketState) else None
+    val marketState: MarketState = if (conf.explicitClearing()) new ClearingMarketState() else new MarketState()
+    if (conf.withGui()) new OrderBookView(marketState)
     val replayer =  new Replayer(eventSource, outFileName = conf.outFileName.get, dataCollector, marketState)
     replayer.run()
   }
