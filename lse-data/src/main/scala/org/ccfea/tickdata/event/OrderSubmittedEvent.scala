@@ -8,5 +8,5 @@ import org.ccfea.tickdata.order.AbstractOrder
  *
  * (C) Steve Phelps 2013
  */
-case class OrderSubmittedEvent(val timeStamp: Date, val messageSequenceNumber: Long,
-                          val tiCode: String, val order: AbstractOrder) extends OrderReplayEvent
+case class OrderSubmittedEvent(timeStamp: Date, messageSequenceNumber: Long,
+                                  tiCode: String, order: AbstractOrder) extends OrderReplayEvent

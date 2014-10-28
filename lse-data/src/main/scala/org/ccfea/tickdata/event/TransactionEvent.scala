@@ -7,8 +7,8 @@ import java.util.Date
  *
  * (C) Steve Phelps 2013
  */
-case class TransactionEvent(val timeStamp: Date, val messageSequenceNumber: Long,
-                            val tiCode: String, val tradeCode: String,
-                            val transactionPrice: BigDecimal, val tradeSize: Long,
-                             val orderCode: Option[String], val matchingOrderCode: Option[String])
+case class TransactionEvent(timeStamp: Date, messageSequenceNumber: Long,
+                              tiCode: String, tradeCode: String,
+                              transactionPrice: BigDecimal, tradeSize: Long,
+                              orderCode: Option[String], matchingOrderCode: Option[String])
   extends OrderReplayEvent

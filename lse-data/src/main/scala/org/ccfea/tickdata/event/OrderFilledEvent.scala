@@ -8,7 +8,7 @@ import org.ccfea.tickdata.order.AbstractOrder
  *
  * (C) Steve Phelps 2013
  */
-case class OrderFilledEvent(val timeStamp: Date, val messageSequenceNumber: Long,
-                            val tiCode: String, val order: AbstractOrder, val matchingOrder: AbstractOrder)
+case class OrderFilledEvent(timeStamp: Date, messageSequenceNumber: Long,
+                              tiCode: String, order: AbstractOrder, matchingOrder: AbstractOrder)
   extends OrderEvent
 

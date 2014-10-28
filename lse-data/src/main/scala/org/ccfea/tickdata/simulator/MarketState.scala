@@ -121,7 +121,7 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
   }
 
   def preProcessing(ev: OrderReplayEvent): Unit = {
-    assert(ev.timeStamp.getTime >= (time match { case None => 0; case Some(t) => t.getTicks}))
+//    assert(ev.timeStamp.getTime >= (time match { case None => 0; case Some(t) => t.getTicks}))
     val newTime = new SimulationTime(ev.timeStamp.getTime)
     this.time = Some(newTime)
     this.volume = Some(0)

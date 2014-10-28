@@ -9,12 +9,12 @@ import org.ccfea.tickdata.order.AbstractOrder
  * (C) Steve Phelps 2013
  */
 case class OrderMatchedEvent(
-                              val timeStamp: Date,
-                              val messageSequenceNumber: Long,
-                              val tiCode: String,
-                              val order: AbstractOrder,
-                              val matchingOrder: AbstractOrder,
-                              val resultingTradeCode: String,
-                              val tradeSize: Long
+                              timeStamp: Date,
+                              messageSequenceNumber: Long,
+                              tiCode: String,
+                              order: AbstractOrder,
+                              matchingOrder: AbstractOrder,
+                              resultingTradeCode: String,
+                              tradeSize: Long
                              )
   extends OrderEvent

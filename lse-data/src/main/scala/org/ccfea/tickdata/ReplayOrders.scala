@@ -3,6 +3,7 @@ package org.ccfea.tickdata
 import org.ccfea.tickdata.collector.UnivariateTimeSeriesCollector
 import org.ccfea.tickdata.event.OrderReplayEvent
 import org.ccfea.tickdata.storage.csv.UnivariateCsvDataCollator
+import org.ccfea.tickdata.storage.shuffled.RandomPermutationRetriever
 
 import scala.Some
 import scala.util.Random
@@ -20,7 +21,7 @@ import grizzled.slf4j.Logger
  *
  * (C) Steve Phelps 2014
  */
-object OrderReplayer extends ReplayApplication {
+object ReplayOrders extends ReplayApplication {
 
   val logger = Logger("org.ccfea.tickdata.OrderReplayer")
 
@@ -58,12 +59,10 @@ object OrderReplayer extends ReplayApplication {
   def simulateAndCollate(dataCollector: MarketState => Option[AnyVal])
                           (implicit conf: ReplayerConf) = {
 
-    var eventSource: Iterable[OrderReplayEvent] =
+    val hbaseEvents: Iterable[OrderReplayEvent] =
       new HBaseRetriever(selectedAsset = conf.tiCode(),
                           startDate =  parseDate(conf.startDate.get),
                           endDate = parseDate(conf.endDate.get))
-
-    if (conf.shuffle()) eventSource = Random.shuffle(eventSource.iterator.toList)
 
     class Replayer(val eventSource: Iterable[OrderReplayEvent],
                     val outFileName: Option[String],
@@ -72,7 +71,15 @@ object OrderReplayer extends ReplayApplication {
         extends UnivariateTimeSeriesCollector with UnivariateCsvDataCollator
 
     val marketState: MarketState = if (conf.explicitClearing()) new ClearingMarketState() else new MarketState()
+
     if (conf.withGui()) new OrderBookView(marketState)
+
+    val eventSource =
+      if (!conf.shuffle())
+        hbaseEvents
+      else
+        new RandomPermutationRetriever(hbaseEvents, conf.proportionShuffling())
+
     val replayer =  new Replayer(eventSource, outFileName = conf.outFileName.get, dataCollector, marketState)
     replayer.run()
   }
