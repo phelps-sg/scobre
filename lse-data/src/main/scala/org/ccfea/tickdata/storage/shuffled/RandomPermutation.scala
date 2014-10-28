@@ -8,15 +8,18 @@ import scala.util.Random
 /**
  * (C) Steve Phelps 2014
  */
-class RandomPermutationRetriever(val source: Iterable[OrderReplayEvent], val proportion: Double) extends Iterable[OrderReplayEvent] {
+class RandomPermutation(val source: Iterable[OrderReplayEvent], val proportion: Double)
+    extends Iterable[OrderReplayEvent] {
+
+  val tickList = source.iterator.toList
+  var ticks: Array[OrderReplayEvent] = new Array[OrderReplayEvent](tickList.length)
 
   override def iterator: Iterator[OrderReplayEvent] = {
-    return shuffle().iterator
+    shuffleTicks()
+    return ticks.iterator
   }
 
-  def shuffle() = {
-    val tickList = source.iterator.toList
-    val ticks: Array[OrderReplayEvent] = new Array[OrderReplayEvent](tickList.length)
+  def shuffleTicks() = {
     tickList.copyToArray(ticks)
     val n = math.round(ticks.length.toDouble * proportion).toInt
     val positions: Seq[Int] = sampleWithoutReplacement(n, ticks.length)
@@ -28,10 +31,9 @@ class RandomPermutationRetriever(val source: Iterable[OrderReplayEvent], val pro
       ticks(a) = ticks(b)
       ticks(b) = tmp
     }
-    ticks
   }
 
-  def sampleWithoutReplacement(n: Int, N: Int) = {
+  def sampleWithoutReplacement(n: Int, N: Int): Seq[Int] = {
     var t: Int = 0
     var m: Int = 0
 

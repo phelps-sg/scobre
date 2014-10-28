@@ -1,5 +1,7 @@
 package org.ccfea.tickdata
 
+import java.{lang, util}
+
 import grizzled.slf4j.Logger
 import org.apache.thrift.server.TThreadPoolServer
 import org.apache.thrift.transport.TServerSocket
@@ -7,8 +9,9 @@ import org.ccfea.tickdata.collector.MultivariateTimeSeriesCollector
 import org.ccfea.tickdata.conf.{BuildInfo, ServerConf}
 
 import org.ccfea.tickdata.event.OrderReplayEvent
-import org.ccfea.tickdata.simulator.MarketState
+import org.ccfea.tickdata.simulator.{ClearingMarketState, MarketState}
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
+import org.ccfea.tickdata.storage.shuffled.RandomWindowedPermutation
 import org.ccfea.tickdata.storage.thrift.MultivariateThriftCollator
 import org.ccfea.tickdata.thrift.OrderReplay
 
@@ -24,17 +27,36 @@ object OrderReplayService extends ReplayApplication {
 
   val logger = Logger("org.ccfea.tickdata.OrderReplayService")
 
+  /**
+   *    Use reflection to find the method to retrieve the  data for each variable (a function of MarketState).
+   *
+   * @param variables  The variables to collect from the simulation.
+   * @return            a map of variables and methods, i.e. the collectors for the simulation.
+   */
+  def collectors(variables: java.util.List[String]) = {
+    def variableToMethod(variable: String): MarketState => Option[AnyVal] =
+      classOf[MarketState].getMethod(variable) invoke _
+    for (variable <- variables) yield (variable, variableToMethod(variable))
+  }
+
   def main(args: Array[String]): Unit = {
 
     val conf = new ServerConf(args)
     val port: Int = conf.port()
+
+    val marketState = if (conf.explicitClearing()) new ClearingMarketState() else new MarketState()
+
+    class Replayer(val eventSource: Iterable[OrderReplayEvent],
+                   val dataCollectors: Map[String, MarketState => Option[AnyVal]],
+                    val marketState: MarketState = marketState)
+      extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
 
     val processor = new org.ccfea.tickdata.thrift.OrderReplay.Processor(new OrderReplay.Iface {
 
       override def replay(assetId: String, variables: java.util.List[String],
                             startDate: String, endDate: String): java.util.List[java.util.Map[String,java.lang.Double]] = {
 
-        logger.info("Fetching data for " + assetId + " between " + startDate + " and " + endDate)
+        logger.info("Using data for " + assetId + " between " + startDate + " and " + endDate)
 
         logger.info("Starting simulation... ")
 
@@ -42,23 +64,28 @@ object OrderReplayService extends ReplayApplication {
           new HBaseRetriever(selectedAsset = assetId, startDate = parseDate(Some(startDate)),
                                                         endDate = parseDate(Some(endDate)))
 
-        class Replayer(val eventSource: Iterable[OrderReplayEvent] = hbaseSource,
-                       val withGui: Boolean = false,
-                       val dataCollectors: Map[String, MarketState => Option[AnyVal]],
-                        val marketState: MarketState = new MarketState())
-          extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
+        val replayer =
+          new Replayer(eventSource = hbaseSource, dataCollectors = Map() ++ collectors(variables))
+        replayer.run()
 
-        // Take the list of variables, use reflection to find the method to retrieve the
-        //  data for each variable (a function of MarketState),
-        //  and then produce a map of variables and methods, i.e. the collectors for the simulation.
+        logger.info("done.")
 
-        def variableToMethod(variable: String): MarketState => Option[AnyVal] =
-          classOf[MarketState].getMethod(variable) invoke _
-        val collectors: Seq[(String, MarketState => Option[AnyVal])] =
-          for(variable <- variables) yield (variable, variableToMethod(variable))
+        replayer.result
+      }
+
+      override def shuffledReplay(assetId: String, variables: util.List[String],
+                                    proportionShuffling: Double, windowSize: Int): util.List[util.Map[String, lang.Double]] = {
+
+        logger.info("Shuffled replay for " + assetId)
+        logger.info("Starting simulation... ")
+
+        val hbaseSource: Iterable[OrderReplayEvent] =
+          new HBaseRetriever(selectedAsset = assetId)
+
+        val shuffledData = new RandomWindowedPermutation(hbaseSource, proportionShuffling, windowSize)
 
         val replayer =
-          new Replayer(dataCollectors = Map() ++ collectors)
+          new Replayer(eventSource = shuffledData, dataCollectors = Map() ++ collectors(variables))
         replayer.run()
 
         logger.info("done.")

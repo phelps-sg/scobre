@@ -9,6 +9,7 @@ class ServerConf(args: Seq[String]) extends ReplayConf(args) {
 
   version("org.ccfea.tickdata.OrderReplayService" + BuildInfo.version + "b-" + BuildInfo.buildinfoBuildnumber +
             " (c) 2014 Steve Phelps")
+
   banner("""Usage: OrderReplayService [OPTION]...
            |Start the order-replay server.
            |Options:

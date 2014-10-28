@@ -38,5 +38,8 @@ service OrderReplay {
     * Replay tick events
     **/
    list<map<string,double>> replay(1:string assetId, 2:list<string> variables,
-                                                        3:string startDate, 4:string endDate)
+                                                        3:string startDate, 4:string endDate),
+
+   list<map<string,double>> shuffledReplay(1:string assetId, 2:list<string> variables,
+                                                        3:double proportionShuffling, 4:i32 windowSize),
 }
