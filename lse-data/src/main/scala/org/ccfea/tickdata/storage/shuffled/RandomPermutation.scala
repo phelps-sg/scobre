@@ -1,15 +1,14 @@
 package org.ccfea.tickdata.storage.shuffled
 
 import org.ccfea.tickdata.event.OrderReplayEvent
-
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
 
 /**
  * (C) Steve Phelps 2014
  */
-class RandomPermutation(val source: Iterable[OrderReplayEvent], val proportion: Double)
-    extends Iterable[OrderReplayEvent] {
+class RandomPermutation(source: Iterable[OrderReplayEvent], proportion: Double, val windowSize: Int = 1)
+      extends Iterable[OrderReplayEvent] {
 
   val tickList = source.iterator.toList
   var ticks: Array[OrderReplayEvent] = new Array[OrderReplayEvent](tickList.length)
@@ -19,14 +18,23 @@ class RandomPermutation(val source: Iterable[OrderReplayEvent], val proportion: 
     return ticks.iterator
   }
 
-  def shuffleTicks() = {
+  def shuffleTicks(): Unit = {
     tickList.copyToArray(ticks)
-    val n = math.round(ticks.length.toDouble * proportion).toInt
-    val positions: Seq[Int] = sampleWithoutReplacement(n, ticks.length)
-    val shuffledPositions = Random.shuffle(positions)
-    for(i <- 0 until positions.length) {
-      val a = positions(i)
-      val b = shuffledPositions(i)
+    if (proportion > 0.0) {
+      val numWindows = ticks.length / windowSize
+      val numShuffledWindows = math.round(proportion * numWindows).toInt
+      val windowsToShuffle = sampleWithoutReplacement(numShuffledWindows, numWindows)
+      val shuffledPositions = Random.shuffle(windowsToShuffle)
+      for(i <- 0 until windowsToShuffle.length) {
+        swapWindows(windowsToShuffle(i), shuffledPositions(i))
+      }
+     }
+  }
+
+  def swapWindows(window1: Int, window2: Int) = {
+    for(i <- 0 until windowSize) {
+      val a = window1 * windowSize + i
+      val b = window2 * windowSize + i
       val tmp = ticks(a)
       ticks(a) = ticks(b)
       ticks(b) = tmp

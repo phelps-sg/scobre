@@ -3,7 +3,7 @@ package org.ccfea.tickdata
 import org.ccfea.tickdata.collector.UnivariateTimeSeriesCollector
 import org.ccfea.tickdata.event.OrderReplayEvent
 import org.ccfea.tickdata.storage.csv.UnivariateCsvDataCollator
-import org.ccfea.tickdata.storage.shuffled.{RandomWindowedPermutation, RandomPermutation}
+import org.ccfea.tickdata.storage.shuffled.RandomPermutation
 
 import scala.Some
 import scala.util.Random
@@ -78,7 +78,7 @@ object ReplayOrders extends ReplayApplication {
       if (!conf.shuffle())
         hbaseEvents
       else
-        new RandomWindowedPermutation(hbaseEvents, conf.proportionShuffling(), conf.shuffleWindowSize())
+        new RandomPermutation(hbaseEvents, conf.proportionShuffling(), conf.shuffleWindowSize())
 
     val replayer =  new Replayer(eventSource, outFileName = conf.outFileName.get, dataCollector, marketState)
     replayer.run()

@@ -294,7 +294,7 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
   def process(ev: OrderSubmittedEvent): Unit = {
     val order = ev.order
     if (orderMap.contains(order.orderCode)) {
-      logger.warn("Submission using existing order code: " + order.orderCode)
+      logger.debug("Submission using existing order code: " + order.orderCode)
       book.remove(orderMap(order.orderCode))
     }
     order match {

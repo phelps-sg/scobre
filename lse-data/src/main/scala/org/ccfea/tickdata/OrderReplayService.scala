@@ -2,6 +2,8 @@ package org.ccfea.tickdata
 
 import java.{lang, util}
 
+import scala.collection.mutable
+
 import grizzled.slf4j.Logger
 import org.apache.thrift.server.TThreadPoolServer
 import org.apache.thrift.transport.TServerSocket
@@ -11,7 +13,7 @@ import org.ccfea.tickdata.conf.{BuildInfo, ServerConf}
 import org.ccfea.tickdata.event.OrderReplayEvent
 import org.ccfea.tickdata.simulator.{ClearingMarketState, MarketState}
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
-import org.ccfea.tickdata.storage.shuffled.RandomWindowedPermutation
+import org.ccfea.tickdata.storage.shuffled.RandomPermutation
 import org.ccfea.tickdata.storage.thrift.MultivariateThriftCollator
 import org.ccfea.tickdata.thrift.OrderReplay
 
@@ -25,6 +27,8 @@ import collection.JavaConversions._
  */
 object OrderReplayService extends ReplayApplication {
 
+  val shufflers = mutable.Map[String, RandomPermutation]()
+
   val logger = Logger("org.ccfea.tickdata.OrderReplayService")
 
   /**
@@ -37,6 +41,18 @@ object OrderReplayService extends ReplayApplication {
     def variableToMethod(variable: String): MarketState => Option[AnyVal] =
       classOf[MarketState].getMethod(variable) invoke _
     for (variable <- variables) yield (variable, variableToMethod(variable))
+  }
+
+  def getShuffledData(assetId: String, source: Iterable[OrderReplayEvent],
+                          proportionShuffling: Double, windowSize: Int): RandomPermutation = {
+    if (shufflers.contains(assetId)) {
+      shufflers(assetId)
+    } else {
+      val hbaseSource = new HBaseRetriever(selectedAsset = assetId)
+      val shuffler = new RandomPermutation(hbaseSource, proportionShuffling, windowSize)
+      shufflers(assetId) = shuffler
+      shuffler
+    }
   }
 
   def main(args: Array[String]): Unit = {
@@ -79,10 +95,8 @@ object OrderReplayService extends ReplayApplication {
         logger.info("Shuffled replay for " + assetId)
         logger.info("Starting simulation... ")
 
-        val hbaseSource: Iterable[OrderReplayEvent] =
-          new HBaseRetriever(selectedAsset = assetId)
-
-        val shuffledData = new RandomWindowedPermutation(hbaseSource, proportionShuffling, windowSize)
+        val source = new HBaseRetriever(selectedAsset = assetId)
+        val shuffledData = getShuffledData(assetId, source, proportionShuffling, windowSize)
 
         val replayer =
           new Replayer(eventSource = shuffledData, dataCollectors = Map() ++ collectors(variables))
