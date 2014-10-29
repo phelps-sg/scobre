@@ -242,8 +242,8 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
       order.setQuantity(ev.newVolume.toInt)
       insertOrder(order)
     } else {
-      logger.warn("Unknown order code when amending existing order: " + ev.order.orderCode)
-      logger.warn("Converting OrderRevisedEvent to OrderSubmittedEvent")
+      logger.debug("Unknown order code when amending existing order: " + ev.order.orderCode)
+      logger.debug("Converting OrderRevisedEvent to OrderSubmittedEvent")
       val newOrder = new LimitOrder(ev.order.orderCode, ev.newVolume, ev.newDirection, ev.newPrice)
       process(new OrderSubmittedEvent(ev.timeStamp, ev.messageSequenceNumber, ev.tiCode, newOrder))
     }
@@ -261,7 +261,7 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
       logger.debug("Removing from book: " + order)
       book.remove(order)
     } else {
-      logger.warn("Unknown order code when removing order: " + orderCode)
+      logger.debug("Unknown order code when removing order: " + orderCode)
     }
   }
 
@@ -272,7 +272,7 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
         logger.debug("Removing order " + orderCode + " from book: " + order)
         book.remove(order)
       } else {
-        logger.warn("Unknown order code when order filled: " + orderCode)
+        logger.debug("Unknown order code when order filled: " + orderCode)
       }
   }
 
@@ -287,7 +287,7 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
             Some(orderMap(ev.matchingOrder.orderCode))
           else None
     }  else {
-      logger.warn("unknown order code " + orderCode)
+      logger.debug("unknown order code " + orderCode)
     }
   }
 
@@ -310,8 +310,8 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
     ev.events match {
       case Nil => // Do nothing
       case (head:StartOfDataMarker) :: tail =>
-        logger.warn("Ignoring events tagged with broadCastUpdateAction='F'")
-        logger.warn("Ignoring events: " + tail)
+        logger.debug("Ignoring events tagged with broadCastUpdateAction='F'")
+        logger.debug("Ignoring events: " + tail)
       case head :: tail =>
         process(head)
         process(new MultipleEvent(tail))

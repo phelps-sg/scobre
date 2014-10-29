@@ -2,7 +2,7 @@ package org.ccfea.tickdata
 
 import java.{lang, util}
 
-import scala.collection.mutable
+import scala.collection.parallel
 
 import grizzled.slf4j.Logger
 import org.apache.thrift.server.TThreadPoolServer
@@ -27,7 +27,7 @@ import collection.JavaConversions._
  */
 object OrderReplayService extends ReplayApplication {
 
-  val shufflers = mutable.Map[String, RandomPermutation]()
+  var tickCache = Map[String, Seq[OrderReplayEvent]]()
 
   val logger = Logger("org.ccfea.tickdata.OrderReplayService")
 
@@ -45,17 +45,15 @@ object OrderReplayService extends ReplayApplication {
 
   def getShuffledData(assetId: String, source: Iterable[OrderReplayEvent],
                           proportionShuffling: Double, windowSize: Int): RandomPermutation = {
-    if (shufflers.contains(assetId)) {
-      val shuffler = shufflers(assetId)
-      shuffler.proportion = proportionShuffling
-      shuffler.windowSize = windowSize
-      shuffler
+    val ticks = if (tickCache.contains(assetId)) {
+      tickCache(assetId)
     } else {
       val hbaseSource = new HBaseRetriever(selectedAsset = assetId)
-      val shuffler = new RandomPermutation(hbaseSource, proportionShuffling, windowSize)
-      shufflers(assetId) = shuffler
-      shuffler
+      val data = hbaseSource.iterator.toList
+      tickCache += (assetId -> data)
+      data
     }
+    new RandomPermutation(ticks, proportionShuffling, windowSize)
   }
 
   def main(args: Array[String]): Unit = {
@@ -63,17 +61,17 @@ object OrderReplayService extends ReplayApplication {
     val conf = new ServerConf(args)
     val port: Int = conf.port()
 
-    val marketState = if (conf.explicitClearing()) new ClearingMarketState() else new MarketState()
-
-    class Replayer(val eventSource: Iterable[OrderReplayEvent],
-                   val dataCollectors: Map[String, MarketState => Option[AnyVal]],
-                    val marketState: MarketState = marketState)
-      extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
-
     val processor = new org.ccfea.tickdata.thrift.OrderReplay.Processor(new OrderReplay.Iface {
 
       override def replay(assetId: String, variables: java.util.List[String],
                             startDate: String, endDate: String): java.util.List[java.util.Map[String,java.lang.Double]] = {
+
+        val marketState = if (conf.explicitClearing()) new ClearingMarketState() else new MarketState()
+
+        class Replayer(val eventSource: Iterable[OrderReplayEvent],
+                       val dataCollectors: Map[String, MarketState => Option[AnyVal]],
+                        val marketState: MarketState = marketState)
+          extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
 
         logger.info("Using data for " + assetId + " between " + startDate + " and " + endDate)
 
@@ -97,6 +95,13 @@ object OrderReplayService extends ReplayApplication {
 
         logger.info("Shuffled replay for " + assetId + " with windowSize " + windowSize + " and percentage " + proportionShuffling)
         logger.info("Starting simulation... ")
+
+        val marketState = if (conf.explicitClearing()) new ClearingMarketState() else new MarketState()
+
+        class Replayer(val eventSource: Iterable[OrderReplayEvent],
+                       val dataCollectors: Map[String, MarketState => Option[AnyVal]],
+                        val marketState: MarketState = marketState)
+          extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
 
         val source = new HBaseRetriever(selectedAsset = assetId)
         val shuffledData = getShuffledData(assetId, source, proportionShuffling, windowSize)

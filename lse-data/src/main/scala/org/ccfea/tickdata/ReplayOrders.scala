@@ -78,7 +78,7 @@ object ReplayOrders extends ReplayApplication {
       if (!conf.shuffle())
         hbaseEvents
       else
-        new RandomPermutation(hbaseEvents, conf.proportionShuffling(), conf.shuffleWindowSize())
+        new RandomPermutation(hbaseEvents.iterator.toList, conf.proportionShuffling(), conf.shuffleWindowSize())
 
     val replayer =  new Replayer(eventSource, outFileName = conf.outFileName.get, dataCollector, marketState)
     replayer.run()
