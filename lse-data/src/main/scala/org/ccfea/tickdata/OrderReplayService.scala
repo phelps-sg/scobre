@@ -46,7 +46,10 @@ object OrderReplayService extends ReplayApplication {
   def getShuffledData(assetId: String, source: Iterable[OrderReplayEvent],
                           proportionShuffling: Double, windowSize: Int): RandomPermutation = {
     if (shufflers.contains(assetId)) {
-      shufflers(assetId)
+      val shuffler = shufflers(assetId)
+      shuffler.proportion = proportionShuffling
+      shuffler.windowSize = windowSize
+      shuffler
     } else {
       val hbaseSource = new HBaseRetriever(selectedAsset = assetId)
       val shuffler = new RandomPermutation(hbaseSource, proportionShuffling, windowSize)

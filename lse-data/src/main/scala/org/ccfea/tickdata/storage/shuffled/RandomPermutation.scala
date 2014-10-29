@@ -7,7 +7,7 @@ import scala.util.Random
 /**
  * (C) Steve Phelps 2014
  */
-class RandomPermutation(source: Iterable[OrderReplayEvent], proportion: Double, val windowSize: Int = 1)
+class RandomPermutation(source: Iterable[OrderReplayEvent], var proportion: Double, var windowSize: Int = 1)
       extends Iterable[OrderReplayEvent] {
 
   val tickList = source.iterator.toList
@@ -22,7 +22,7 @@ class RandomPermutation(source: Iterable[OrderReplayEvent], proportion: Double, 
     tickList.copyToArray(ticks)
     if (proportion > 0.0) {
       val numWindows = ticks.length / windowSize
-      val numShuffledWindows = math.round(proportion * numWindows).toInt
+      val numShuffledWindows = math.floor(proportion * numWindows).toInt
       val windowsToShuffle = sampleWithoutReplacement(numShuffledWindows, numWindows)
       val shuffledPositions = Random.shuffle(windowsToShuffle)
       for(i <- 0 until windowsToShuffle.length) {
