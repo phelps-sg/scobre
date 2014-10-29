@@ -36,11 +36,12 @@ def get_shuffled_data(asset, proportion, windowSize,
 
 #dataset = get_hf_data('GB0009252882', '2/3/2007', '3/3/2007')
 for window in [4 ** (x + 1) for x in range(8)]:
-    for percentage in 100 * arange(0, 1.1, 0.1):
+    for proportion in arange(0, 1.1, 0.1):
+        percentage = round(proportion * 100)
         print "window size = %d" % window
-        print "percentage = %d" % percentage 
+        print "proportion = %f" % proportion 
         print "Fetching data..."
-        dataset = get_shuffled_data('BHP', percentage, window)
+        dataset = get_shuffled_data('BHP', proportion, window)
         print "done."
         print "Writing data..."
         dataset.to_csv('/home/sphelps/tmp/orderflow-shuffle/bhp-shuffled-ws%d-p%d.csv' % (window, percentage))

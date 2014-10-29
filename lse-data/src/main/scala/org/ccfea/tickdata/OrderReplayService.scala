@@ -95,7 +95,7 @@ object OrderReplayService extends ReplayApplication {
       override def shuffledReplay(assetId: String, variables: util.List[String],
                                     proportionShuffling: Double, windowSize: Int): util.List[util.Map[String, lang.Double]] = {
 
-        logger.info("Shuffled replay for " + assetId)
+        logger.info("Shuffled replay for " + assetId + " with windowSize " + windowSize + " and percentage " + proportionShuffling)
         logger.info("Starting simulation... ")
 
         val source = new HBaseRetriever(selectedAsset = assetId)
