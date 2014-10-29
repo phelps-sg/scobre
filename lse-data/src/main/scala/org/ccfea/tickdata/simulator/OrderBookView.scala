@@ -7,7 +7,7 @@ import java.awt.BorderLayout
 
 import org.ccfea.tickdata.event.OrderReplayEvent
 
-import scala.collection.mutable
+import scala.collection.mutable.{Subscriber, Publisher}
 
 /**
  * A visualisation of the current state of the order book.
@@ -15,7 +15,7 @@ import scala.collection.mutable
  * (c) Steve Phelps 2013
  */
 class OrderBookView(val market: MarketState, val maxLevels: Int = 12)
-    extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher[OrderReplayEvent]] {
+    extends Subscriber[OrderReplayEvent, Publisher[OrderReplayEvent]] {
 
   market.subscribe(this)
 
@@ -34,7 +34,7 @@ class OrderBookView(val market: MarketState, val maxLevels: Int = 12)
   myFrame.pack()
   myFrame.setVisible(true)
 
-  def notify(pub: mutable.Publisher[OrderReplayEvent], ev: OrderReplayEvent) = {
+  def notify(pub: Publisher[OrderReplayEvent], ev: OrderReplayEvent) = {
     SwingUtilities.invokeAndWait(new Runnable() {
       def run() = {
         orderBookView.update()

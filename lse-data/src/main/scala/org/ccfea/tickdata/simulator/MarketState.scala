@@ -1,27 +1,22 @@
 package org.ccfea.tickdata.simulator
 
 import net.sourceforge.jabm.SimulationTime
-
 import net.sourceforge.jasa.agent.SimpleTradingAgent
-
-import collection.JavaConversions._
-
 import net.sourceforge.jasa.market.FourHeapOrderBook
 
 import grizzled.slf4j.Logger
 
-import java.util.{Observable, GregorianCalendar, Observer}
+import java.util.GregorianCalendar
 
 import org.ccfea.tickdata.event._
 import org.ccfea.tickdata.event.OrderFilledEvent
 import org.ccfea.tickdata.event.OrderMatchedEvent
-
-import scala.Some
-
 import org.ccfea.tickdata.order.{TradeDirection, AbstractOrder, LimitOrder}
 
 import scala.beans.BeanProperty
-import scala.collection.mutable
+import collection.JavaConversions._
+
+import scala.collection.mutable.{Publisher, Subscriber, Map}
 
 /**
  * The state of the market at a single point in time.  This class contains a mutable
@@ -31,8 +26,8 @@ import scala.collection.mutable
  *
  * (c) Steve Phelps 2013
  */
-class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher[OrderReplayEvent]]
-    with mutable.Publisher[OrderReplayEvent] {
+class MarketState extends Subscriber[OrderReplayEvent, Publisher[OrderReplayEvent]]
+    with Publisher[OrderReplayEvent] {
 
   /**
    * The current state of the book.
@@ -43,13 +38,7 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
   /**
    * Lookup table mapping order-codes to Orders.
    */
-  val orderMap = collection.mutable.Map[String, net.sourceforge.jasa.market.Order]()
-
-  /**
-   * Lookup table mapping each transaction code to a
-   *  list of the corresponding matched orders.
-   */
-//  val transactionMap = collection.mutable.Map[String, mutable.ListBuffer[AbstractOrder]]()
+  val orderMap = Map[String, net.sourceforge.jasa.market.Order]()
 
   /**
    * The time of the most recent event.
@@ -85,26 +74,8 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
 
   val logger = Logger(classOf[MarketState])
 
-  /**
-   * Convert an order-replay order into a JASA order.
-   *
-   * @param o  The order to be converted.
-   * @return   An order which can be processed by the JASA classes.
-   */
-  def toJasaOrder(o: AbstractOrder): net.sourceforge.jasa.market.Order = {
-    val order = new net.sourceforge.jasa.market.Order()
-    o match {
-      case lo:LimitOrder =>
-        order.setPrice(lo.price.toDouble)
-        order.setQuantity(lo.aggregateSize.toInt)
-        order.setAgent(new SimpleTradingAgent())
-        order.setIsBid(lo.tradeDirection == TradeDirection.Buy)
-    }
-    order.setTimeStamp(time.get)
-    order
-  }
 
-  override def notify(pub: mutable.Publisher[OrderReplayEvent], event: OrderReplayEvent): Unit = {
+  override def notify(pub: Publisher[OrderReplayEvent], event: OrderReplayEvent): Unit = {
     newEvent(event)
   }
 
@@ -130,6 +101,204 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
   def postProcessing(ev: OrderReplayEvent): Unit = {
     stateTransition(ev)
     checkConsistency(ev)
+  }
+
+  /**
+   * Process event-specific state changes.
+   *
+   * @param ev  The subsequent event in the replay sequence.
+   */
+  def process(ev: OrderReplayEvent): Unit = {
+    logger.debug("Processing " + ev)
+    ev match {
+      case tr: TransactionEvent           =>  process(tr)
+      case or: OrderRemovedEvent          =>  process(or)
+      case of: OrderFilledEvent           =>  process(of)
+      case lo: OrderSubmittedEvent        =>  process(lo)
+      case me: MultipleEvent              =>  process(me)
+      case om: OrderMatchedEvent          =>  process(om)
+      case or: OrderRevisedEvent          =>  process(or)
+      case _ => logger.error("Unknown event type: " + ev)
+    }
+  }
+
+  def process(ev: OrderRevisedEvent): Unit = {
+    val orderCode = ev.order.orderCode
+    if (orderMap.contains(orderCode)) {
+      val order = orderMap(orderCode)
+      book.remove(order)
+      order.setPrice(ev.newPrice.doubleValue())
+      order.setQuantity(ev.newVolume.toInt)
+      insertOrder(order)
+    } else {
+      logger.debug("Unknown order code when amending existing order: " + ev.order.orderCode)
+      logger.debug("Converting OrderRevisedEvent to OrderSubmittedEvent")
+      val newOrder = new LimitOrder(ev.order.orderCode, ev.newVolume, ev.newDirection, ev.newPrice)
+      process(new OrderSubmittedEvent(ev.timeStamp, ev.messageSequenceNumber, ev.tiCode, newOrder))
+    }
+  }
+
+  def process(ev: TransactionEvent): Unit = {
+    this.lastTransactionPrice = Some(ev.transactionPrice.toDouble)
+    this.volume = Some(ev.tradeSize)
+  }
+
+  def process(ev: OrderRemovedEvent): Unit = {
+    val orderCode = ev.order.orderCode
+    if (orderMap.contains(orderCode)) {
+      val order = orderMap(orderCode)
+      logger.debug("Removing from book: " + order)
+      book.remove(order)
+    } else {
+      logger.debug("Unknown order code when removing order: " + orderCode)
+    }
+  }
+
+  def process(ev: OrderFilledEvent): Unit = {
+    val orderCode = ev.order.orderCode
+      if (orderMap.contains(orderCode)) {
+        val order = orderMap(orderCode)
+        logger.debug("Removing filled order " + orderCode + " from book: " + order)
+        book.remove(order)
+      } else {
+        logger.debug("Unknown order code when order filled: " + orderCode)
+      }
+  }
+
+  def process(ev: OrderMatchedEvent): Unit = {
+    val orderCode = ev.order.orderCode
+    if (orderMap.contains(orderCode)) {
+      val order = orderMap(orderCode)
+      adjustQuantity(order, ev)
+      logger.debug("partially filled order " + order)
+      val matchedOrder =
+          if (orderMap.contains(ev.matchingOrder.orderCode))
+            Some(orderMap(ev.matchingOrder.orderCode))
+          else None
+    }  else {
+      logger.debug("unknown order code " + orderCode)
+    }
+  }
+
+  def process(ev: OrderSubmittedEvent): Unit = {
+    val order = ev.order
+    if (orderMap.contains(order.orderCode)) {
+      logger.debug("Submission using existing order code: " + order.orderCode)
+      book.remove(orderMap(order.orderCode))
+    }
+    order match {
+       case lo: LimitOrder =>
+         val newOrder = toJasaOrder(order)
+         insertOrder(newOrder)
+         orderMap(order.orderCode) = newOrder
+       case _ =>
+    }
+  }
+
+  def process(ev: MultipleEvent): Unit = {
+    ev.events match {
+      case Nil => // Do nothing
+      case (head:StartOfDataMarker) :: tail =>
+        logger.debug("Ignoring events tagged with broadCastUpdateAction='F'")
+        logger.debug("Ignoring events: " + tail)
+      case head :: tail =>
+        process(head)
+        process(new MultipleEvent(tail))
+    }
+  }
+
+  def adjustQuantity(jasaOrder: net.sourceforge.jasa.market.Order,
+                      ev: OrderMatchedEvent): Unit = {
+    logger.debug("Adjusting qty for order based on partial match" + ev)
+    jasaOrder.setQuantity(jasaOrder.getQuantity - ev.tradeSize.toInt)
+    logger.debug("New order = " + jasaOrder)
+//    assert(jasaOrder.getQuantity >= 0)
+    if (jasaOrder.getQuantity <= 0) {
+      logger.warn("Removing order with zero or negative volume from book before full match: " + jasaOrder)
+      book.remove(jasaOrder)
+    }
+  }
+
+  /**
+   * Check the consistency of the market after processing the given event,
+   * and take any remedial action if the state is inconsistent.
+   *
+   * @param ev  The event that has just been processed.
+   */
+  def checkConsistency(ev: OrderReplayEvent): Unit = {
+    if (this.auctionState == AuctionState.continuous) {
+//      logger.debug("quote = " + quote)
+//      if (hour > 8) {
+//        var consistent = false
+//        do {
+//          quote match {
+//            case Quote(Some(bid), Some(ask)) =>
+//              if (bid > ask) {
+//                logger.warn("Artificially clearing book to maintain consistency following event " + ev)
+//                book.remove(book.getHighestUnmatchedBid)
+//                book.remove(book.getLowestUnmatchedAsk)
+//              } else {
+//                consistent = true
+//              }
+//            case _ => consistent = true
+//          }
+//        } while (!consistent)
+//      }
+    }
+  }
+
+  def insertOrder(order: net.sourceforge.jasa.market.Order) = {
+    if (order.isBid) {
+      book.insertUnmatchedBid(order)
+    } else {
+      book.insertUnmatchedAsk(order)
+    }
+  }
+
+  def printState() = {
+    book.printState()
+  }
+
+  implicit def price(order: net.sourceforge.jasa.market.Order) = if (order != null) Some(order.getPrice) else None
+  def quote = new Quote(book.getHighestUnmatchedBid, book.getLowestUnmatchedAsk)
+
+  def midPrice: Option[Double] = {
+    quote match {
+      case Quote(None,      None)      => None
+      case Quote(Some(bid), None)      => Some(bid)
+      case Quote(None,      Some(ask)) => Some(ask)
+      case Quote(Some(bid), Some(ask)) => Some((bid + ask) / 2.0)
+    }
+  }
+
+  def calendar = {
+    val cal = new GregorianCalendar()
+    cal.setTime(new java.util.Date(time.get.getTicks))
+    cal
+  }
+
+  def day = {
+    calendar.get(java.util.Calendar.DAY_OF_MONTH)
+  }
+
+  def hour = {
+    calendar.get(java.util.Calendar.HOUR_OF_DAY)
+  }
+
+  def minute = {
+    calendar.get(java.util.Calendar.MINUTE)
+  }
+
+  /**
+   * Bean-compatible getter for Java clients.
+   *
+   * @return  The current state of the order-book.
+   */
+  def getLastTransactionPrice: Double = {
+    lastTransactionPrice match {
+      case Some(price)  => price
+      case None         => Double.NaN
+    }
   }
 
   /**
@@ -213,204 +382,23 @@ class MarketState extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
     this.auctionState = newState
   }
 
-
   /**
-   * Process event-specific state changes.
+   * Convert an order-replay order into a JASA order.
    *
-   * @param ev  The subsequent event in the replay sequence.
+   * @param o  The order to be converted.
+   * @return   An order which can be processed by the JASA classes.
    */
-  def process(ev: OrderReplayEvent): Unit = {
-    logger.debug("Processing " + ev)
-    ev match {
-      case tr: TransactionEvent           =>  process(tr)
-      case or: OrderRemovedEvent          =>  process(or)
-      case of: OrderFilledEvent           =>  process(of)
-      case lo: OrderSubmittedEvent        =>  process(lo)
-      case me: MultipleEvent              =>  process(me)
-      case om: OrderMatchedEvent          =>  process(om)
-      case or: OrderRevisedEvent          =>  process(or)
-      case _ => logger.error("Unknown event type: " + ev)
+  def toJasaOrder(o: AbstractOrder): net.sourceforge.jasa.market.Order = {
+    val order = new net.sourceforge.jasa.market.Order()
+    o match {
+      case lo:LimitOrder =>
+        order.setPrice(lo.price.toDouble)
+        order.setQuantity(lo.aggregateSize.toInt)
+        order.setAgent(new SimpleTradingAgent())
+        order.setIsBid(lo.tradeDirection == TradeDirection.Buy)
     }
-  }
-
-  def process(ev: OrderRevisedEvent): Unit = {
-    val orderCode = ev.order.orderCode
-    if (orderMap.contains(orderCode)) {
-      val order = orderMap(orderCode)
-      book.remove(order)
-      order.setPrice(ev.newPrice.doubleValue())
-      order.setQuantity(ev.newVolume.toInt)
-      insertOrder(order)
-    } else {
-      logger.debug("Unknown order code when amending existing order: " + ev.order.orderCode)
-      logger.debug("Converting OrderRevisedEvent to OrderSubmittedEvent")
-      val newOrder = new LimitOrder(ev.order.orderCode, ev.newVolume, ev.newDirection, ev.newPrice)
-      process(new OrderSubmittedEvent(ev.timeStamp, ev.messageSequenceNumber, ev.tiCode, newOrder))
-    }
-  }
-
-  def process(ev: TransactionEvent): Unit = {
-    this.lastTransactionPrice = Some(ev.transactionPrice.toDouble)
-    this.volume = Some(ev.tradeSize)
-  }
-
-  def process(ev: OrderRemovedEvent): Unit = {
-    val orderCode = ev.order.orderCode
-    if (orderMap.contains(orderCode)) {
-      val order = orderMap(orderCode)
-      logger.debug("Removing from book: " + order)
-      book.remove(order)
-    } else {
-      logger.debug("Unknown order code when removing order: " + orderCode)
-    }
-  }
-
-  def process(ev: OrderFilledEvent): Unit = {
-    val orderCode = ev.order.orderCode
-      if (orderMap.contains(orderCode)) {
-        val order = orderMap(orderCode)
-        logger.debug("Removing order " + orderCode + " from book: " + order)
-        book.remove(order)
-      } else {
-        logger.debug("Unknown order code when order filled: " + orderCode)
-      }
-  }
-
-  def process(ev: OrderMatchedEvent): Unit = {
-    val orderCode = ev.order.orderCode
-    if (orderMap.contains(orderCode)) {
-      val order = orderMap(orderCode)
-      adjustQuantity(order, ev)
-      logger.debug("partially filled order " + order)
-      val matchedOrder =
-          if (orderMap.contains(ev.matchingOrder.orderCode))
-            Some(orderMap(ev.matchingOrder.orderCode))
-          else None
-    }  else {
-      logger.debug("unknown order code " + orderCode)
-    }
-  }
-
-  def process(ev: OrderSubmittedEvent): Unit = {
-    val order = ev.order
-    if (orderMap.contains(order.orderCode)) {
-      logger.debug("Submission using existing order code: " + order.orderCode)
-      book.remove(orderMap(order.orderCode))
-    }
-    order match {
-       case lo: LimitOrder =>
-         val newOrder = toJasaOrder(order)
-         insertOrder(newOrder)
-         orderMap(order.orderCode) = newOrder
-       case _ =>
-    }
-  }
-
-  def process(ev: MultipleEvent): Unit = {
-    ev.events match {
-      case Nil => // Do nothing
-      case (head:StartOfDataMarker) :: tail =>
-        logger.debug("Ignoring events tagged with broadCastUpdateAction='F'")
-        logger.debug("Ignoring events: " + tail)
-      case head :: tail =>
-        process(head)
-        process(new MultipleEvent(tail))
-    }
-  }
-
-  def adjustQuantity(jasaOrder: net.sourceforge.jasa.market.Order,
-                      ev: OrderMatchedEvent): Unit = {
-    logger.debug("Adjusting qty for order based on partial match" + ev)
-    jasaOrder.setQuantity(jasaOrder.getQuantity - ev.tradeSize.toInt)
-    logger.debug("New order = " + jasaOrder)
-//    assert(jasaOrder.getQuantity >= 0)
-    if (jasaOrder.getQuantity <= 0) {
-      logger.warn("Removing order with zero or negative volume from book before full match: " + jasaOrder)
-      book.remove(jasaOrder)
-    }
-  }
-
-
-  /**
-   * Check the consistency of the market after processing the given event,
-   * and take any remedial action if the state is inconsistent.
-   *
-   * @param ev  The event that has just been processed.
-   */
-  def checkConsistency(ev: OrderReplayEvent): Unit = {
-    if (this.auctionState == AuctionState.continuous) {
-//      logger.debug("quote = " + quote)
-//      if (hour > 8) {
-//        var consistent = false
-//        do {
-//          quote match {
-//            case Quote(Some(bid), Some(ask)) =>
-//              if (bid > ask) {
-//                logger.warn("Artificially clearing book to maintain consistency following event " + ev)
-//                book.remove(book.getHighestUnmatchedBid)
-//                book.remove(book.getLowestUnmatchedAsk)
-//              } else {
-//                consistent = true
-//              }
-//            case _ => consistent = true
-//          }
-//        } while (!consistent)
-//      }
-    }
-  }
-
-  def insertOrder(order: net.sourceforge.jasa.market.Order) = {
-    if (order.isBid) {
-      book.insertUnmatchedBid(order)
-    } else {
-      book.insertUnmatchedAsk(order)
-    }
-  }
-
-  def printState() = {
-    book.printState()
-  }
-
-  implicit def price(order: net.sourceforge.jasa.market.Order) = if (order != null) Some(order.getPrice) else None
-  def quote = new Quote(book.getHighestUnmatchedBid, book.getLowestUnmatchedAsk)
-
-  def midPrice: Option[Double] = {
-    quote match {
-      case Quote(None,      None)      => None
-      case Quote(Some(bid), None)      => Some(bid)
-      case Quote(None,      Some(ask)) => Some(ask)
-      case Quote(Some(bid), Some(ask)) => Some((bid + ask) / 2.0)
-    }
-  }
-
-  def calendar = {
-    val cal = new GregorianCalendar()
-    cal.setTime(new java.util.Date(time.get.getTicks))
-    cal
-  }
-
-  def day = {
-    calendar.get(java.util.Calendar.DAY_OF_MONTH)
-  }
-
-  def hour = {
-    calendar.get(java.util.Calendar.HOUR_OF_DAY)
-  }
-
-  def minute = {
-    calendar.get(java.util.Calendar.MINUTE)
-  }
-
-  /**
-   * Bean-compatible getter for Java clients.
-   *
-   * @return  The current state of the order-book.
-   */
-  def getLastTransactionPrice: Double = {
-    lastTransactionPrice match {
-      case Some(price)  => price
-      case None         => Double.NaN
-    }
+    order.setTimeStamp(time.get)
+    order
   }
 
 }

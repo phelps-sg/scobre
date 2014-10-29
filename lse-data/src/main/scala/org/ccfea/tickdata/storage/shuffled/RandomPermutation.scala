@@ -43,11 +43,8 @@ class RandomPermutation(val source: Seq[OrderReplayEvent], val proportion: Doubl
   def sampleWithoutReplacement(n: Int, N: Int): Seq[Int] = {
     var t: Int = 0
     var m: Int = 0
-
     val samples = new ListBuffer[Int]()
-
     while (m < n) {
-
       if ((N - t) * Random.nextDouble() >= n - m) {
         t = t + 1
       } else {
