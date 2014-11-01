@@ -4,6 +4,9 @@ import net.sourceforge.jasa.market.Order
 import org.ccfea.tickdata.event.{OrderFilledEvent, OrderMatchedEvent, OrderReplayEvent}
 
 /**
+ * A market-state in which the uncrossing is performed explicitly by the simulator,
+ * as opposed to being implied by OrderFilledEvent and OrderMatchedEvent.
+ *
  * (C) Steve Phelps 2014
  */
 class ClearingMarketState extends MarketState {
