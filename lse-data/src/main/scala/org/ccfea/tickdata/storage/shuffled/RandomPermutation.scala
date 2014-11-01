@@ -10,7 +10,8 @@ import scala.util.Random
 class RandomPermutation(val source: Seq[OrderReplayEvent], val proportion: Double, val windowSize: Int = 1)
       extends Iterable[OrderReplayEvent] {
 
-  var ticks: Array[OrderReplayEvent] = new Array[OrderReplayEvent](source.length)
+  val n: Int = source.length - (source.length % windowSize)
+  var ticks: Array[OrderReplayEvent] = new Array[OrderReplayEvent](n)
 
   override def iterator: Iterator[OrderReplayEvent] = {
     shuffleTicks()
@@ -18,7 +19,7 @@ class RandomPermutation(val source: Seq[OrderReplayEvent], val proportion: Doubl
   }
 
   def shuffleTicks(): Unit = {
-    source.copyToArray(ticks)
+    source.copyToArray(ticks, 0, n)
     if (proportion > 0.0) {
       val numWindows = ticks.length / windowSize
       val numShuffledWindows = math.floor(proportion * numWindows).toInt
