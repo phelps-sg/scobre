@@ -13,7 +13,7 @@ import org.ccfea.tickdata.conf.{BuildInfo, ServerConf}
 import org.ccfea.tickdata.event.OrderReplayEvent
 import org.ccfea.tickdata.simulator.{ClearingMarketState, MarketState}
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
-import org.ccfea.tickdata.storage.shuffled.RandomPermutation
+import org.ccfea.tickdata.storage.shuffled.{IntraWindowRandomPermutation, RandomPermutation}
 import org.ccfea.tickdata.storage.thrift.MultivariateThriftCollator
 import org.ccfea.tickdata.thrift.OrderReplay
 
@@ -44,7 +44,7 @@ object OrderReplayService extends ReplayApplication {
   }
 
   def getShuffledData(assetId: String, source: Iterable[OrderReplayEvent],
-                          proportionShuffling: Double, windowSize: Int): RandomPermutation = {
+                          proportionShuffling: Double, windowSize: Int, intraWindow: Boolean): RandomPermutation = {
     val ticks = if (tickCache.contains(assetId)) {
       tickCache(assetId)
     } else {
@@ -53,7 +53,10 @@ object OrderReplayService extends ReplayApplication {
       tickCache += (assetId -> data)
       data
     }
-    new RandomPermutation(ticks, proportionShuffling, windowSize)
+    if (intraWindow)
+      new IntraWindowRandomPermutation(ticks, proportionShuffling, windowSize)
+    else
+      new RandomPermutation(ticks, proportionShuffling, windowSize)
   }
 
   def main(args: Array[String]): Unit = {
@@ -91,7 +94,8 @@ object OrderReplayService extends ReplayApplication {
       }
 
       override def shuffledReplay(assetId: String, variables: util.List[String],
-                                    proportionShuffling: Double, windowSize: Int): util.List[util.Map[String, lang.Double]] = {
+                                    proportionShuffling: Double, windowSize: Int, intraWindow: Boolean):
+                                                util.List[util.Map[String, lang.Double]] = {
 
         logger.info("Shuffled replay for " + assetId + " with windowSize " + windowSize + " and percentage " + proportionShuffling)
         logger.info("Starting simulation... ")
@@ -104,7 +108,7 @@ object OrderReplayService extends ReplayApplication {
           extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
 
         val source = new HBaseRetriever(selectedAsset = assetId)
-        val shuffledData = getShuffledData(assetId, source, proportionShuffling, windowSize)
+        val shuffledData = getShuffledData(assetId, source, proportionShuffling, windowSize, intraWindow)
 
         val replayer =
           new Replayer(eventSource = shuffledData, dataCollectors = Map() ++ collectors(variables))

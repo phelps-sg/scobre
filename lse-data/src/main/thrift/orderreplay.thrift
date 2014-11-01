@@ -20,19 +20,11 @@
 namespace java org.ccfea.tickdata.thrift
 namespace py orderreplay
 
-//
-//struct TimeSeriesDatum {
-//    1:i64 time,
-//    2:double price
-//}
-
 /**
  * Order-book replay service
  */
 service OrderReplay {
 
-
-//   list<TimeSeriesDatum> replay(1:string assetId, 2:string property, 3:string startDate, 4:string endDate)
 
    /**
     * Replay tick events
@@ -41,5 +33,6 @@ service OrderReplay {
                                                         3:string startDate, 4:string endDate),
 
    list<map<string,double>> shuffledReplay(1:string assetId, 2:list<string> variables,
-                                                        3:double proportionShuffling, 4:i32 windowSize),
+                                                        3:double proportionShuffling, 4:i32 windowSize,
+                                                        5:bool intraWindow)
 }

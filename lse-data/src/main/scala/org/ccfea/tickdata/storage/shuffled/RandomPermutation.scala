@@ -18,8 +18,12 @@ class RandomPermutation(val source: Seq[OrderReplayEvent], val proportion: Doubl
     return ticks.iterator
   }
 
-  def shuffleTicks(): Unit = {
+  def initialise(): Unit = {
     source.copyToArray(ticks, 0, n)
+  }
+
+  def shuffleTicks(): Unit = {
+    initialise()
     if (proportion > 0.0) {
       val numWindows = ticks.length / windowSize
       val numShuffledWindows = math.floor(proportion * numWindows).toInt

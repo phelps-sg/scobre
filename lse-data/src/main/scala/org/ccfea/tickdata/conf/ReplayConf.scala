@@ -12,6 +12,6 @@ class ReplayConf(args: Seq[String]) extends ScallopConf(args) {
 
   version("org.ccfea.tickdata.OrderReplay " + BuildInfo.version + "-b" + BuildInfo.buildinfoBuildnumber
              + " (c) 2014 Steve Phelps")
-  val explicitClearing = opt[Boolean](default = Some(false), descr="Explicitly clear the market after each event")
+  val explicitClearing = opt[Boolean](default = Some(false), descr="Explicitly uncross the market after each event")
 }
 

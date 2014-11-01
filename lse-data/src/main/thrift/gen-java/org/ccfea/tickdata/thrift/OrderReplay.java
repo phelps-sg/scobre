@@ -48,7 +48,7 @@ public class OrderReplay {
      */
     public List<Map<String,Double>> replay(String assetId, List<String> variables, String startDate, String endDate) throws org.apache.thrift.TException;
 
-    public List<Map<String,Double>> shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize) throws org.apache.thrift.TException;
+    public List<Map<String,Double>> shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow) throws org.apache.thrift.TException;
 
   }
 
@@ -56,7 +56,7 @@ public class OrderReplay {
 
     public void replay(String assetId, List<String> variables, String startDate, String endDate, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.replay_call> resultHandler) throws org.apache.thrift.TException;
 
-    public void shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.shuffledReplay_call> resultHandler) throws org.apache.thrift.TException;
+    public void shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.shuffledReplay_call> resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -106,19 +106,20 @@ public class OrderReplay {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "replay failed: unknown result");
     }
 
-    public List<Map<String,Double>> shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize) throws org.apache.thrift.TException
+    public List<Map<String,Double>> shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow) throws org.apache.thrift.TException
     {
-      send_shuffledReplay(assetId, variables, proportionShuffling, windowSize);
+      send_shuffledReplay(assetId, variables, proportionShuffling, windowSize, intraWindow);
       return recv_shuffledReplay();
     }
 
-    public void send_shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize) throws org.apache.thrift.TException
+    public void send_shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow) throws org.apache.thrift.TException
     {
       shuffledReplay_args args = new shuffledReplay_args();
       args.setAssetId(assetId);
       args.setVariables(variables);
       args.setProportionShuffling(proportionShuffling);
       args.setWindowSize(windowSize);
+      args.setIntraWindow(intraWindow);
       sendBase("shuffledReplay", args);
     }
 
@@ -191,9 +192,9 @@ public class OrderReplay {
       }
     }
 
-    public void shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, org.apache.thrift.async.AsyncMethodCallback<shuffledReplay_call> resultHandler) throws org.apache.thrift.TException {
+    public void shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, org.apache.thrift.async.AsyncMethodCallback<shuffledReplay_call> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      shuffledReplay_call method_call = new shuffledReplay_call(assetId, variables, proportionShuffling, windowSize, resultHandler, this, ___protocolFactory, ___transport);
+      shuffledReplay_call method_call = new shuffledReplay_call(assetId, variables, proportionShuffling, windowSize, intraWindow, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -203,12 +204,14 @@ public class OrderReplay {
       private List<String> variables;
       private double proportionShuffling;
       private int windowSize;
-      public shuffledReplay_call(String assetId, List<String> variables, double proportionShuffling, int windowSize, org.apache.thrift.async.AsyncMethodCallback<shuffledReplay_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private boolean intraWindow;
+      public shuffledReplay_call(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, org.apache.thrift.async.AsyncMethodCallback<shuffledReplay_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.assetId = assetId;
         this.variables = variables;
         this.proportionShuffling = proportionShuffling;
         this.windowSize = windowSize;
+        this.intraWindow = intraWindow;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
@@ -218,6 +221,7 @@ public class OrderReplay {
         args.setVariables(variables);
         args.setProportionShuffling(proportionShuffling);
         args.setWindowSize(windowSize);
+        args.setIntraWindow(intraWindow);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -285,7 +289,7 @@ public class OrderReplay {
 
       public shuffledReplay_result getResult(I iface, shuffledReplay_args args) throws org.apache.thrift.TException {
         shuffledReplay_result result = new shuffledReplay_result();
-        result.success = iface.shuffledReplay(args.assetId, args.variables, args.proportionShuffling, args.windowSize);
+        result.success = iface.shuffledReplay(args.assetId, args.variables, args.proportionShuffling, args.windowSize, args.intraWindow);
         return result;
       }
     }
@@ -1463,6 +1467,7 @@ public class OrderReplay {
     private static final org.apache.thrift.protocol.TField VARIABLES_FIELD_DESC = new org.apache.thrift.protocol.TField("variables", org.apache.thrift.protocol.TType.LIST, (short)2);
     private static final org.apache.thrift.protocol.TField PROPORTION_SHUFFLING_FIELD_DESC = new org.apache.thrift.protocol.TField("proportionShuffling", org.apache.thrift.protocol.TType.DOUBLE, (short)3);
     private static final org.apache.thrift.protocol.TField WINDOW_SIZE_FIELD_DESC = new org.apache.thrift.protocol.TField("windowSize", org.apache.thrift.protocol.TType.I32, (short)4);
+    private static final org.apache.thrift.protocol.TField INTRA_WINDOW_FIELD_DESC = new org.apache.thrift.protocol.TField("intraWindow", org.apache.thrift.protocol.TType.BOOL, (short)5);
 
     private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
     static {
@@ -1474,13 +1479,15 @@ public class OrderReplay {
     public List<String> variables; // required
     public double proportionShuffling; // required
     public int windowSize; // required
+    public boolean intraWindow; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
       ASSET_ID((short)1, "assetId"),
       VARIABLES((short)2, "variables"),
       PROPORTION_SHUFFLING((short)3, "proportionShuffling"),
-      WINDOW_SIZE((short)4, "windowSize");
+      WINDOW_SIZE((short)4, "windowSize"),
+      INTRA_WINDOW((short)5, "intraWindow");
 
       private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -1503,6 +1510,8 @@ public class OrderReplay {
             return PROPORTION_SHUFFLING;
           case 4: // WINDOW_SIZE
             return WINDOW_SIZE;
+          case 5: // INTRA_WINDOW
+            return INTRA_WINDOW;
           default:
             return null;
         }
@@ -1545,6 +1554,7 @@ public class OrderReplay {
     // isset id assignments
     private static final int __PROPORTIONSHUFFLING_ISSET_ID = 0;
     private static final int __WINDOWSIZE_ISSET_ID = 1;
+    private static final int __INTRAWINDOW_ISSET_ID = 2;
     private byte __isset_bitfield = 0;
     public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
@@ -1558,6 +1568,8 @@ public class OrderReplay {
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.DOUBLE)));
       tmpMap.put(_Fields.WINDOW_SIZE, new org.apache.thrift.meta_data.FieldMetaData("windowSize", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.INTRA_WINDOW, new org.apache.thrift.meta_data.FieldMetaData("intraWindow", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.BOOL)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(shuffledReplay_args.class, metaDataMap);
     }
@@ -1569,7 +1581,8 @@ public class OrderReplay {
       String assetId,
       List<String> variables,
       double proportionShuffling,
-      int windowSize)
+      int windowSize,
+      boolean intraWindow)
     {
       this();
       this.assetId = assetId;
@@ -1578,6 +1591,8 @@ public class OrderReplay {
       setProportionShufflingIsSet(true);
       this.windowSize = windowSize;
       setWindowSizeIsSet(true);
+      this.intraWindow = intraWindow;
+      setIntraWindowIsSet(true);
     }
 
     /**
@@ -1597,6 +1612,7 @@ public class OrderReplay {
       }
       this.proportionShuffling = other.proportionShuffling;
       this.windowSize = other.windowSize;
+      this.intraWindow = other.intraWindow;
     }
 
     public shuffledReplay_args deepCopy() {
@@ -1611,6 +1627,8 @@ public class OrderReplay {
       this.proportionShuffling = 0.0;
       setWindowSizeIsSet(false);
       this.windowSize = 0;
+      setIntraWindowIsSet(false);
+      this.intraWindow = false;
     }
 
     public String getAssetId() {
@@ -1722,6 +1740,29 @@ public class OrderReplay {
       __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __WINDOWSIZE_ISSET_ID, value);
     }
 
+    public boolean isIntraWindow() {
+      return this.intraWindow;
+    }
+
+    public shuffledReplay_args setIntraWindow(boolean intraWindow) {
+      this.intraWindow = intraWindow;
+      setIntraWindowIsSet(true);
+      return this;
+    }
+
+    public void unsetIntraWindow() {
+      __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __INTRAWINDOW_ISSET_ID);
+    }
+
+    /** Returns true if field intraWindow is set (has been assigned a value) and false otherwise */
+    public boolean isSetIntraWindow() {
+      return EncodingUtils.testBit(__isset_bitfield, __INTRAWINDOW_ISSET_ID);
+    }
+
+    public void setIntraWindowIsSet(boolean value) {
+      __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __INTRAWINDOW_ISSET_ID, value);
+    }
+
     public void setFieldValue(_Fields field, Object value) {
       switch (field) {
       case ASSET_ID:
@@ -1756,6 +1797,14 @@ public class OrderReplay {
         }
         break;
 
+      case INTRA_WINDOW:
+        if (value == null) {
+          unsetIntraWindow();
+        } else {
+          setIntraWindow((Boolean)value);
+        }
+        break;
+
       }
     }
 
@@ -1772,6 +1821,9 @@ public class OrderReplay {
 
       case WINDOW_SIZE:
         return Integer.valueOf(getWindowSize());
+
+      case INTRA_WINDOW:
+        return Boolean.valueOf(isIntraWindow());
 
       }
       throw new IllegalStateException();
@@ -1792,6 +1844,8 @@ public class OrderReplay {
         return isSetProportionShuffling();
       case WINDOW_SIZE:
         return isSetWindowSize();
+      case INTRA_WINDOW:
+        return isSetIntraWindow();
       }
       throw new IllegalStateException();
     }
@@ -1842,6 +1896,15 @@ public class OrderReplay {
         if (!(this_present_windowSize && that_present_windowSize))
           return false;
         if (this.windowSize != that.windowSize)
+          return false;
+      }
+
+      boolean this_present_intraWindow = true;
+      boolean that_present_intraWindow = true;
+      if (this_present_intraWindow || that_present_intraWindow) {
+        if (!(this_present_intraWindow && that_present_intraWindow))
+          return false;
+        if (this.intraWindow != that.intraWindow)
           return false;
       }
 
@@ -1901,6 +1964,16 @@ public class OrderReplay {
           return lastComparison;
         }
       }
+      lastComparison = Boolean.valueOf(isSetIntraWindow()).compareTo(typedOther.isSetIntraWindow());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetIntraWindow()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.intraWindow, typedOther.intraWindow);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
       return 0;
     }
 
@@ -1943,6 +2016,10 @@ public class OrderReplay {
       if (!first) sb.append(", ");
       sb.append("windowSize:");
       sb.append(this.windowSize);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("intraWindow:");
+      sb.append(this.intraWindow);
       first = false;
       sb.append(")");
       return sb.toString();
@@ -2031,6 +2108,14 @@ public class OrderReplay {
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
+            case 5: // INTRA_WINDOW
+              if (schemeField.type == org.apache.thrift.protocol.TType.BOOL) {
+                struct.intraWindow = iprot.readBool();
+                struct.setIntraWindowIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
             default:
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
           }
@@ -2069,6 +2154,9 @@ public class OrderReplay {
         oprot.writeFieldBegin(WINDOW_SIZE_FIELD_DESC);
         oprot.writeI32(struct.windowSize);
         oprot.writeFieldEnd();
+        oprot.writeFieldBegin(INTRA_WINDOW_FIELD_DESC);
+        oprot.writeBool(struct.intraWindow);
+        oprot.writeFieldEnd();
         oprot.writeFieldStop();
         oprot.writeStructEnd();
       }
@@ -2099,7 +2187,10 @@ public class OrderReplay {
         if (struct.isSetWindowSize()) {
           optionals.set(3);
         }
-        oprot.writeBitSet(optionals, 4);
+        if (struct.isSetIntraWindow()) {
+          optionals.set(4);
+        }
+        oprot.writeBitSet(optionals, 5);
         if (struct.isSetAssetId()) {
           oprot.writeString(struct.assetId);
         }
@@ -2118,12 +2209,15 @@ public class OrderReplay {
         if (struct.isSetWindowSize()) {
           oprot.writeI32(struct.windowSize);
         }
+        if (struct.isSetIntraWindow()) {
+          oprot.writeBool(struct.intraWindow);
+        }
       }
 
       @Override
       public void read(org.apache.thrift.protocol.TProtocol prot, shuffledReplay_args struct) throws org.apache.thrift.TException {
         TTupleProtocol iprot = (TTupleProtocol) prot;
-        BitSet incoming = iprot.readBitSet(4);
+        BitSet incoming = iprot.readBitSet(5);
         if (incoming.get(0)) {
           struct.assetId = iprot.readString();
           struct.setAssetIdIsSet(true);
@@ -2148,6 +2242,10 @@ public class OrderReplay {
         if (incoming.get(3)) {
           struct.windowSize = iprot.readI32();
           struct.setWindowSizeIsSet(true);
+        }
+        if (incoming.get(4)) {
+          struct.intraWindow = iprot.readBool();
+          struct.setIntraWindowIsSet(true);
         }
       }
     }
