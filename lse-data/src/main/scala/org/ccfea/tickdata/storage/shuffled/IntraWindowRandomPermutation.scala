@@ -23,11 +23,9 @@ class IntraWindowRandomPermutation(source: Seq[OrderReplayEvent], proportion: Do
     val positionsToShuffle = sampleWithoutReplacement(numPositionsToShuffle, windowSize)
     val shuffledPositions = Random.shuffle(positionsToShuffle)
     for(i <- 0 until shuffledPositions.length) {
-      val a = positionsToShuffle(i)
-      val b = shuffledPositions(i)
-      val tmp = ticks(a)
-      ticks(a) = ticks(b)
-      ticks(b) = tmp
+      val a = positionsToShuffle(i) + i*windowSize
+      val b = shuffledPositions(i) + i*windowSize
+      swap(a, b)
     }
   }
 }

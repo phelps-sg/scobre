@@ -108,7 +108,7 @@ object OrderReplayService extends ReplayApplication {
           extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
 
         val source = new HBaseRetriever(selectedAsset = assetId)
-        val shuffledData = getShuffledData(assetId, source, proportionShuffling, windowSize, intraWindow)
+        val shuffledData = getShuffledData(assetId, source, proportionShuffling, windowSize, intraWindow )
 
         val replayer =
           new Replayer(eventSource = shuffledData, dataCollectors = Map() ++ collectors(variables))
