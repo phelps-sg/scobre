@@ -39,10 +39,14 @@ class RandomPermutation(val source: Seq[OrderReplayEvent], val proportion: Doubl
     for(i <- 0 until windowSize) {
       val a = window1 * windowSize + i
       val b = window2 * windowSize + i
-      val tmp = ticks(a)
-      ticks(a) = ticks(b)
-      ticks(b) = tmp
+      swap(a,b)
     }
+  }
+
+  def swap(a: Int, b: Int) = {
+    val tmp = ticks(a)
+    ticks(a) = ticks(b)
+    ticks(b) = tmp
   }
 
   def sampleWithoutReplacement(n: Int, N: Int): Seq[Int] = {
