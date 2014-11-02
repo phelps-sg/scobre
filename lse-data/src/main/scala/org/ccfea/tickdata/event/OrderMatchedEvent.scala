@@ -4,7 +4,7 @@ import java.util.Date
 import org.ccfea.tickdata.order.AbstractOrder
 
 /**
- * Order is partially matched with another one.
+ * An order has been partially matched with another one.
  *
  * (C) Steve Phelps 2013
  */

@@ -1,10 +1,11 @@
 package org.ccfea.tickdata.storage.shuffled
 
 import org.ccfea.tickdata.event.OrderReplayEvent
-import scala.collection.mutable.ListBuffer
 import scala.util.Random
 
 /**
+ * Shuffle the ticks before replaying them.
+ *
  * (C) Steve Phelps 2014
  */
 class RandomPermutation(val source: Seq[OrderReplayEvent], val proportion: Double, val windowSize: Int = 1)
@@ -52,12 +53,12 @@ class RandomPermutation(val source: Seq[OrderReplayEvent], val proportion: Doubl
   def sampleWithoutReplacement(n: Int, N: Int): Seq[Int] = {
     var t: Int = 0
     var m: Int = 0
-    val samples = new ListBuffer[Int]()
+    val samples = new Array[Int](n)
     while (m < n) {
       if ((N - t) * Random.nextDouble() >= n - m) {
         t = t + 1
       } else {
-        samples += t
+        samples(m) = t
         t = t + 1
         m = m + 1
       }
