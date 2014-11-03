@@ -6,9 +6,9 @@ import pp
 from orderreplay import *
 import thrift
 
-def get_shuffled_data(asset, proportion, window_size, intra_window = 0,
+def get_shuffled_data(asset, proportion, window_size, intra_window = False,
                 variables = ['midPrice'],
-                server = 'localhost', port = 9090):
+                server = 'cseesp1', port = 9090):
     from thrift.transport import TSocket
     from thrift.protocol import TBinaryProtocol
     from orderreplay import *
@@ -26,10 +26,10 @@ def get_shuffled_data(asset, proportion, window_size, intra_window = 0,
     return df
     
 def perform_shuffle(proportion, window, intra_window = False, directory='/var/data/orderflow-shuffle'):
-    for iteration in range(100):    
+    for i in range(100):    
         percentage = round(proportion * 100)
         dataset = get_shuffled_data('BHP', proportion, window, intra_window)
-        dataset.to_csv('%s/bhp-shuffled-ws%d-p%d-i%d-%d.csv' % (directory, window, percentage, intra_window, i))
+        dataset.to_csv('%s/bhp-shuffled-ws%d-p%d-i%d-%d.csv' % (directory, window, percentage, intra_window, i), cols=['midPrice'], index=False, header=False)
     None
 
 job_server = pp.Server(ncpus=3, secret='shuffle') 
@@ -38,7 +38,7 @@ dep_modules = ('pandas', 'orderreplay', 'thrift')
 dep_functions = (get_shuffled_data, )
 
 jobs = []
-for intraWindow in [True, False]:
+for intra_window in [True, False]:
     for window in [4 ** (x + 1) for x in range(8)]:
         for proportion in numpy.arange(0, 1.1, 0.1):
             job = job_server.submit(perform_shuffle, (proportion, window, intra_window), dep_functions, dep_modules)
