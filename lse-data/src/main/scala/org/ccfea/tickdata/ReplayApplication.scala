@@ -3,6 +3,9 @@ package org.ccfea.tickdata
 import java.text.DateFormat
 import java.util.Date
 
+import org.ccfea.tickdata.conf.ServerConf
+import org.ccfea.tickdata.simulator.{MarketState, ClearingMarketState}
+
 /**
  * (C) Steve Phelps 2014
  */
@@ -18,6 +21,9 @@ trait ReplayApplication {
     case Some(long: Long) => Some(long)
     case None => None
   }
+
+  def newMarketState(implicit conf: ServerConf) =
+    if (conf.explicitClearing()) new ClearingMarketState() else new MarketState()
 
   def main(args:Array[String])
 

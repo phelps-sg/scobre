@@ -59,9 +59,14 @@ object OrderReplayService extends ReplayApplication {
       new RandomPermutation(ticks, proportionShuffling, windowSize)
   }
 
+  class Replayer(val eventSource: Iterable[TickDataEvent],
+                 val dataCollectors: Map[String, MarketState => Option[AnyVal]],
+                  val marketState: MarketState = marketState)
+    extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
+
   def main(args: Array[String]): Unit = {
 
-    val conf = new ServerConf(args)
+    implicit val conf = new ServerConf(args)
     val port: Int = conf.port()
 
     val processor = new org.ccfea.tickdata.thrift.OrderReplay.Processor(new OrderReplay.Iface {
@@ -69,25 +74,17 @@ object OrderReplayService extends ReplayApplication {
       override def replay(assetId: String, variables: java.util.List[String],
                             startDate: String, endDate: String): java.util.List[java.util.Map[String,java.lang.Double]] = {
 
-        val marketState = if (conf.explicitClearing()) new ClearingMarketState() else new MarketState()
-
-        class Replayer(val eventSource: Iterable[TickDataEvent],
-                       val dataCollectors: Map[String, MarketState => Option[AnyVal]],
-                        val marketState: MarketState = marketState)
-          extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
-
         logger.info("Using data for " + assetId + " between " + startDate + " and " + endDate)
-
         logger.info("Starting simulation... ")
 
+        val marketState = newMarketState
         val hbaseSource: Iterable[TickDataEvent] =
-          new HBaseRetriever(selectedAsset = assetId, startDate = parseDate(Some(startDate)),
-                                                        endDate = parseDate(Some(endDate)))
+          new HBaseRetriever(selectedAsset = assetId,
+                              startDate = parseDate(Some(startDate)), endDate = parseDate(Some(endDate)))
 
         val replayer =
           new Replayer(eventSource = hbaseSource, dataCollectors = Map() ++ collectors(variables))
         replayer.run()
-
         logger.info("done.")
 
         replayer.result
@@ -100,22 +97,15 @@ object OrderReplayService extends ReplayApplication {
         logger.info("Shuffled replay for " + assetId + " with windowSize " + windowSize + " and percentage " + proportionShuffling)
         logger.info("Starting simulation... ")
 
-        val marketState = if (conf.explicitClearing()) new ClearingMarketState() else new MarketState()
-
-        class Replayer(val eventSource: Iterable[TickDataEvent],
-                       val dataCollectors: Map[String, MarketState => Option[AnyVal]],
-                        val marketState: MarketState = marketState)
-          extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
-
-        val source = new HBaseRetriever(selectedAsset = assetId)
-        val shuffledData = getShuffledData(assetId, source, proportionShuffling, windowSize, intraWindow )
+        val marketState = newMarketState
+        val hbaseSource = new HBaseRetriever(selectedAsset = assetId)
+        val shuffledData = getShuffledData(assetId, hbaseSource, proportionShuffling, windowSize, intraWindow)
 
         val replayer =
           new Replayer(eventSource = shuffledData, dataCollectors = Map() ++ collectors(variables))
         replayer.run()
 
         logger.info("done.")
-
         replayer.result
       }
     })

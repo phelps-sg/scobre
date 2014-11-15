@@ -15,30 +15,13 @@ import org.ccfea.tickdata.cep.CepObserver
 trait OrderReplayer[T] extends Runnable {
 
   /**
-   * If true then show a graphical user-interface as
-   * the simulation progresses.
-   */
-//  def withGui: Boolean
-
-  /**
-   * The filename to write data to.
-   */
-//  def outFileName: Option[String]
-
-  /**
    * The source of event objects to replay.
    */
   def eventSource: Iterable[TickDataEvent]
 
-//  val out: java.io.PrintStream = openOutput
-
   def marketState: MarketState
 
   val simulator = new MarketSimulator(eventSource, marketState)
-//  simulator.addObserver(new CepObserver())
-
-//  val orderBookView = if (withGui) new OrderBookView(marketState) else None
-
 
   /**
    * Run the replay which will simulate the events and collate the resulting data.
