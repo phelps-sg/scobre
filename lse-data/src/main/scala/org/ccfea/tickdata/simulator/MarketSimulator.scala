@@ -1,6 +1,6 @@
 package org.ccfea.tickdata.simulator
 
-import org.ccfea.tickdata.event.{OrderReplayEvent, Event}
+import org.ccfea.tickdata.event.{TickDataEvent, Event}
 import java.util.{Observable, Observer}
 
 import scala.collection.mutable
@@ -18,8 +18,8 @@ import scala.collection.mutable
  *
  * (c) Steve Phelps 2013
  */
-class MarketSimulator(val events: Iterable[OrderReplayEvent], val market: MarketState = new MarketState())
-    extends mutable.Publisher[OrderReplayEvent] {
+class MarketSimulator(val events: Iterable[TickDataEvent], val market: MarketState = new MarketState())
+    extends mutable.Publisher[TickDataEvent] {
 
   subscribe(market)
 
@@ -30,7 +30,7 @@ class MarketSimulator(val events: Iterable[OrderReplayEvent], val market: Market
     })
   }
 
-  def process(ev: OrderReplayEvent) = {
+  def process(ev: TickDataEvent) = {
     publish(ev)
   }
 

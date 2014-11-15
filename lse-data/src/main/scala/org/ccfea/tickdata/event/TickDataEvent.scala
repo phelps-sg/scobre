@@ -7,7 +7,7 @@ import java.util.Date
  *
  * (C) Steve Phelps 2013
  */
-abstract class OrderReplayEvent {
+abstract class TickDataEvent {
   def timeStamp: Date
   def messageSequenceNumber: Long
   def tiCode: String

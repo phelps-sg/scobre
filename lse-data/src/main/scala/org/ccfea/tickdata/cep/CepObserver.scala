@@ -1,7 +1,7 @@
 package org.ccfea.tickdata.cep
 
 import org.ccfea.tickdata.simulator.{MarketState, MarketSimulator}
-import org.ccfea.tickdata.event.{MarketStateEvent, OrderReplayEvent}
+import org.ccfea.tickdata.event.{MarketStateEvent, TickDataEvent}
 import com.espertech.esper.client._
 import org.ccfea.tickdata.event.MarketStateEvent
 import java.util.{Observable, Observer}
@@ -14,7 +14,7 @@ import scala.collection.mutable
  *
  * (C) Steve Phelps 2014
  */
-class CepObserver extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher[OrderReplayEvent]] {
+class CepObserver extends mutable.Subscriber[TickDataEvent, mutable.Publisher[TickDataEvent]] {
 
   val query =
     "select avg(state.lastTransactionPrice) from org.ccfea.tickdata.event.MarketStateEvent.win:time(100 sec)"
@@ -23,7 +23,7 @@ class CepObserver extends mutable.Subscriber[OrderReplayEvent, mutable.Publisher
 //  val statement = epService.getEPAdministrator.createEPL(query)
 //  statement.addListener(this)
 
-  override def notify(pub: mutable.Publisher[OrderReplayEvent], ev: OrderReplayEvent): Unit = {
+  override def notify(pub: mutable.Publisher[TickDataEvent], ev: TickDataEvent): Unit = {
     pub match {
       case simulator: MarketSimulator =>
         epService.getEPRuntime.sendEvent(new MarketStateEvent(simulator.market))

@@ -1,6 +1,6 @@
 package org.ccfea.tickdata.storage.shuffled
 
-import org.ccfea.tickdata.event.OrderReplayEvent
+import org.ccfea.tickdata.event.TickDataEvent
 import scala.util.Random
 
 /**
@@ -8,13 +8,13 @@ import scala.util.Random
  *
  * (C) Steve Phelps 2014
  */
-class RandomPermutation(val source: Seq[OrderReplayEvent], val proportion: Double, val windowSize: Int = 1)
-      extends Iterable[OrderReplayEvent] {
+class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, val windowSize: Int = 1)
+      extends Iterable[TickDataEvent] {
 
   val n: Int = source.length - (source.length % windowSize)
-  var ticks: Array[OrderReplayEvent] = new Array[OrderReplayEvent](n)
+  var ticks: Array[TickDataEvent] = new Array[TickDataEvent](n)
 
-  override def iterator: Iterator[OrderReplayEvent] = {
+  override def iterator: Iterator[TickDataEvent] = {
     shuffleTicks()
     return ticks.iterator
   }

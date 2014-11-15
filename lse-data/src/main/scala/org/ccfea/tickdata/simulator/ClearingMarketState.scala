@@ -1,7 +1,7 @@
 package org.ccfea.tickdata.simulator
 
 import net.sourceforge.jasa.market.Order
-import org.ccfea.tickdata.event.{OrderFilledEvent, OrderMatchedEvent, OrderReplayEvent}
+import org.ccfea.tickdata.event.{OrderFilledEvent, OrderMatchedEvent, TickDataEvent}
 
 /**
  * A market-state in which the uncrossing is performed explicitly by the simulator,
@@ -11,7 +11,7 @@ import org.ccfea.tickdata.event.{OrderFilledEvent, OrderMatchedEvent, OrderRepla
  */
 class ClearingMarketState extends MarketState {
 
-  override def postProcessing(ev: OrderReplayEvent): Unit = {
+  override def postProcessing(ev: TickDataEvent): Unit = {
     book.matchOrders()
     auctionState = AuctionState.continuous
   }

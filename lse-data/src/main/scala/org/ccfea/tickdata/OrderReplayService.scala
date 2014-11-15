@@ -10,7 +10,7 @@ import org.apache.thrift.transport.TServerSocket
 import org.ccfea.tickdata.collector.MultivariateTimeSeriesCollector
 import org.ccfea.tickdata.conf.{BuildInfo, ServerConf}
 
-import org.ccfea.tickdata.event.OrderReplayEvent
+import org.ccfea.tickdata.event.TickDataEvent
 import org.ccfea.tickdata.simulator.{ClearingMarketState, MarketState}
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
 import org.ccfea.tickdata.storage.shuffled.{IntraWindowRandomPermutation, RandomPermutation}
@@ -27,7 +27,7 @@ import collection.JavaConversions._
  */
 object OrderReplayService extends ReplayApplication {
 
-  var tickCache = Map[String, Seq[OrderReplayEvent]]()
+  var tickCache = Map[String, Seq[TickDataEvent]]()
 
   val logger = Logger("org.ccfea.tickdata.OrderReplayService")
 
@@ -43,7 +43,7 @@ object OrderReplayService extends ReplayApplication {
     for (variable <- variables) yield (variable, variableToMethod(variable))
   }
 
-  def getShuffledData(assetId: String, source: Iterable[OrderReplayEvent],
+  def getShuffledData(assetId: String, source: Iterable[TickDataEvent],
                           proportionShuffling: Double, windowSize: Int, intraWindow: Boolean): RandomPermutation = {
     val ticks = if (tickCache.contains(assetId)) {
       tickCache(assetId)
@@ -71,7 +71,7 @@ object OrderReplayService extends ReplayApplication {
 
         val marketState = if (conf.explicitClearing()) new ClearingMarketState() else new MarketState()
 
-        class Replayer(val eventSource: Iterable[OrderReplayEvent],
+        class Replayer(val eventSource: Iterable[TickDataEvent],
                        val dataCollectors: Map[String, MarketState => Option[AnyVal]],
                         val marketState: MarketState = marketState)
           extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
@@ -80,7 +80,7 @@ object OrderReplayService extends ReplayApplication {
 
         logger.info("Starting simulation... ")
 
-        val hbaseSource: Iterable[OrderReplayEvent] =
+        val hbaseSource: Iterable[TickDataEvent] =
           new HBaseRetriever(selectedAsset = assetId, startDate = parseDate(Some(startDate)),
                                                         endDate = parseDate(Some(endDate)))
 
@@ -102,7 +102,7 @@ object OrderReplayService extends ReplayApplication {
 
         val marketState = if (conf.explicitClearing()) new ClearingMarketState() else new MarketState()
 
-        class Replayer(val eventSource: Iterable[OrderReplayEvent],
+        class Replayer(val eventSource: Iterable[TickDataEvent],
                        val dataCollectors: Map[String, MarketState => Option[AnyVal]],
                         val marketState: MarketState = marketState)
           extends MultivariateTimeSeriesCollector with MultivariateThriftCollator

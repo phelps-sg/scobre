@@ -60,7 +60,7 @@ case class Event(eventID: Option[Long],
 
   val logger = Logger(classOf[Event])
 
-  def toOrderReplayEvent: OrderReplayEvent = {
+  def toOrderReplayEvent: TickDataEvent = {
 
     this.eventType match {
 
@@ -104,5 +104,5 @@ case class Event(eventID: Option[Long],
     }
   }
 
-  implicit def nonRelationalToObjectOriented(x: Event): OrderReplayEvent = x.toOrderReplayEvent
+  implicit def nonRelationalToObjectOriented(x: Event): TickDataEvent = x.toOrderReplayEvent
 }

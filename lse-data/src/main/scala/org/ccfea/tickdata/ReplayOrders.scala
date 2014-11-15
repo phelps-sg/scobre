@@ -1,7 +1,7 @@
 package org.ccfea.tickdata
 
 import org.ccfea.tickdata.collector.UnivariateTimeSeriesCollector
-import org.ccfea.tickdata.event.OrderReplayEvent
+import org.ccfea.tickdata.event.TickDataEvent
 import org.ccfea.tickdata.storage.csv.UnivariateCsvDataCollator
 import org.ccfea.tickdata.storage.shuffled.RandomPermutation
 
@@ -59,12 +59,12 @@ object ReplayOrders extends ReplayApplication {
   def simulateAndCollate(dataCollector: MarketState => Option[AnyVal])
                           (implicit conf: ReplayerConf) = {
 
-    val hbaseEvents: Iterable[OrderReplayEvent] =
+    val hbaseEvents: Iterable[TickDataEvent] =
       new HBaseRetriever(selectedAsset = conf.tiCode(),
                           startDate =  parseDate(conf.startDate.get),
                           endDate = parseDate(conf.endDate.get))
 
-    class Replayer(val eventSource: Iterable[OrderReplayEvent],
+    class Replayer(val eventSource: Iterable[TickDataEvent],
                     val outFileName: Option[String],
                     val dataCollector: MarketState => Option[AnyVal],
                     val marketState: MarketState)

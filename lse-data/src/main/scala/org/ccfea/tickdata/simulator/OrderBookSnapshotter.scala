@@ -9,12 +9,12 @@ import collection.JavaConversions._
 import util.control.Breaks._
 import grizzled.slf4j.Logger
 import java.util
-import org.ccfea.tickdata.event.OrderReplayEvent
+import org.ccfea.tickdata.event.TickDataEvent
 
 /**
  * (C) Steve Phelps 2013
  */
-class OrderBookSnapshotter(val eventSource: Iterable[OrderReplayEvent], val t: SimulationTime,
+class OrderBookSnapshotter(val eventSource: Iterable[TickDataEvent], val t: SimulationTime,
                             val outFileName: Option[String] = None, val withGui: Boolean = false,
                             val marketState: MarketState = new MarketState())
     extends OrderReplayer[Option[FourHeapOrderBook]] with PrintStreamOutputer {

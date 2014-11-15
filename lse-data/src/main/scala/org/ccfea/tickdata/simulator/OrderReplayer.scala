@@ -1,6 +1,6 @@
 package org.ccfea.tickdata.simulator
 
-import org.ccfea.tickdata.event.OrderReplayEvent
+import org.ccfea.tickdata.event.TickDataEvent
 import java.io.PrintStream
 import org.ccfea.tickdata.cep.CepObserver
 
@@ -28,7 +28,7 @@ trait OrderReplayer[T] extends Runnable {
   /**
    * The source of event objects to replay.
    */
-  def eventSource: Iterable[OrderReplayEvent]
+  def eventSource: Iterable[TickDataEvent]
 
 //  val out: java.io.PrintStream = openOutput
 

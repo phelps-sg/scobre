@@ -11,4 +11,4 @@ case class TransactionEvent(timeStamp: Date, messageSequenceNumber: Long,
                               tiCode: String, tradeCode: String,
                               transactionPrice: BigDecimal, tradeSize: Long,
                               orderCode: Option[String], matchingOrderCode: Option[String])
-  extends OrderReplayEvent
+  extends TickDataEvent

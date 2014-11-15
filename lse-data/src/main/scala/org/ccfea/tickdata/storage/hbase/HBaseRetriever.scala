@@ -3,7 +3,7 @@ package org.ccfea.tickdata.storage.hbase
 import org.apache.hadoop.hbase.client.{ResultScanner, Scan, Result}
 import org.apache.hadoop.hbase.util.Bytes
 import collection.JavaConversions._
-import org.ccfea.tickdata.event.{OrderReplayEvent, Event}
+import org.ccfea.tickdata.event.{TickDataEvent, Event}
 import java.util.Date
 import grizzled.slf4j.Logger
 
@@ -13,13 +13,13 @@ import grizzled.slf4j.Logger
  */
 class HBaseRetriever(val cacheSize: Int = 1000, val selectedAsset: String,
                       val startDate: Option[Date] = None, val endDate: Option[Date] = None)
-    extends HBaseEventConverter with Iterable[OrderReplayEvent] {
+    extends HBaseEventConverter with Iterable[TickDataEvent] {
 
   val partialKeyScan = new DateKeyRange(selectedAsset, startDate, endDate, cacheSize)
 
   val scanner = partialKeyScan.scanner
 
-  def iterator: Iterator[OrderReplayEvent] = {
+  def iterator: Iterator[TickDataEvent] = {
     new EventIterator(scanner)
   }
 

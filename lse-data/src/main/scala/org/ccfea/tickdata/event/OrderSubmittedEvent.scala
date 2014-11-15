@@ -9,4 +9,4 @@ import org.ccfea.tickdata.order.AbstractOrder
  * (C) Steve Phelps 2013
  */
 case class OrderSubmittedEvent(timeStamp: Date, messageSequenceNumber: Long,
-                                  tiCode: String, order: AbstractOrder) extends OrderReplayEvent
+                                  tiCode: String, order: AbstractOrder) extends TickDataEvent

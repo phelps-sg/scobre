@@ -7,4 +7,4 @@ import java.util.Date
  *
  * (c) Steve Phelps 2013
  */
-case class StartOfDataMarker(timeStamp: Date, messageSequenceNumber: Long, tiCode: String) extends OrderReplayEvent
+case class StartOfDataMarker(timeStamp: Date, messageSequenceNumber: Long, tiCode: String) extends TickDataEvent

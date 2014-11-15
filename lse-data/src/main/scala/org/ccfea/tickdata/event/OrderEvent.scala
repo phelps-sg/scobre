@@ -7,6 +7,6 @@ import org.ccfea.tickdata.order.AbstractOrder
  *
  * (C) Steve Phelps 2013
  */
-abstract class OrderEvent extends OrderReplayEvent {
+abstract class OrderEvent extends TickDataEvent {
   def order: AbstractOrder
 }

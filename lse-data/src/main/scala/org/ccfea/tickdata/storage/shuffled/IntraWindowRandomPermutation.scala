@@ -1,6 +1,6 @@
 package org.ccfea.tickdata.storage.shuffled
 
-import org.ccfea.tickdata.event.OrderReplayEvent
+import org.ccfea.tickdata.event.TickDataEvent
 
 import scala.util.Random
 
@@ -9,7 +9,7 @@ import scala.util.Random
  *
  * (C) Steve Phelps 2014
  */
-class IntraWindowRandomPermutation(source: Seq[OrderReplayEvent], proportion: Double, windowSize: Int)
+class IntraWindowRandomPermutation(source: Seq[TickDataEvent], proportion: Double, windowSize: Int)
   extends RandomPermutation(source, proportion, windowSize) {
 
   override def shuffleTicks(): Unit = {

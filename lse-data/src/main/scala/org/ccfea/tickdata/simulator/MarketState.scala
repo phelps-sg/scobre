@@ -26,8 +26,8 @@ import scala.collection.mutable.{Publisher, Subscriber, Map}
  *
  * (c) Steve Phelps 2013
  */
-class MarketState extends Subscriber[OrderReplayEvent, Publisher[OrderReplayEvent]]
-    with Publisher[OrderReplayEvent] {
+class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
+    with Publisher[TickDataEvent] {
 
   /**
    * The current state of the book.
@@ -75,7 +75,7 @@ class MarketState extends Subscriber[OrderReplayEvent, Publisher[OrderReplayEven
   val logger = Logger(classOf[MarketState])
 
 
-  override def notify(pub: Publisher[OrderReplayEvent], event: OrderReplayEvent): Unit = {
+  override def notify(pub: Publisher[TickDataEvent], event: TickDataEvent): Unit = {
     newEvent(event)
   }
 
@@ -84,21 +84,21 @@ class MarketState extends Subscriber[OrderReplayEvent, Publisher[OrderReplayEven
    *
    * @param ev  The next event in the replay sequence.
    */
-  def newEvent(ev: OrderReplayEvent): Unit = {
+  def newEvent(ev: TickDataEvent): Unit = {
     preProcessing(ev)
     process(ev)
     postProcessing(ev)
     publish(ev)
   }
 
-  def preProcessing(ev: OrderReplayEvent): Unit = {
+  def preProcessing(ev: TickDataEvent): Unit = {
 //    assert(ev.timeStamp.getTime >= (time match { case None => 0; case Some(t) => t.getTicks}))
     val newTime = new SimulationTime(ev.timeStamp.getTime)
     this.time = Some(newTime)
     this.volume = Some(0)
   }
 
-  def postProcessing(ev: OrderReplayEvent): Unit = {
+  def postProcessing(ev: TickDataEvent): Unit = {
     stateTransition(ev)
     checkConsistency(ev)
   }
@@ -108,7 +108,7 @@ class MarketState extends Subscriber[OrderReplayEvent, Publisher[OrderReplayEven
    *
    * @param ev  The subsequent event in the replay sequence.
    */
-  def process(ev: OrderReplayEvent): Unit = {
+  def process(ev: TickDataEvent): Unit = {
     logger.debug("Processing " + ev)
     ev match {
       case tr: TransactionEvent           =>  process(tr)
@@ -225,7 +225,7 @@ class MarketState extends Subscriber[OrderReplayEvent, Publisher[OrderReplayEven
    *
    * @param ev  The event that has just been processed.
    */
-  def checkConsistency(ev: OrderReplayEvent): Unit = {
+  def checkConsistency(ev: TickDataEvent): Unit = {
     if (this.auctionState == AuctionState.continuous) {
 //      logger.debug("quote = " + quote)
 //      if (hour > 8) {
@@ -310,7 +310,7 @@ class MarketState extends Subscriber[OrderReplayEvent, Publisher[OrderReplayEven
    *
    * @param ev  The next event in the replay sequence.
    */
-  def stateTransition(ev: OrderReplayEvent) {
+  def stateTransition(ev: TickDataEvent) {
 
     val newState: AuctionState.Value =
 

@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat
 import net.sourceforge.jasa.market.auctioneer.ContinuousDoubleAuctioneer
 import java.awt.BorderLayout
 
-import org.ccfea.tickdata.event.OrderReplayEvent
+import org.ccfea.tickdata.event.TickDataEvent
 
 import scala.collection.mutable.{Subscriber, Publisher}
 
@@ -15,7 +15,7 @@ import scala.collection.mutable.{Subscriber, Publisher}
  * (c) Steve Phelps 2013
  */
 class OrderBookView(val market: MarketState, val maxLevels: Int = 12)
-    extends Subscriber[OrderReplayEvent, Publisher[OrderReplayEvent]] {
+    extends Subscriber[TickDataEvent, Publisher[TickDataEvent]] {
 
   market.subscribe(this)
 
@@ -34,7 +34,7 @@ class OrderBookView(val market: MarketState, val maxLevels: Int = 12)
   myFrame.pack()
   myFrame.setVisible(true)
 
-  def notify(pub: Publisher[OrderReplayEvent], ev: OrderReplayEvent) = {
+  def notify(pub: Publisher[TickDataEvent], ev: TickDataEvent) = {
     SwingUtilities.invokeAndWait(new Runnable() {
       def run() = {
         orderBookView.update()
