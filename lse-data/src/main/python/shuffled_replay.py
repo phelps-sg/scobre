@@ -1,5 +1,4 @@
-import pandas 
-import numpy 
+import numpy
 import pp
 import csv
 
@@ -20,9 +19,9 @@ def get_shuffled_data(asset, proportion, window_size, intra_window = False,
     return result
     
     
-def perform_shuffle(proportion, window, intra_window = False, directory='/var/data/orderflow-shuffle'):
-    for i in range(100):    
-        percentage = round(proportion * 100)
+def perform_shuffle(proportion, window, n = 100, intra_window = False, directory='/var/data/orderflow-shuffle'):
+    for i in range(n):
+        percentage = round(proportion * n)
         dataset = get_shuffled_data('BHP', proportion, window, intra_window)
         filename = '%s/bhp-shuffled-ws%d-p%d-i%d-%d.csv' % (directory, window, percentage, intra_window, i)
         f = open(filename, 'w', buffering=200000)
@@ -30,7 +29,7 @@ def perform_shuffle(proportion, window, intra_window = False, directory='/var/da
         for row in dataset:
             csv_writer.writerow([ round(row['midPrice'], 4) ])
         f.close()
-    None
+    return None
 
 job_server = pp.Server(ncpus=4, secret='shuffle') 
 
@@ -43,3 +42,4 @@ for intra_window in [True, False]:
         for proportion in numpy.arange(0, 1.1, 0.1):
             job = job_server.submit(perform_shuffle, (proportion, window, intra_window), dep_functions, dep_modules)
             jobs.append(job)
+
