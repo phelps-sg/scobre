@@ -27,6 +27,11 @@ import collection.JavaConversions._
  */
 object OrderReplayService extends ReplayApplication {
 
+  class Replayer(val eventSource: Iterable[TickDataEvent],
+                 val dataCollectors: Map[String, MarketState => Option[AnyVal]],
+                  val marketState: MarketState)
+    extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
+
   var tickCache = Map[String, Seq[TickDataEvent]]()
 
   val logger = Logger("org.ccfea.tickdata.OrderReplayService")
@@ -59,11 +64,6 @@ object OrderReplayService extends ReplayApplication {
       new RandomPermutation(ticks, proportionShuffling, windowSize)
   }
 
-  class Replayer(val eventSource: Iterable[TickDataEvent],
-                 val dataCollectors: Map[String, MarketState => Option[AnyVal]],
-                  val marketState: MarketState = marketState)
-    extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
-
   def main(args: Array[String]): Unit = {
 
     implicit val conf = new ServerConf(args)
@@ -83,7 +83,7 @@ object OrderReplayService extends ReplayApplication {
                               startDate = parseDate(Some(startDate)), endDate = parseDate(Some(endDate)))
 
         val replayer =
-          new Replayer(eventSource = hbaseSource, dataCollectors = Map() ++ collectors(variables))
+          new Replayer(eventSource = hbaseSource, dataCollectors = Map() ++ collectors(variables), marketState)
         replayer.run()
         logger.info("done.")
 
@@ -102,7 +102,7 @@ object OrderReplayService extends ReplayApplication {
         val shuffledData = getShuffledData(assetId, hbaseSource, proportionShuffling, windowSize, intraWindow)
 
         val replayer =
-          new Replayer(eventSource = shuffledData, dataCollectors = Map() ++ collectors(variables))
+          new Replayer(eventSource = shuffledData, dataCollectors = Map() ++ collectors(variables), marketState)
         replayer.run()
 
         logger.info("done.")

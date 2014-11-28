@@ -70,7 +70,7 @@ object ReplayOrders extends ReplayApplication {
                     val marketState: MarketState)
         extends UnivariateTimeSeriesCollector with UnivariateCsvDataCollator
 
-    val marketState = newMarketState
+    val marketState = newMarketState(conf)
 
     if (conf.withGui()) new OrderBookView(marketState)
 
