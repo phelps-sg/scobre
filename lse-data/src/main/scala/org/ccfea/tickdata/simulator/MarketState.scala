@@ -11,7 +11,7 @@ import java.util.GregorianCalendar
 import org.ccfea.tickdata.event._
 import org.ccfea.tickdata.event.OrderFilledEvent
 import org.ccfea.tickdata.event.OrderMatchedEvent
-import org.ccfea.tickdata.order.{TradeDirection, AbstractOrder, LimitOrder}
+import org.ccfea.tickdata.order.{OffsetOrder, TradeDirection, AbstractOrder, LimitOrder}
 
 import scala.beans.BeanProperty
 import collection.JavaConversions._
@@ -188,9 +188,9 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     }
     order match {
        case lo: LimitOrder =>
-         val newOrder = toJasaOrder(order)
-         insertOrder(newOrder)
-         orderMap(order.orderCode) = newOrder
+         processNewLimitOrder(lo)
+       case oo: OffsetOrder =>
+         processNewLimitOrder(oo.toLimitOrder(this))
        case _ =>
     }
   }
@@ -205,6 +205,12 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
         process(head)
         process(new MultipleEvent(tail))
     }
+  }
+
+  def processNewLimitOrder(order: LimitOrder) = {
+    val newOrder = toJasaOrder(order)
+    insertOrder(newOrder)
+    orderMap(order.orderCode) = newOrder
   }
 
   def adjustQuantity(jasaOrder: net.sourceforge.jasa.market.Order,

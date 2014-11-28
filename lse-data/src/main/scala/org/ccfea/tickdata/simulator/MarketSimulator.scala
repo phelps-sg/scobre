@@ -1,7 +1,6 @@
 package org.ccfea.tickdata.simulator
 
-import org.ccfea.tickdata.event.{TickDataEvent, Event}
-import java.util.{Observable, Observer}
+import org.ccfea.tickdata.event.TickDataEvent
 
 import scala.collection.mutable
 
