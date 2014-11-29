@@ -9,15 +9,12 @@ import scala.util.Random
  * (C) Steve Phelps 2014
  */
 class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, val windowSize: Int = 1)
-      extends Iterable[TickDataEvent] {
+      extends Seq[TickDataEvent] {
 
   val n: Int = source.length - (source.length % windowSize)
   var ticks: Array[TickDataEvent] = new Array[TickDataEvent](n)
 
-  override def iterator: Iterator[TickDataEvent] = {
-    shuffleTicks()
-    return ticks.iterator
-  }
+  shuffleTicks()
 
   def initialise(): Unit = {
     source.copyToArray(ticks, 0, n)
@@ -66,4 +63,7 @@ class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, 
     samples
   }
 
+  override def iterator: Iterator[TickDataEvent] = ticks.iterator
+  override def length: Int = ticks.length
+  override def apply(idx: Int): TickDataEvent = ticks(idx)
 }
