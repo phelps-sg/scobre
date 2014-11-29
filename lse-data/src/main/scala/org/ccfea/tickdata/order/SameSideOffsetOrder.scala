@@ -17,7 +17,10 @@ class SameSideOffsetOrder(limitOrder: LimitOrder, initialMarketState: MarketStat
     //TODO: In this case the _offset_ should be zero?
     p match  {
       case Some(p) => p
-      case None => 0.0
+      case None => 100.0
     }
+
+  override def toString() =
+    "SameSideOffsetOrder(" + offset + ")"
 
 }
