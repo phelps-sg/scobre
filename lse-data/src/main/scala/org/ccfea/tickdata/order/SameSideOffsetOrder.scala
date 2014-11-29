@@ -5,13 +5,19 @@ import org.ccfea.tickdata.simulator.MarketState
 /**
  * (C) Steve Phelps
  */
-class SameSideOffsetOrder(val offset: Double, val aggregateSize: Long, val tradeDirection: TradeDirection.Value,
-                            val orderCode: String) extends OffsetOrder {
+class SameSideOffsetOrder(limitOrder: LimitOrder, initialMarketState: MarketState)
+    extends OffsetOrder(limitOrder, initialMarketState) {
 
-  def bestPrice(implicit marketState: MarketState) =
-    if (tradeDirection == TradeDirection.Buy)
-      marketState.book.getHighestUnmatchedBid.getPrice
-    else
-      marketState.book.getLowestUnmatchedAsk.getPrice
+  def bestPrice(implicit marketState: MarketState) = {
+    val quote = marketState.quote
+    if (tradeDirection == TradeDirection.Buy) SomethingOrZero(quote.bid) else SomethingOrZero(quote.ask)
+  }
+
+  def SomethingOrZero(p: Option[Double]): Double =
+    //TODO: In this case the _offset_ should be zero?
+    p match  {
+      case Some(p) => p
+      case None => 0.0
+    }
 
 }

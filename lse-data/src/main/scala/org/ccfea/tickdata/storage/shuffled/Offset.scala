@@ -6,7 +6,8 @@ import org.ccfea.tickdata.order.{AbstractOrder, OffsetOrder}
 /**
  * (C) Steve Phelps 2014
  */
-class Offset(val offsetOrder: AbstractOrder => OffsetOrder, val source: Seq[TickDataEvent]) extends Seq[TickDataEvent] {
+class Offset(val offsetOrder: AbstractOrder => OffsetOrder, val source: Iterable[TickDataEvent])
+    extends Iterable[TickDataEvent] {
 
   def convert(event: TickDataEvent): TickDataEvent = {
      event match {
@@ -22,7 +23,7 @@ class Offset(val offsetOrder: AbstractOrder => OffsetOrder, val source: Seq[Tick
     def hasNext = source.iterator.hasNext
   }
 
-  override def length: Int = source.length
-
-  override def apply(idx: Int): TickDataEvent = convert(source.apply(idx))
+//  override def length: Int = source.length
+//
+//  override def apply(idx: Int): TickDataEvent = convert(source.apply(idx))
 }

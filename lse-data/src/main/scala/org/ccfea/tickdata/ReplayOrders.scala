@@ -1,19 +1,15 @@
 package org.ccfea.tickdata
 
 import org.ccfea.tickdata.collector.UnivariateTimeSeriesCollector
-import org.ccfea.tickdata.event.TickDataEvent
+import org.ccfea.tickdata.event.{OrderSubmittedEvent, TickDataEvent}
+import org.ccfea.tickdata.order.{LimitOrder, SameSideOffsetOrder, AbstractOrder}
 import org.ccfea.tickdata.storage.csv.UnivariateCsvDataCollator
-import org.ccfea.tickdata.storage.shuffled.RandomPermutation
-
-import scala.Some
-import scala.util.Random
-
-import org.ccfea.tickdata.conf.{ReplayerConf, ReplayConf}
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
+import org.ccfea.tickdata.storage.shuffled.{RandomPermutation, Offset}
+
+import org.ccfea.tickdata.conf.ReplayerConf
 import org.ccfea.tickdata.simulator._
 
-import java.text.DateFormat
-import java.util. Date
 import grizzled.slf4j.Logger
 
 /**
@@ -74,15 +70,34 @@ object ReplayOrders extends ReplayApplication {
 
     if (conf.withGui()) new OrderBookView(marketState)
 
-    val eventSource =
-      if (!conf.shuffle())
-        hbaseEvents
-      else
-        new RandomPermutation(hbaseEvents.iterator.toList, conf.proportionShuffling(), conf.shuffleWindowSize())
+    val eventSource = if (conf.shuffle()) shuffledTicks(hbaseEvents) else hbaseEvents
 
-    val replayer =  new Replayer(eventSource, outFileName = conf.outFileName.get, dataCollector, marketState)
+    val replayer = new Replayer(eventSource, outFileName = conf.outFileName.get, dataCollector, marketState)
     replayer.run()
   }
 
-}
+  def shuffledTicks(eventSource: Iterable[TickDataEvent])(implicit conf: ReplayerConf) = {
 
+    // This market-state is used to calculate best-price offsets before shuffling
+    val marketState = newMarketState(conf)
+
+    def offsetConverter(tick: TickDataEvent) = {
+      marketState.newEvent(tick)
+      tick match {
+        case os: OrderSubmittedEvent =>
+          val offsetOrder = os.order match {
+            case lo: LimitOrder => new SameSideOffsetOrder(lo, marketState)
+          }
+          new OrderSubmittedEvent(os.timeStamp, os.messageSequenceNumber, os.tiCode, offsetOrder)
+        // TODO OrderRevisedEvents?
+        case other =>
+          other
+      }
+    }
+
+//    val offsetTicks = for(tick <- eventSource) yield offsetConverter(tick)
+    val offsetTicks = eventSource
+
+    new RandomPermutation(offsetTicks.iterator.toList, conf.proportionShuffling(), conf.shuffleWindowSize())
+  }
+}
