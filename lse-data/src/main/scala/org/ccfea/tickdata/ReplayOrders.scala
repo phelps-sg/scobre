@@ -1,8 +1,7 @@
 package org.ccfea.tickdata
 
 import org.ccfea.tickdata.collector.UnivariateTimeSeriesCollector
-import org.ccfea.tickdata.event.{OrderRevisedEvent, OrderSubmittedEvent, TickDataEvent}
-import org.ccfea.tickdata.order.{TradeDirection, LimitOrder, SameSideOffsetOrder, AbstractOrder}
+import org.ccfea.tickdata.event.TickDataEvent
 import org.ccfea.tickdata.storage.csv.UnivariateCsvDataCollator
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
 import org.ccfea.tickdata.storage.shuffled.{RandomPermutation, Offset}
@@ -80,29 +79,8 @@ object ReplayOrders extends ReplayApplication {
 
     // This market-state is used to calculate best-price offsets before shuffling
     val marketState = newMarketState(conf)
-
-    def offsetConverter(tick: TickDataEvent) = {
-      marketState.newEvent(tick)
-      tick match {
-        case os: OrderSubmittedEvent =>
-          val offsetOrder = os.order match {
-            case lo: LimitOrder => new SameSideOffsetOrder(lo, marketState)
-          }
-          new OrderSubmittedEvent(os.timeStamp, os.messageSequenceNumber, os.tiCode, offsetOrder)
-        case or: OrderRevisedEvent =>
-          val originalOrder = marketState.orderMap(or.order.orderCode)
-          val tradeDirection = if (originalOrder.isBid) TradeDirection.Buy else TradeDirection.Sell
-          val lo = new LimitOrder(or.order.orderCode, or.newVolume, tradeDirection, or.newPrice)
-          val offsetOrder = new SameSideOffsetOrder(lo, marketState)
-          new OrderSubmittedEvent(or.timeStamp, or.messageSequenceNumber, or.tiCode, offsetOrder)
-        case other =>
-          other
-      }
-    }
-
-    val offsetTicks = for(tick <- eventSource) yield offsetConverter(tick)
-//    val offsetTicks = eventSource
-
+    val offsetTicks = new Offset(marketState, eventSource)
     new RandomPermutation(offsetTicks.iterator.toList, conf.proportionShuffling(), conf.shuffleWindowSize())
   }
+
 }

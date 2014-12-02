@@ -1,29 +1,36 @@
 package org.ccfea.tickdata.storage.shuffled
 
-import org.ccfea.tickdata.event.{OrderSubmittedEvent, TickDataEvent}
-import org.ccfea.tickdata.order.{AbstractOrder, OffsetOrder}
+import org.ccfea.tickdata.event.{OrderRevisedEvent, OrderSubmittedEvent, TickDataEvent}
+import org.ccfea.tickdata.order.{SameSideOffsetOrder, LimitOrder, AbstractOrder, OffsetOrder}
+import org.ccfea.tickdata.simulator.MarketState
 
 /**
  * (C) Steve Phelps 2014
  */
-class Offset(val offsetOrder: AbstractOrder => OffsetOrder, val source: Iterable[TickDataEvent])
+class Offset(val marketState: MarketState, val ticks: Iterable[TickDataEvent])
     extends Iterable[TickDataEvent] {
 
-  def convert(event: TickDataEvent): TickDataEvent = {
-     event match {
-        case ose: OrderSubmittedEvent =>
-          new OrderSubmittedEvent(ose.timeStamp, ose.messageSequenceNumber, ose.tiCode, offsetOrder(ose.order))
-        case other =>
-          other
-      }
+  val offsetTicks = for(tick <- ticks) yield convertToOffset(tick)
+
+  def convertToOffset(tick: TickDataEvent) = {
+    val convertedTick = tick match {
+      case _: OrderSubmittedEvent | _: OrderRevisedEvent =>
+        val limitOrder = tick match {
+          case os: OrderSubmittedEvent =>
+            os.order match {
+              case lo: LimitOrder => lo
+            }
+          case or: OrderRevisedEvent =>
+            new LimitOrder(or.order.orderCode, or.newVolume, or.newDirection, or.newPrice)
+        }
+        val offsetOrder = new SameSideOffsetOrder(limitOrder, marketState)
+        new OrderSubmittedEvent(tick.timeStamp, tick.messageSequenceNumber, tick.tiCode, offsetOrder)
+      case other =>
+        tick
+    }
+    marketState.newEvent(tick)
+    convertedTick
   }
 
-  override def iterator: Iterator[TickDataEvent] = new Iterator[TickDataEvent] {
-    def next(): TickDataEvent =  convert(source.iterator.next())
-    def hasNext = source.iterator.hasNext
-  }
-
-//  override def length: Int = source.length
-//
-//  override def apply(idx: Int): TickDataEvent = convert(source.apply(idx))
+  override def iterator: Iterator[TickDataEvent] = offsetTicks.iterator
 }

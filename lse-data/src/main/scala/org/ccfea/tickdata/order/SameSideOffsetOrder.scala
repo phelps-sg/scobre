@@ -8,17 +8,10 @@ import org.ccfea.tickdata.simulator.MarketState
 class SameSideOffsetOrder(limitOrder: LimitOrder, initialMarketState: MarketState)
     extends OffsetOrder(limitOrder, initialMarketState) {
 
-  def bestPrice(implicit marketState: MarketState) = {
+  def bestPrice(implicit marketState: MarketState): Option[Double] = {
     val quote = marketState.quote
-    if (tradeDirection == TradeDirection.Buy) SomethingOrZero(quote.bid) else SomethingOrZero(quote.ask)
+    if (tradeDirection == TradeDirection.Buy) quote.bid else quote.ask
   }
-
-  def SomethingOrZero(p: Option[Double]): Double =
-    //TODO: In this case the _offset_ should be zero?
-    p match  {
-      case Some(p) => p
-      case None => 100.0
-    }
 
   override def toString() =
     "SameSideOffsetOrder(" + offset + ")"

@@ -13,14 +13,23 @@ import org.ccfea.tickdata.simulator.MarketState
  */
 abstract class OffsetOrder(val limitOrder: LimitOrder, val initialMarketState: MarketState) extends OrderWithVolume {
 
-  val offset: Double = (limitOrder.price - bestPrice(initialMarketState)).toDouble
+  val offset: Double = bestPrice(initialMarketState) match {
+    case Some(best) => (limitOrder.price - best).toDouble
+    case None => 0.0
+  }
+
   val orderCode = limitOrder.orderCode
   val aggregateSize = limitOrder.aggregateSize
   val tradeDirection = limitOrder.tradeDirection
+  val originalPrice = limitOrder.price
 
-  def price(implicit marketState: MarketState): BigDecimal =  bestPrice + offset
+  def price(implicit marketState: MarketState): BigDecimal =
+    bestPrice match {
+      case None => originalPrice
+      case Some(p) => p + offset
+    }
 
-  def bestPrice(implicit marketState: MarketState): Double
+  def bestPrice(implicit marketState: MarketState): Option[Double]
 
   def toLimitOrder(implicit marketState: MarketState) = {
     new LimitOrder(orderCode, aggregateSize, tradeDirection, price)
