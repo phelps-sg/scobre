@@ -53,5 +53,5 @@ for offsetting in [OFFSETTING_NONE, OFFSETTING_SAME, OFFSETTING_MID, OFFSETTING_
             for proportion in numpy.arange(0, 1.1, 0.1):
                 job = job_server.submit(perform_shuffle, (proportion, window, intra_window, offsetting), dep_functions, dep_modules)
                 jobs.append(job)
-                #time.sleep(randint(0, 10))
+                time.sleep(randint(0, 10))
                     
