@@ -34,7 +34,7 @@ class Iface:
     """
     pass
 
-  def shuffledReplay(self, assetId, variables, proportionShuffling, windowSize, intraWindow):
+  def shuffledReplay(self, assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting):
     """
     Parameters:
      - assetId
@@ -42,6 +42,7 @@ class Iface:
      - proportionShuffling
      - windowSize
      - intraWindow
+     - offsetting
     """
     pass
 
@@ -95,7 +96,7 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "replay failed: unknown result");
 
-  def shuffledReplay(self, assetId, variables, proportionShuffling, windowSize, intraWindow):
+  def shuffledReplay(self, assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting):
     """
     Parameters:
      - assetId
@@ -103,11 +104,12 @@ class Client(Iface):
      - proportionShuffling
      - windowSize
      - intraWindow
+     - offsetting
     """
-    self.send_shuffledReplay(assetId, variables, proportionShuffling, windowSize, intraWindow)
+    self.send_shuffledReplay(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting)
     return self.recv_shuffledReplay()
 
-  def send_shuffledReplay(self, assetId, variables, proportionShuffling, windowSize, intraWindow):
+  def send_shuffledReplay(self, assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting):
     self._oprot.writeMessageBegin('shuffledReplay', TMessageType.CALL, self._seqid)
     args = shuffledReplay_args()
     args.assetId = assetId
@@ -115,6 +117,7 @@ class Client(Iface):
     args.proportionShuffling = proportionShuffling
     args.windowSize = windowSize
     args.intraWindow = intraWindow
+    args.offsetting = offsetting
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
@@ -172,7 +175,7 @@ class Processor(Iface, TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = shuffledReplay_result()
-    result.success = self._handler.shuffledReplay(args.assetId, args.variables, args.proportionShuffling, args.windowSize, args.intraWindow)
+    result.success = self._handler.shuffledReplay(args.assetId, args.variables, args.proportionShuffling, args.windowSize, args.intraWindow, args.offsetting)
     oprot.writeMessageBegin("shuffledReplay", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
@@ -370,6 +373,7 @@ class shuffledReplay_args:
    - proportionShuffling
    - windowSize
    - intraWindow
+   - offsetting
   """
 
   thrift_spec = (
@@ -379,14 +383,16 @@ class shuffledReplay_args:
     (3, TType.DOUBLE, 'proportionShuffling', None, None, ), # 3
     (4, TType.I32, 'windowSize', None, None, ), # 4
     (5, TType.BOOL, 'intraWindow', None, None, ), # 5
+    (6, TType.I32, 'offsetting', None, None, ), # 6
   )
 
-  def __init__(self, assetId=None, variables=None, proportionShuffling=None, windowSize=None, intraWindow=None,):
+  def __init__(self, assetId=None, variables=None, proportionShuffling=None, windowSize=None, intraWindow=None, offsetting=None,):
     self.assetId = assetId
     self.variables = variables
     self.proportionShuffling = proportionShuffling
     self.windowSize = windowSize
     self.intraWindow = intraWindow
+    self.offsetting = offsetting
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -427,6 +433,11 @@ class shuffledReplay_args:
           self.intraWindow = iprot.readBool();
         else:
           iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.I32:
+          self.offsetting = iprot.readI32();
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -459,6 +470,10 @@ class shuffledReplay_args:
     if self.intraWindow is not None:
       oprot.writeFieldBegin('intraWindow', TType.BOOL, 5)
       oprot.writeBool(self.intraWindow)
+      oprot.writeFieldEnd()
+    if self.offsetting is not None:
+      oprot.writeFieldBegin('offsetting', TType.I32, 6)
+      oprot.writeI32(self.offsetting)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()

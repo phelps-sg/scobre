@@ -2,10 +2,11 @@ package org.ccfea.tickdata
 
 import org.ccfea.tickdata.collector.UnivariateTimeSeriesCollector
 import org.ccfea.tickdata.event.TickDataEvent
-import org.ccfea.tickdata.order.{LimitOrder, SameSideOffsetOrder}
+import org.ccfea.tickdata.order.LimitOrder
+import org.ccfea.tickdata.order.offset.{OppositeSideOffsetOrder, MidPriceOffsetOrder, SameSideOffsetOrder}
 import org.ccfea.tickdata.storage.csv.UnivariateCsvDataCollator
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
-import org.ccfea.tickdata.storage.shuffled.{RandomPermutation, Offset}
+import org.ccfea.tickdata.storage.shuffled.{RandomPermutation, OffsettedTicks}
 
 import org.ccfea.tickdata.conf.ReplayerConf
 import org.ccfea.tickdata.simulator._
@@ -78,9 +79,9 @@ object ReplayOrders extends ReplayApplication {
 
   def shuffledTicks(eventSource: Iterable[TickDataEvent])(implicit conf: ReplayerConf) = {
     val marketState = newMarketState(conf) // This market-state is used to calculate -price offsets before shuffling
-    val offsetTicks = new Offset(marketState, eventSource,
-                                  (lo: LimitOrder, quote: Quote) => new SameSideOffsetOrder(lo, quote))
-    new RandomPermutation(offsetTicks.iterator.toList, conf.proportionShuffling(), conf.shuffleWindowSize())
+    val offsettedTicks = new OffsettedTicks(marketState, eventSource,
+                                             (lo: LimitOrder, quote: Quote) => new SameSideOffsetOrder(lo, quote))
+    new RandomPermutation(offsettedTicks.iterator.toList, conf.proportionShuffling(), conf.shuffleWindowSize())
   }
 
 }

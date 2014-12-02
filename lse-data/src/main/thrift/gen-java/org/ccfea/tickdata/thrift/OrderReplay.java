@@ -48,7 +48,7 @@ public class OrderReplay {
      */
     public List<Map<String,Double>> replay(String assetId, List<String> variables, String startDate, String endDate) throws org.apache.thrift.TException;
 
-    public List<Map<String,Double>> shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow) throws org.apache.thrift.TException;
+    public List<Map<String,Double>> shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting) throws org.apache.thrift.TException;
 
   }
 
@@ -56,7 +56,7 @@ public class OrderReplay {
 
     public void replay(String assetId, List<String> variables, String startDate, String endDate, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.replay_call> resultHandler) throws org.apache.thrift.TException;
 
-    public void shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.shuffledReplay_call> resultHandler) throws org.apache.thrift.TException;
+    public void shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.shuffledReplay_call> resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -106,13 +106,13 @@ public class OrderReplay {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "replay failed: unknown result");
     }
 
-    public List<Map<String,Double>> shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow) throws org.apache.thrift.TException
+    public List<Map<String,Double>> shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting) throws org.apache.thrift.TException
     {
-      send_shuffledReplay(assetId, variables, proportionShuffling, windowSize, intraWindow);
+      send_shuffledReplay(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting);
       return recv_shuffledReplay();
     }
 
-    public void send_shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow) throws org.apache.thrift.TException
+    public void send_shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting) throws org.apache.thrift.TException
     {
       shuffledReplay_args args = new shuffledReplay_args();
       args.setAssetId(assetId);
@@ -120,6 +120,7 @@ public class OrderReplay {
       args.setProportionShuffling(proportionShuffling);
       args.setWindowSize(windowSize);
       args.setIntraWindow(intraWindow);
+      args.setOffsetting(offsetting);
       sendBase("shuffledReplay", args);
     }
 
@@ -192,9 +193,9 @@ public class OrderReplay {
       }
     }
 
-    public void shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, org.apache.thrift.async.AsyncMethodCallback<shuffledReplay_call> resultHandler) throws org.apache.thrift.TException {
+    public void shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, org.apache.thrift.async.AsyncMethodCallback<shuffledReplay_call> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      shuffledReplay_call method_call = new shuffledReplay_call(assetId, variables, proportionShuffling, windowSize, intraWindow, resultHandler, this, ___protocolFactory, ___transport);
+      shuffledReplay_call method_call = new shuffledReplay_call(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -205,13 +206,15 @@ public class OrderReplay {
       private double proportionShuffling;
       private int windowSize;
       private boolean intraWindow;
-      public shuffledReplay_call(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, org.apache.thrift.async.AsyncMethodCallback<shuffledReplay_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private int offsetting;
+      public shuffledReplay_call(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, org.apache.thrift.async.AsyncMethodCallback<shuffledReplay_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.assetId = assetId;
         this.variables = variables;
         this.proportionShuffling = proportionShuffling;
         this.windowSize = windowSize;
         this.intraWindow = intraWindow;
+        this.offsetting = offsetting;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
@@ -222,6 +225,7 @@ public class OrderReplay {
         args.setProportionShuffling(proportionShuffling);
         args.setWindowSize(windowSize);
         args.setIntraWindow(intraWindow);
+        args.setOffsetting(offsetting);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -289,7 +293,7 @@ public class OrderReplay {
 
       public shuffledReplay_result getResult(I iface, shuffledReplay_args args) throws org.apache.thrift.TException {
         shuffledReplay_result result = new shuffledReplay_result();
-        result.success = iface.shuffledReplay(args.assetId, args.variables, args.proportionShuffling, args.windowSize, args.intraWindow);
+        result.success = iface.shuffledReplay(args.assetId, args.variables, args.proportionShuffling, args.windowSize, args.intraWindow, args.offsetting);
         return result;
       }
     }
@@ -1468,6 +1472,7 @@ public class OrderReplay {
     private static final org.apache.thrift.protocol.TField PROPORTION_SHUFFLING_FIELD_DESC = new org.apache.thrift.protocol.TField("proportionShuffling", org.apache.thrift.protocol.TType.DOUBLE, (short)3);
     private static final org.apache.thrift.protocol.TField WINDOW_SIZE_FIELD_DESC = new org.apache.thrift.protocol.TField("windowSize", org.apache.thrift.protocol.TType.I32, (short)4);
     private static final org.apache.thrift.protocol.TField INTRA_WINDOW_FIELD_DESC = new org.apache.thrift.protocol.TField("intraWindow", org.apache.thrift.protocol.TType.BOOL, (short)5);
+    private static final org.apache.thrift.protocol.TField OFFSETTING_FIELD_DESC = new org.apache.thrift.protocol.TField("offsetting", org.apache.thrift.protocol.TType.I32, (short)6);
 
     private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
     static {
@@ -1480,6 +1485,7 @@ public class OrderReplay {
     public double proportionShuffling; // required
     public int windowSize; // required
     public boolean intraWindow; // required
+    public int offsetting; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -1487,7 +1493,8 @@ public class OrderReplay {
       VARIABLES((short)2, "variables"),
       PROPORTION_SHUFFLING((short)3, "proportionShuffling"),
       WINDOW_SIZE((short)4, "windowSize"),
-      INTRA_WINDOW((short)5, "intraWindow");
+      INTRA_WINDOW((short)5, "intraWindow"),
+      OFFSETTING((short)6, "offsetting");
 
       private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -1512,6 +1519,8 @@ public class OrderReplay {
             return WINDOW_SIZE;
           case 5: // INTRA_WINDOW
             return INTRA_WINDOW;
+          case 6: // OFFSETTING
+            return OFFSETTING;
           default:
             return null;
         }
@@ -1555,6 +1564,7 @@ public class OrderReplay {
     private static final int __PROPORTIONSHUFFLING_ISSET_ID = 0;
     private static final int __WINDOWSIZE_ISSET_ID = 1;
     private static final int __INTRAWINDOW_ISSET_ID = 2;
+    private static final int __OFFSETTING_ISSET_ID = 3;
     private byte __isset_bitfield = 0;
     public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
@@ -1570,6 +1580,8 @@ public class OrderReplay {
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       tmpMap.put(_Fields.INTRA_WINDOW, new org.apache.thrift.meta_data.FieldMetaData("intraWindow", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.BOOL)));
+      tmpMap.put(_Fields.OFFSETTING, new org.apache.thrift.meta_data.FieldMetaData("offsetting", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(shuffledReplay_args.class, metaDataMap);
     }
@@ -1582,7 +1594,8 @@ public class OrderReplay {
       List<String> variables,
       double proportionShuffling,
       int windowSize,
-      boolean intraWindow)
+      boolean intraWindow,
+      int offsetting)
     {
       this();
       this.assetId = assetId;
@@ -1593,6 +1606,8 @@ public class OrderReplay {
       setWindowSizeIsSet(true);
       this.intraWindow = intraWindow;
       setIntraWindowIsSet(true);
+      this.offsetting = offsetting;
+      setOffsettingIsSet(true);
     }
 
     /**
@@ -1613,6 +1628,7 @@ public class OrderReplay {
       this.proportionShuffling = other.proportionShuffling;
       this.windowSize = other.windowSize;
       this.intraWindow = other.intraWindow;
+      this.offsetting = other.offsetting;
     }
 
     public shuffledReplay_args deepCopy() {
@@ -1629,6 +1645,8 @@ public class OrderReplay {
       this.windowSize = 0;
       setIntraWindowIsSet(false);
       this.intraWindow = false;
+      setOffsettingIsSet(false);
+      this.offsetting = 0;
     }
 
     public String getAssetId() {
@@ -1763,6 +1781,29 @@ public class OrderReplay {
       __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __INTRAWINDOW_ISSET_ID, value);
     }
 
+    public int getOffsetting() {
+      return this.offsetting;
+    }
+
+    public shuffledReplay_args setOffsetting(int offsetting) {
+      this.offsetting = offsetting;
+      setOffsettingIsSet(true);
+      return this;
+    }
+
+    public void unsetOffsetting() {
+      __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __OFFSETTING_ISSET_ID);
+    }
+
+    /** Returns true if field offsetting is set (has been assigned a value) and false otherwise */
+    public boolean isSetOffsetting() {
+      return EncodingUtils.testBit(__isset_bitfield, __OFFSETTING_ISSET_ID);
+    }
+
+    public void setOffsettingIsSet(boolean value) {
+      __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __OFFSETTING_ISSET_ID, value);
+    }
+
     public void setFieldValue(_Fields field, Object value) {
       switch (field) {
       case ASSET_ID:
@@ -1805,6 +1846,14 @@ public class OrderReplay {
         }
         break;
 
+      case OFFSETTING:
+        if (value == null) {
+          unsetOffsetting();
+        } else {
+          setOffsetting((Integer)value);
+        }
+        break;
+
       }
     }
 
@@ -1824,6 +1873,9 @@ public class OrderReplay {
 
       case INTRA_WINDOW:
         return Boolean.valueOf(isIntraWindow());
+
+      case OFFSETTING:
+        return Integer.valueOf(getOffsetting());
 
       }
       throw new IllegalStateException();
@@ -1846,6 +1898,8 @@ public class OrderReplay {
         return isSetWindowSize();
       case INTRA_WINDOW:
         return isSetIntraWindow();
+      case OFFSETTING:
+        return isSetOffsetting();
       }
       throw new IllegalStateException();
     }
@@ -1905,6 +1959,15 @@ public class OrderReplay {
         if (!(this_present_intraWindow && that_present_intraWindow))
           return false;
         if (this.intraWindow != that.intraWindow)
+          return false;
+      }
+
+      boolean this_present_offsetting = true;
+      boolean that_present_offsetting = true;
+      if (this_present_offsetting || that_present_offsetting) {
+        if (!(this_present_offsetting && that_present_offsetting))
+          return false;
+        if (this.offsetting != that.offsetting)
           return false;
       }
 
@@ -1974,6 +2037,16 @@ public class OrderReplay {
           return lastComparison;
         }
       }
+      lastComparison = Boolean.valueOf(isSetOffsetting()).compareTo(typedOther.isSetOffsetting());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetOffsetting()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.offsetting, typedOther.offsetting);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
       return 0;
     }
 
@@ -2020,6 +2093,10 @@ public class OrderReplay {
       if (!first) sb.append(", ");
       sb.append("intraWindow:");
       sb.append(this.intraWindow);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("offsetting:");
+      sb.append(this.offsetting);
       first = false;
       sb.append(")");
       return sb.toString();
@@ -2116,6 +2193,14 @@ public class OrderReplay {
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
+            case 6: // OFFSETTING
+              if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+                struct.offsetting = iprot.readI32();
+                struct.setOffsettingIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
             default:
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
           }
@@ -2157,6 +2242,9 @@ public class OrderReplay {
         oprot.writeFieldBegin(INTRA_WINDOW_FIELD_DESC);
         oprot.writeBool(struct.intraWindow);
         oprot.writeFieldEnd();
+        oprot.writeFieldBegin(OFFSETTING_FIELD_DESC);
+        oprot.writeI32(struct.offsetting);
+        oprot.writeFieldEnd();
         oprot.writeFieldStop();
         oprot.writeStructEnd();
       }
@@ -2190,7 +2278,10 @@ public class OrderReplay {
         if (struct.isSetIntraWindow()) {
           optionals.set(4);
         }
-        oprot.writeBitSet(optionals, 5);
+        if (struct.isSetOffsetting()) {
+          optionals.set(5);
+        }
+        oprot.writeBitSet(optionals, 6);
         if (struct.isSetAssetId()) {
           oprot.writeString(struct.assetId);
         }
@@ -2212,12 +2303,15 @@ public class OrderReplay {
         if (struct.isSetIntraWindow()) {
           oprot.writeBool(struct.intraWindow);
         }
+        if (struct.isSetOffsetting()) {
+          oprot.writeI32(struct.offsetting);
+        }
       }
 
       @Override
       public void read(org.apache.thrift.protocol.TProtocol prot, shuffledReplay_args struct) throws org.apache.thrift.TException {
         TTupleProtocol iprot = (TTupleProtocol) prot;
-        BitSet incoming = iprot.readBitSet(5);
+        BitSet incoming = iprot.readBitSet(6);
         if (incoming.get(0)) {
           struct.assetId = iprot.readString();
           struct.setAssetIdIsSet(true);
@@ -2246,6 +2340,10 @@ public class OrderReplay {
         if (incoming.get(4)) {
           struct.intraWindow = iprot.readBool();
           struct.setIntraWindowIsSet(true);
+        }
+        if (incoming.get(5)) {
+          struct.offsetting = iprot.readI32();
+          struct.setOffsettingIsSet(true);
         }
       }
     }

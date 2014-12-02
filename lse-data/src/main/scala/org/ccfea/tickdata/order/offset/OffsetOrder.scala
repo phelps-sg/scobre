@@ -1,7 +1,7 @@
-package org.ccfea.tickdata.order
+package org.ccfea.tickdata.order.offset
 
-import net.sourceforge.jasa.market.MarketQuote
-import org.ccfea.tickdata.simulator.{Quote, MarketState}
+import org.ccfea.tickdata.order.{LimitOrder, OrderWithVolume}
+import org.ccfea.tickdata.simulator.Quote
 
 /**
  * A virtual limit-order used for simulation studies in which

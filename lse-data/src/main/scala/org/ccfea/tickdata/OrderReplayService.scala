@@ -2,6 +2,9 @@ package org.ccfea.tickdata
 
 import java.{lang, util}
 
+import org.ccfea.tickdata.order.LimitOrder
+import org.ccfea.tickdata.order.offset.{OppositeSideOffsetOrder, SameSideOffsetOrder, MidPriceOffsetOrder, Offsetting}
+
 import scala.collection.parallel
 
 import grizzled.slf4j.Logger
@@ -11,9 +14,9 @@ import org.ccfea.tickdata.collector.MultivariateTimeSeriesCollector
 import org.ccfea.tickdata.conf.{BuildInfo, ServerConf}
 
 import org.ccfea.tickdata.event.TickDataEvent
-import org.ccfea.tickdata.simulator.{ClearingMarketState, MarketState}
+import org.ccfea.tickdata.simulator.{Quote, ClearingMarketState, MarketState}
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
-import org.ccfea.tickdata.storage.shuffled.{IntraWindowRandomPermutation, RandomPermutation}
+import org.ccfea.tickdata.storage.shuffled.{OffsettedTicks, IntraWindowRandomPermutation, RandomPermutation}
 import org.ccfea.tickdata.storage.thrift.MultivariateThriftCollator
 import org.ccfea.tickdata.thrift.OrderReplay
 
@@ -32,7 +35,7 @@ object OrderReplayService extends ReplayApplication {
                   val marketState: MarketState)
     extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
 
-  var tickCache = Map[String, Seq[TickDataEvent]]()
+  var tickCache = Map[(String, Offsetting.Value), Seq[TickDataEvent]]()
 
   val logger = Logger("org.ccfea.tickdata.OrderReplayService")
 
@@ -48,15 +51,34 @@ object OrderReplayService extends ReplayApplication {
     for (variable <- variables) yield (variable, variableToMethod(variable))
   }
 
+  def getOffsettedTicks(ticks: Seq[TickDataEvent], offsetting: Offsetting.Value)(implicit conf: ServerConf) = {
+    val marketState = newMarketState
+    offsetting match {
+      case Offsetting.NoOffsetting =>
+        ticks
+      case Offsetting.MidPrice =>
+        new OffsettedTicks(marketState, ticks,
+                            (limitOrder: LimitOrder, quote: Quote) => new MidPriceOffsetOrder(limitOrder, quote))
+      case Offsetting.SameSide =>
+        new OffsettedTicks(marketState, ticks,
+                            (limitOrder: LimitOrder, quote: Quote) => new SameSideOffsetOrder(limitOrder, quote))
+      case Offsetting.OppositeSide =>
+        new OffsettedTicks(marketState, ticks,
+                              (limitOrder: LimitOrder, quote: Quote) => new OppositeSideOffsetOrder(limitOrder, quote))
+    }
+  }
+
   def getShuffledData(assetId: String, source: Iterable[TickDataEvent],
-                          proportionShuffling: Double, windowSize: Int, intraWindow: Boolean): RandomPermutation = {
-    val ticks = if (tickCache.contains(assetId)) {
-      tickCache(assetId)
+                          proportionShuffling: Double,
+                          windowSize: Int, intraWindow: Boolean,
+                          offsetting: Offsetting.Value)(implicit conf: ServerConf): RandomPermutation = {
+    val ticks = if (tickCache.contains((assetId, offsetting))) {
+      tickCache((assetId, offsetting))
     } else {
-      val hbaseSource = new HBaseRetriever(selectedAsset = assetId)
-      val data = hbaseSource.iterator.toList
-      tickCache += (assetId -> data)
-      data
+      val originalData = new HBaseRetriever(selectedAsset = assetId).toList
+      val offsettedTicks = getOffsettedTicks(originalData, offsetting).toList
+      tickCache += ((assetId, offsetting) -> offsettedTicks)
+      offsettedTicks
     }
     if (intraWindow)
       new IntraWindowRandomPermutation(ticks, proportionShuffling, windowSize)
@@ -91,7 +113,8 @@ object OrderReplayService extends ReplayApplication {
       }
 
       override def shuffledReplay(assetId: String, variables: util.List[String],
-                                    proportionShuffling: Double, windowSize: Int, intraWindow: Boolean):
+                                    proportionShuffling: Double, windowSize: Int, intraWindow: Boolean,
+                                      offsetting: Int):
                                                 util.List[util.Map[String, lang.Double]] = {
 
         logger.info("Shuffled replay for " + assetId + " with windowSize " + windowSize + " and percentage " + proportionShuffling)
@@ -99,7 +122,8 @@ object OrderReplayService extends ReplayApplication {
 
         val marketState = newMarketState
         val hbaseSource = new HBaseRetriever(selectedAsset = assetId)
-        val shuffledData = getShuffledData(assetId, hbaseSource, proportionShuffling, windowSize, intraWindow)
+        val shuffledData =
+          getShuffledData(assetId, hbaseSource, proportionShuffling, windowSize, intraWindow, Offsetting(offsetting))
 
         val replayer =
           new Replayer(eventSource = shuffledData, dataCollectors = Map() ++ collectors(variables), marketState)

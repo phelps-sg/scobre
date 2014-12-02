@@ -11,7 +11,8 @@ import java.util.GregorianCalendar
 import org.ccfea.tickdata.event._
 import org.ccfea.tickdata.event.OrderFilledEvent
 import org.ccfea.tickdata.event.OrderMatchedEvent
-import org.ccfea.tickdata.order.{OffsetOrder, TradeDirection, AbstractOrder, LimitOrder}
+import org.ccfea.tickdata.order.offset.OffsetOrder
+import org.ccfea.tickdata.order.{TradeDirection, AbstractOrder, LimitOrder}
 
 import scala.beans.BeanProperty
 import collection.JavaConversions._
@@ -190,7 +191,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
        case lo: LimitOrder =>
          processNewLimitOrder(lo)
        case oo: OffsetOrder =>
-         val lo = oo.toLimitOrder(this.quote)
+         val lo = oo.toLimitOrder(this.quote())
          processNewLimitOrder(lo)
        case _ =>
     }
@@ -267,16 +268,10 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   }
 
   implicit def price(order: net.sourceforge.jasa.market.Order) = if (order != null) Some(order.getPrice) else None
-  def quote = new Quote(book.getHighestUnmatchedBid, book.getLowestUnmatchedAsk)
 
-  def midPrice: Option[Double] = {
-    quote match {
-      case Quote(None,      None)      => None
-      case Quote(Some(bid), None)      => Some(bid)
-      case Quote(None,      Some(ask)) => Some(ask)
-      case Quote(Some(bid), Some(ask)) => Some((bid + ask) / 2.0)
-    }
-  }
+  def quote() = new Quote(book.getHighestUnmatchedBid, book.getLowestUnmatchedAsk)
+
+  def midPrice: Option[Double] = quote().midPrice
 
   def calendar = {
     val cal = new GregorianCalendar()
