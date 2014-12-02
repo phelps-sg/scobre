@@ -14,8 +14,9 @@ OFFSETTING_MID =      2
 OFFSETTING_OPPOSITE = 3
 
 def get_shuffled_data(asset, proportion, window_size, intra_window = False,
-                variables = ['midPrice'],
-                server = 'cseesp1', port = 9090, offsetting = 0):
+                          offsetting = 0,
+                          variables = ['midPrice'],
+                            server = 'cseesp1', port = 9090):
     from thrift.transport import TSocket
     from thrift.protocol import TBinaryProtocol
     from orderreplay import *
