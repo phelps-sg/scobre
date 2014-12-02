@@ -47,10 +47,10 @@ dep_functions = (get_shuffled_data, )
 
 jobs = []
 for offsetting in [OFFSETTING_NONE, OFFSETTING_SAME, OFFSETTING_MID, OFFSETTING_OPPOSITE]:
-for intra_window in [True, False]:
-    for window in [4 ** (x + 1) for x in range(8)]:
-        for proportion in numpy.arange(0, 1.1, 0.1):
-            time.sleep(randint(0, 10))
-            job = job_server.submit(perform_shuffle, (proportion, window, intra_window, offsetting), dep_functions, dep_modules)
-            jobs.append(job)
-            
+    for intra_window in [True, False]:
+        for window in [4 ** (x + 1) for x in range(8)]:
+            for proportion in numpy.arange(0, 1.1, 0.1):
+                time.sleep(randint(0, 10))
+                job = job_server.submit(perform_shuffle, (proportion, window, intra_window, offsetting), dep_functions, dep_modules)
+                jobs.append(job)
+    
