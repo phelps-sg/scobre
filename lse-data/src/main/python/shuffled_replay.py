@@ -14,8 +14,9 @@ OFFSETTING_MID =      2
 OFFSETTING_OPPOSITE = 3
 
 def get_shuffled_data(asset, proportion, window_size, intra_window = False,
-                variables = ['midPrice'],
-                server = 'cseesp1', port = 9090, offsetting = 0):
+                          offsetting = 0,
+                          variables = ['midPrice'],
+                            server = 'cseesp1', port = 9090):
     from thrift.transport import TSocket
     from thrift.protocol import TBinaryProtocol
     from orderreplay import *
@@ -53,5 +54,5 @@ for offsetting in [OFFSETTING_NONE, OFFSETTING_SAME, OFFSETTING_MID, OFFSETTING_
             for proportion in numpy.arange(0, 1.1, 0.1):
                 job = job_server.submit(perform_shuffle, (proportion, window, intra_window, offsetting), dep_functions, dep_modules)
                 jobs.append(job)
-                time.sleep(randint(0, 10))
+                #time.sleep(randint(0, 10))
                     
