@@ -15,7 +15,7 @@ OFFSETTING_OPPOSITE = 3
 
 def get_shuffled_data(asset, proportion, window_size, intra_window = False,
                 variables = ['midPrice'],
-                server = 'cseesp1', port = 9090, offsetting = OFFSETTING_NONE):
+                server = 'cseesp1', port = 9090, offsetting = 0):
     from thrift.transport import TSocket
     from thrift.protocol import TBinaryProtocol
     from orderreplay import *
@@ -29,11 +29,11 @@ def get_shuffled_data(asset, proportion, window_size, intra_window = False,
     return result
     
     
-def perform_shuffle(proportion, window, n = 100, intra_window = False, offsetting = OFFSETTING_NONE, directory='/var/data/orderflow-shuffle'):
+def perform_shuffle(proportion, window, n = 100, intra_window = False, offsetting = 0, directory='/var/data/orderflow-shuffle'):
     for i in range(n):
         percentage = round(proportion * n)
         dataset = get_shuffled_data('BHP', proportion, window, intra_window, offsetting)
-        filename = '%s/bhp-shuffled-ws%d-p%d-i%d-%d.csv' % (directory, window, percentage, intra_window, i)
+        filename = '%s/bhp-shuffled-ws%d-p%d-i%d-o%d-%d.csv' % (directory, window, percentage, intra_window, offsetting, i)
         f = open(filename, 'w', buffering=200000)
         csv_writer = csv.writer(f)
         for row in dataset:
@@ -51,7 +51,7 @@ for offsetting in [OFFSETTING_NONE, OFFSETTING_SAME, OFFSETTING_MID, OFFSETTING_
     for intra_window in [True, False]:
         for window in [4 ** (x + 1) for x in range(8)]:
             for proportion in numpy.arange(0, 1.1, 0.1):
-                time.sleep(randint(0, 10))
                 job = job_server.submit(perform_shuffle, (proportion, window, intra_window, offsetting), dep_functions, dep_modules)
                 jobs.append(job)
-    
+                #time.sleep(randint(0, 10))
+                    
