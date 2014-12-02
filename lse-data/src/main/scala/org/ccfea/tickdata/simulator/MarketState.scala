@@ -190,7 +190,8 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
        case lo: LimitOrder =>
          processNewLimitOrder(lo)
        case oo: OffsetOrder =>
-         processNewLimitOrder(oo.toLimitOrder(this))
+         val lo = oo.toLimitOrder(this.quote)
+         processNewLimitOrder(lo)
        case _ =>
     }
   }

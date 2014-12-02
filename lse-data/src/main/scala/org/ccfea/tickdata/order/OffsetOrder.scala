@@ -1,6 +1,7 @@
 package org.ccfea.tickdata.order
 
-import org.ccfea.tickdata.simulator.MarketState
+import net.sourceforge.jasa.market.MarketQuote
+import org.ccfea.tickdata.simulator.{Quote, MarketState}
 
 /**
  * A virtual limit-order used for simulation studies in which
@@ -11,28 +12,28 @@ import org.ccfea.tickdata.simulator.MarketState
  *
  * (C) Steve Phelps 2014
  */
-abstract class OffsetOrder(val limitOrder: LimitOrder, val initialMarketState: MarketState) extends OrderWithVolume {
-
-  val offset: Double = bestPrice(initialMarketState) match {
-    case Some(best) => (limitOrder.price - best).toDouble
-    case None => 0.0
-  }
+abstract class OffsetOrder(val limitOrder: LimitOrder, val initialQuote: Quote) extends OrderWithVolume {
 
   val orderCode = limitOrder.orderCode
   val aggregateSize = limitOrder.aggregateSize
   val tradeDirection = limitOrder.tradeDirection
   val originalPrice = limitOrder.price
 
-  def price(implicit marketState: MarketState): BigDecimal =
-    bestPrice match {
+  val offset: Double = bestPrice(initialQuote) match {
+    case Some(best) => (limitOrder.price - best).toDouble
+    case None => 0.0
+  }
+
+  def price(quote: Quote): BigDecimal =
+    bestPrice(quote) match {
       case None => originalPrice
       case Some(p) => p + offset
     }
 
-  def bestPrice(implicit marketState: MarketState): Option[Double]
+  def bestPrice(quote: Quote): Option[Double]
 
-  def toLimitOrder(implicit marketState: MarketState) = {
-    new LimitOrder(orderCode, aggregateSize, tradeDirection, price)
+  def toLimitOrder(quote: Quote) = {
+    new LimitOrder(orderCode, aggregateSize, tradeDirection, price(quote))
   }
 
 }

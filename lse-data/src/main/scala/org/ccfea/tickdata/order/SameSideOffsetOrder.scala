@@ -1,19 +1,18 @@
 package org.ccfea.tickdata.order
 
-import org.ccfea.tickdata.simulator.MarketState
+import org.ccfea.tickdata.simulator.{Quote, MarketState}
 
 /**
  * (C) Steve Phelps
  */
-class SameSideOffsetOrder(limitOrder: LimitOrder, initialMarketState: MarketState)
-    extends OffsetOrder(limitOrder, initialMarketState) {
+class SameSideOffsetOrder(limitOrder: LimitOrder, initialQuote: Quote)
+    extends OffsetOrder(limitOrder, initialQuote) {
 
-  def bestPrice(implicit marketState: MarketState): Option[Double] = {
-    val quote = marketState.quote
+  def bestPrice(quote: Quote): Option[Double] = {
     if (tradeDirection == TradeDirection.Buy) quote.bid else quote.ask
   }
 
   override def toString() =
-    "SameSideOffsetOrder(" + offset + ")"
+    "SameSideOffsetOrder(" + offset + "," + orderCode + "," + originalPrice + "," + tradeDirection + "," + aggregateSize + "," + initialQuote.bid + "," + initialQuote.ask + ")"
 
 }

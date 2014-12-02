@@ -1,14 +1,18 @@
 package org.ccfea.tickdata.storage.shuffled
 
+import grizzled.slf4j.Logger
 import org.ccfea.tickdata.event.{OrderRevisedEvent, OrderSubmittedEvent, TickDataEvent}
 import org.ccfea.tickdata.order.{SameSideOffsetOrder, LimitOrder, AbstractOrder, OffsetOrder}
-import org.ccfea.tickdata.simulator.MarketState
+import org.ccfea.tickdata.simulator.{Quote, MarketState}
 
 /**
  * (C) Steve Phelps 2014
  */
-class Offset(val marketState: MarketState, val ticks: Iterable[TickDataEvent])
+class Offset(val marketState: MarketState, val ticks: Iterable[TickDataEvent],
+              val createOffsetOrder: (LimitOrder,Quote) => OffsetOrder)
     extends Iterable[TickDataEvent] {
+
+  val logger = Logger("org.ccfea.tickdata.OrderReplayer")
 
   val offsetTicks = for(tick <- ticks) yield convertToOffset(tick)
 
@@ -23,7 +27,8 @@ class Offset(val marketState: MarketState, val ticks: Iterable[TickDataEvent])
           case or: OrderRevisedEvent =>
             new LimitOrder(or.order.orderCode, or.newVolume, or.newDirection, or.newPrice)
         }
-        val offsetOrder = new SameSideOffsetOrder(limitOrder, marketState)
+//        val offsetOrder = new SameSideOffsetOrder(limitOrder, marketState.quote)
+        val offsetOrder = createOffsetOrder(limitOrder, marketState.quote)
         new OrderSubmittedEvent(tick.timeStamp, tick.messageSequenceNumber, tick.tiCode, offsetOrder)
       case other =>
         tick
