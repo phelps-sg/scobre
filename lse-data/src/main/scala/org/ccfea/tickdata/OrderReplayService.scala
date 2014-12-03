@@ -100,12 +100,11 @@ object OrderReplayService extends ReplayApplication {
         logger.info("Starting simulation... ")
 
         val marketState = newMarketState
-        val hbaseSource: Iterable[TickDataEvent] =
+        val ticks =
           new HBaseRetriever(selectedAsset = assetId,
                               startDate = parseDate(Some(startDate)), endDate = parseDate(Some(endDate)))
 
-        val replayer =
-          new Replayer(eventSource = hbaseSource, dataCollectors = Map() ++ collectors(variables), marketState)
+        val replayer = new Replayer(ticks, dataCollectors = Map() ++ collectors(variables), marketState)
         replayer.run()
         logger.info("done.")
 
@@ -121,12 +120,12 @@ object OrderReplayService extends ReplayApplication {
         logger.info("Starting simulation... ")
 
         val marketState = newMarketState
-        val hbaseSource = new HBaseRetriever(selectedAsset = assetId)
-        val shuffledData =
-          getShuffledData(assetId, hbaseSource, proportionShuffling, windowSize, intraWindow, Offsetting(offsetting))
+        val ticks = new HBaseRetriever(selectedAsset = assetId)
+        val shuffledTicks =
+          getShuffledData(assetId, ticks, proportionShuffling, windowSize, intraWindow, Offsetting(offsetting))
 
         val replayer =
-          new Replayer(eventSource = shuffledData, dataCollectors = Map() ++ collectors(variables), marketState)
+          new Replayer(shuffledTicks, dataCollectors = Map() ++ collectors(variables), marketState)
         replayer.run()
 
         logger.info("done.")

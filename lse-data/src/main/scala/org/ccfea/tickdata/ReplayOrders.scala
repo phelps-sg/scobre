@@ -56,7 +56,7 @@ object ReplayOrders extends ReplayApplication {
   def simulateAndCollate(dataCollector: MarketState => Option[AnyVal])
                           (implicit conf: ReplayerConf) = {
 
-    val hbaseEvents: Iterable[TickDataEvent] =
+    val hbaseTicks: Iterable[TickDataEvent] =
       new HBaseRetriever(selectedAsset = conf.tiCode(),
                           startDate =  parseDate(conf.startDate.get),
                           endDate = parseDate(conf.endDate.get))
@@ -68,18 +68,15 @@ object ReplayOrders extends ReplayApplication {
         extends UnivariateTimeSeriesCollector with UnivariateCsvDataCollator
 
     val marketState = newMarketState(conf)
-
     if (conf.withGui()) new OrderBookView(marketState)
-
-    val eventSource = if (conf.shuffle()) shuffledTicks(hbaseEvents) else hbaseEvents
-
-    val replayer = new Replayer(eventSource, outFileName = conf.outFileName.get, dataCollector, marketState)
+    val ticks = if (conf.shuffle()) shuffledTicks(hbaseTicks) else hbaseTicks
+    val replayer = new Replayer(ticks, outFileName = conf.outFileName.get, dataCollector, marketState)
     replayer.run()
   }
 
-  def shuffledTicks(eventSource: Iterable[TickDataEvent])(implicit conf: ReplayerConf) = {
+  def shuffledTicks(ticks: Iterable[TickDataEvent])(implicit conf: ReplayerConf) = {
     val marketState = newMarketState(conf) // This market-state is used to calculate -price offsets before shuffling
-    val offsettedTicks = new OffsettedTicks(marketState, eventSource,
+    val offsettedTicks = new OffsettedTicks(marketState, ticks,
                                              (lo: LimitOrder, quote: Quote) => new SameSideOffsetOrder(lo, quote))
     new RandomPermutation(offsettedTicks.iterator.toList, conf.proportionShuffling(), conf.shuffleWindowSize())
   }

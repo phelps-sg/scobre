@@ -12,7 +12,7 @@ import org.ccfea.tickdata.event._
 import org.ccfea.tickdata.event.OrderFilledEvent
 import org.ccfea.tickdata.event.OrderMatchedEvent
 import org.ccfea.tickdata.order.offset.OffsetOrder
-import org.ccfea.tickdata.order.{TradeDirection, AbstractOrder, LimitOrder}
+import org.ccfea.tickdata.order.{MarketOrder, TradeDirection, AbstractOrder, LimitOrder}
 
 import scala.beans.BeanProperty
 import collection.JavaConversions._
@@ -188,12 +188,9 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
       book.remove(orderMap(order.orderCode))
     }
     order match {
-       case lo: LimitOrder =>
-         processNewLimitOrder(lo)
-       case oo: OffsetOrder =>
-         val lo = oo.toLimitOrder(this.quote())
-         processNewLimitOrder(lo)
-       case _ =>
+       case lo: LimitOrder =>   processLimitOrder(lo)
+       case oo: OffsetOrder =>  processLimitOrder(oo.toLimitOrder(this.quote()))
+       case mo: MarketOrder =>  processMarketOrder(mo)
     }
   }
 
@@ -209,10 +206,15 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     }
   }
 
-  def processNewLimitOrder(order: LimitOrder) = {
+  def processLimitOrder(order: LimitOrder) = {
     val newOrder = toJasaOrder(order)
     insertOrder(newOrder)
     orderMap(order.orderCode) = newOrder
+  }
+
+  def processMarketOrder(order: MarketOrder) = {
+    logger.debug("No action required for market order without explicit clearing: " + order)
+    //TODO Override in subclass
   }
 
   def adjustQuantity(jasaOrder: net.sourceforge.jasa.market.Order,
