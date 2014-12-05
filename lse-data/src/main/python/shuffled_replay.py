@@ -13,6 +13,8 @@ OFFSETTING_SAME =     1
 OFFSETTING_MID =      2
 OFFSETTING_OPPOSITE = 3
 
+ITERATIONS = 100
+
 def get_shuffled_data(asset, proportion, window_size, intra_window = False,
                           offsetting = 0,
                           variables = ['midPrice'],
@@ -42,18 +44,16 @@ def perform_shuffle(proportion, window, n = 100, intra_window = False, offsettin
         f.close()
     return None
 
-job_server = pp.Server(ncpus=4, secret='shuffle') 
+job_server = pp.Server(ncpus=8, secret='shuffle') 
 
 dep_modules = ('pandas', 'orderreplay', 'thrift', 'csv')
 dep_functions = (get_shuffled_data, )
-
-ITERATIONS = 100
-
 jobs = []
+
 for offsetting in [OFFSETTING_NONE, OFFSETTING_SAME, OFFSETTING_MID, OFFSETTING_OPPOSITE]:
     for intra_window in [True, False]:
         for window in [4 ** (x + 1) for x in range(8)]:
             for proportion in numpy.arange(0, 1.1, 0.1):
                 job = job_server.submit(perform_shuffle, (proportion, window, ITERATIONS, intra_window, offsetting), dep_functions, dep_modules)
                 jobs.append(job)
-                time.sleep(randint(0, 10))
+                time.sleep(randint(0, 3))
