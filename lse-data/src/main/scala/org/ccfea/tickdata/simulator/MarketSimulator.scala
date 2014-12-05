@@ -7,8 +7,8 @@ import scala.collection.mutable.Publisher
 /**
  * A simulator which takes a sequence of events and replays them, producing some function of a
  * MarketState object for each event via a map method.  The specified function can be used to collect data of interest
- * on the market, e.g. the mid-price, as a time-series.  By implementing a map method, instances of this class
- * can be used in for comprehensions; e.g.
+ * on the market, e.g. the mid-price, as a time-series.  Instances of this class * can be used in for comprehensions;
+ *  e.g.
  *
  * <code>
  *  val simulator = new MarketSimulator(events, market)
@@ -41,4 +41,3 @@ class MarketSimulator(val events: Iterable[TickDataEvent], val market: MarketSta
   }
 
 }
-
