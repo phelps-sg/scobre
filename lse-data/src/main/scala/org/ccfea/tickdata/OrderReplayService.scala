@@ -52,7 +52,7 @@ object OrderReplayService extends ReplayApplication {
   }
 
   def getOffsettedTicks(ticks: Seq[TickDataEvent], offsetting: Offsetting.Value)(implicit conf: ServerConf) = {
-    val marketState = newMarketState
+    val marketState = newMarketState(conf)
     offsetting match {
       case Offsetting.NoOffsetting =>
         ticks
@@ -99,7 +99,7 @@ object OrderReplayService extends ReplayApplication {
         logger.info("Using data for " + assetId + " between " + startDate + " and " + endDate)
         logger.info("Starting simulation... ")
 
-        val marketState = newMarketState
+        val marketState = newMarketState(conf)
         val ticks =
           new HBaseRetriever(selectedAsset = assetId,
                               startDate = parseDate(Some(startDate)), endDate = parseDate(Some(endDate)))
