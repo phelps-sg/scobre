@@ -2,6 +2,7 @@ package org.ccfea.tickdata.simulator
 
 import net.sourceforge.jasa.market.Order
 import org.ccfea.tickdata.event.{OrderFilledEvent, OrderMatchedEvent, TickDataEvent}
+import org.ccfea.tickdata.order.{TradeDirection, LimitOrder, MarketOrder}
 
 /**
  * A market-state in which the uncrossing is performed explicitly by the simulator,
@@ -27,4 +28,17 @@ class ClearingMarketState extends MarketState {
   override def process(ev: OrderMatchedEvent): Unit = {
     logger.debug("Ignoring OrderMatchedEvent with explicit clearing " + ev)
   }
+
+  override def processMarketOrder(order: MarketOrder) = {
+    val quote: Quote = this.quote()
+    val bestPrice = if (order.tradeDirection == TradeDirection.Buy) quote.ask else quote.bid
+    bestPrice match {
+      case Some(p) =>
+        val lo = new LimitOrder(order.orderCode, order.aggregateSize, order.tradeDirection, p)
+        processLimitOrder(lo)
+      case None =>
+        logger.info("Ignoring market order because there is no best price: " + order)
+    }
+  }
+
 }

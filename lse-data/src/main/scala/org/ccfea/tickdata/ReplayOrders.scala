@@ -75,7 +75,7 @@ object ReplayOrders extends ReplayApplication {
   }
 
   def shuffledTicks(ticks: Iterable[TickDataEvent])(implicit conf: ReplayerConf) = {
-    val marketState = newMarketState(conf) // This market-state is used to calculate -price offsets before shuffling
+    val marketState = newMarketState(conf) // This market-state is used to calculate price-offsets before shuffling
     val offsettedTicks = new OffsettedTicks(marketState, ticks,
                                              (lo: LimitOrder, quote: Quote) => new SameSideOffsetOrder(lo, quote))
     new RandomPermutation(offsettedTicks.iterator.toList, conf.proportionShuffling(), conf.shuffleWindowSize())
