@@ -37,7 +37,7 @@ class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, 
     for(i <- 0 until windowSize) {
       val a = window1 * windowSize + i
       val b = window2 * windowSize + i
-      swap(a,b)
+      swap(a, b)
     }
   }
 
