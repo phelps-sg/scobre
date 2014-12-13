@@ -191,6 +191,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
        case lo: LimitOrder =>   processLimitOrder(lo)
        case oo: OffsetOrder =>  processLimitOrder(oo.toLimitOrder(this.quote()))
        case mo: MarketOrder =>  processMarketOrder(mo)
+       case other: Any =>       logger.warn("Ignoring unknown order-type " + other)
     }
   }
 
