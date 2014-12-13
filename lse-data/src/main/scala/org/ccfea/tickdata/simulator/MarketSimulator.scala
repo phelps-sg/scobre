@@ -17,7 +17,7 @@ import scala.collection.mutable.Publisher
  *
  * (c) Steve Phelps 2013
  */
-class MarketSimulator(val events: Iterable[TickDataEvent], val market: MarketState = new MarketState())
+class MarketSimulator(val ticks: Iterable[TickDataEvent], val market: MarketState = new MarketState())
     extends Publisher[TickDataEvent] {
 
   subscribe(market)
@@ -25,19 +25,19 @@ class MarketSimulator(val events: Iterable[TickDataEvent], val market: MarketSta
   //TODO: Add filters to ignore outliers
 
   def map[B](f: MarketState => B): Iterable[B] = {
-    events.map(ev => {
-      process(ev)
+    ticks.map(tick => {
+      process(tick)
       f(market)
     })
   }
 
-  def process(ev: TickDataEvent) = {
-    publish(ev)
+  def process(tick: TickDataEvent) = {
+    publish(tick)
   }
 
   def step() = {
-    val ev = events.iterator.next()
-    process(ev)
+    val tick = ticks.iterator.next()
+    process(tick)
   }
 
 }
