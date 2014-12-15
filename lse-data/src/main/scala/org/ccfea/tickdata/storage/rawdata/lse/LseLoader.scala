@@ -3,15 +3,15 @@ package org.ccfea.tickdata.storage.rawdata.lse
 import grizzled.slf4j.Logger
 import org.ccfea.tickdata.event.{EventType, Event}
 import org.ccfea.tickdata.order.{TradeDirection, MarketMechanismType}
-import org.ccfea.tickdata.storage.DataLoader
+import org.ccfea.tickdata.storage.{DataParser, DataLoader}
 import org.ccfea.tickdata.storage.rawdata.HasDateTime
 
 /**
  * (C) Steve Phelps 2014
  */
-trait LseLoader extends DataLoader {
+trait LseLoader extends DataParser {
 
-  override val logger = Logger("org.ccfea.tickdata.storage.rawdata.lse.LseLoader")
+  val logger = Logger("org.ccfea.tickdata.storage.rawdata.lse.LseLoader")
 
   /**
    * One of "order_history_raw", "order_detail_raw" or "trade_reports_raw" to indicate the
@@ -24,7 +24,7 @@ trait LseLoader extends DataLoader {
     var i = 0
     def next: Option[String] = {
       val result = values(i)
-      i = i+1
+      i += 1
       result
     }
 

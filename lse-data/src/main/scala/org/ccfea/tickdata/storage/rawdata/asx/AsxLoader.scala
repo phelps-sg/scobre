@@ -2,14 +2,13 @@ package org.ccfea.tickdata.storage.rawdata.asx
 
 import org.ccfea.tickdata.event.{EventType, Event}
 import org.ccfea.tickdata.order.{TradeDirection, MarketMechanismType}
-import org.ccfea.tickdata.storage.DataLoader
+import org.ccfea.tickdata.storage.{DataParser, DataLoader}
 import org.ccfea.tickdata.storage.rawdata.HasDateTime
 
 /**
  * (C) Steve Phelps 2014
  */
-trait AsxLoader extends DataLoader {
-
+trait AsxLoader extends DataParser {
 
   def toRecord(values: Array[Option[String]], lineNumber: Long): HasDateTime = {
     //  Instrument,Date,Time,Record Type,Price,Volume,Bid ID,Ask ID,Bid/Ask,SameOffset,OppOffset,MidOffset
@@ -17,7 +16,7 @@ trait AsxLoader extends DataLoader {
     var i = 0
     def next: Option[String] = {
       val result = values(i)
-      i = i+1
+      i = i + 1
       result
     }
     new AsxTickRaw(lineNumber, next.get, next.get, next.get, next.get, next, next, next, next, next.get, next, next, next)
@@ -50,4 +49,5 @@ trait AsxLoader extends DataLoader {
                             None, ev.askId, None, None, None, None)
     }
   }
+
 }

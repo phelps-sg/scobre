@@ -22,9 +22,7 @@ class OffsettedTicks(val marketState: MarketState, val ticks: Iterable[TickDataE
       case _: OrderSubmittedEvent | _: OrderRevisedEvent =>
         val limitOrder = tick match {
           case os: OrderSubmittedEvent =>
-            os.order match {
-              case lo: LimitOrder => lo
-            }
+            os.order match {case lo: LimitOrder => lo}
           case or: OrderRevisedEvent =>
             new LimitOrder(or.order.orderCode, or.newVolume, or.newDirection, or.newPrice)
         }
