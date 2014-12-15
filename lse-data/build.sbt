@@ -26,7 +26,7 @@ scalaVersion := "2.11.2"
 
 publishMavenStyle := true
 
-publishTo:= Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository"))) 
+publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository")))
 
 //scalaSource in Compile := file("src/")
 javaSource in Compile := file("src/main/thrift/gen-java")
@@ -38,8 +38,8 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-	"org.apache.hbase" % "hbase-client" % "0.98.7-hadoop2",
-	"org.apache.hbase" % "hbase-common" % "0.98.7-hadoop2",
+	"org.apache.hbase" % "hbase-client" % "0.98.8-hadoop2",
+	"org.apache.hbase" % "hbase-common" % "0.98.8-hadoop2",
   "org.apache.hadoop" % "hadoop-client" % "2.2.0",
   "org.apache.hadoop" % "hadoop-common" % "2.2.0",
   "org.apache.thrift" % "libthrift" % "0.9.1",
