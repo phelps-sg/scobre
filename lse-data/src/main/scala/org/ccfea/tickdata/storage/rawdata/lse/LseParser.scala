@@ -7,17 +7,15 @@ import org.ccfea.tickdata.storage.{DataParser, DataLoader}
 import org.ccfea.tickdata.storage.rawdata.HasDateTime
 
 /**
- * (C) Steve Phelps 2014
+ *  recordType is
+  * one of "order_history_raw", "order_detail_raw" or "trade_reports_raw" to indicate the
+  * source of the data.
+ *
+  * (C) Steve Phelps 2014
  */
-trait LseParser extends DataParser {
+class LseParser(recordType: String) extends DataParser {
 
   val logger = Logger("org.ccfea.tickdata.storage.rawdata.lse.LseLoader")
-
-  /**
-   * One of "order_history_raw", "order_detail_raw" or "trade_reports_raw" to indicate the
-   * source of the data.
-   */
-  val recordType: String
 
   def toRecord(values: Array[Option[String]], lineNumber: Long): HasDateTime = {
 

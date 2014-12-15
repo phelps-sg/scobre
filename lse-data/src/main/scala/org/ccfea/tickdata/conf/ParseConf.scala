@@ -15,5 +15,6 @@ class ParseConf(args: Seq[String]) extends ScallopConf(args) {
            |""".stripMargin)
   val bufferSize = opt[Int](default = Some(2000), descr="The number of records to buffer before writing")
   val fileName = opt[String](required=true, descr="The name of the CSV file containing the raw data")
-  val recordType = opt[String](required=true, descr="Either order_detail, order_history or trade_report")
+  val parser = opt[String](required=false, default = Some("LSE"), descr="The format of the data being imported; either LSE or ASX")
+  val recordType = opt[String](required=false, descr="For LSE data: one of order_detail, order_history or trade_report")
 }

@@ -128,14 +128,14 @@ IDEA), and then directly import the `build.sbt` file as a new project.
 
 3. Create an empty table called `events` with column family `data` using the HBase shell:
 
-		cd /opt/hbase-0.98.6-hadoop2/bin
+		cd /opt/hbase-0.98.8-hadoop2/bin
 		./hbase shell
 		create 'events', 'data'
 
 4. Run the shell script `hbase-import.sh` specifying the raw files to import:
 
 		cd ./scripts
-		./import-hbase.sh ../data/lse/*.CSV.gz
+		./importdata-lse.sh ../data/lse/*.CSV.gz
 
 
 ## Contact

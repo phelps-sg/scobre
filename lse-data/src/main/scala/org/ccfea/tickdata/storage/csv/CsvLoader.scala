@@ -102,6 +102,6 @@ trait CsvLoader extends DataLoader {
     }
   }
 
-  def toRecord(values: Array[Option[String]], lineNumber: Long): HasDateTime
+//  def toRecord(values: Array[Option[String]], lineNumber: Long): HasDateTime
 
 }

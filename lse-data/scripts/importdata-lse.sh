@@ -5,7 +5,7 @@ PIPE=/tmp/tickdata.pipe
 # Import CSV files into Apache HBase.
 
 if [ $# -lt 1 ]; then
-	echo "Usage: importdata.sh <FILENAMES>"
+	echo "Usage: importdata-lse.sh <FILENAMES>"
 	exit 1
 fi
 
@@ -14,7 +14,7 @@ import_pipe() {
 	
 	echo "Importing $TABLE"
 
-	java org.ccfea.tickdata.ImportLseData -b 2600 -r $TABLE -f $PIPE
+	java org.ccfea.tickdata.ImportData -b 2600 -r $TABLE -f $PIPE
 }
 
 cat_data() {

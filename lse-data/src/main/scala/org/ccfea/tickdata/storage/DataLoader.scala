@@ -18,11 +18,15 @@ trait DataLoader {
 
   val batchSize: Int
 
+  def parser: DataParser
+
   def run(): Unit
 
   def insertData(parsedEvents: Seq[Event]): Int
 
-  def parseEvent(rawEvent: HasDateTime): Event
+  def parseEvent(rawEvent: HasDateTime): Event = parser.parseEvent(rawEvent)
+
+  def toRecord(values: Array[Option[String]], lineNumber: Long): HasDateTime = parser.toRecord(values, lineNumber)
 
 }
 

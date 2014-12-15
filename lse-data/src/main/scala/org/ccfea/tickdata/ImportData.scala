@@ -14,14 +14,14 @@ import org.springframework.ejb.config.LocalStatelessSessionBeanDefinitionParser
  */
 object ImportData extends ImportApplication {
 
-
   def getParser(implicit conf: ParseConf) = {
-    conf.format() match {
+    conf.parser() match {
       case "ASX" => new AsxParser()
-      case "LSE" => new LseParser()
+      case "LSE" => new LseParser(conf.recordType())
     }
   }
-  def loader(conf: ParseConf) = new CsvToHBaseLoader(parser = getParser,
+
+  def loader(conf: ParseConf) = new CsvToHBaseLoader(parser = getParser(conf),
                                                         batchSize = conf.bufferSize(),
                                                         fileName = conf.fileName())
 
