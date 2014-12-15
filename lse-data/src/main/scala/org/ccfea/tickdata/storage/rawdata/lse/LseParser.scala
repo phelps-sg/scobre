@@ -9,7 +9,7 @@ import org.ccfea.tickdata.storage.rawdata.HasDateTime
 /**
  * (C) Steve Phelps 2014
  */
-trait LseLoader extends DataParser {
+trait LseParser extends DataParser {
 
   val logger = Logger("org.ccfea.tickdata.storage.rawdata.lse.LseLoader")
 

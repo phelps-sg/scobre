@@ -8,7 +8,7 @@ import org.ccfea.tickdata.storage.rawdata.HasDateTime
 /**
  * (C) Steve Phelps 2014
  */
-trait AsxLoader extends DataParser {
+trait AsxParser extends DataParser {
 
   def toRecord(values: Array[Option[String]], lineNumber: Long): HasDateTime = {
     //  Instrument,Date,Time,Record Type,Price,Volume,Bid ID,Ask ID,Bid/Ask,SameOffset,OppOffset,MidOffset
