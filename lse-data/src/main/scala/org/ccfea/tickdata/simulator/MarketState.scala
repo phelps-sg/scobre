@@ -270,6 +270,15 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     book.printState()
   }
 
+  /**
+   * When replaying ticks the simulator may inject "virtual" ticks
+   * into the replay process.  By default there are no virtual ticks,
+   * hence it returns an empty list.
+   *
+   * @return  A sequence of "virtual" ticks to be injected into the replayer.
+   */
+  def virtualTicks: Seq[TickDataEvent] = List()
+
   implicit def price(order: net.sourceforge.jasa.market.Order) = if (order != null) Some(order.getPrice) else None
 
   def quote() = new Quote(book.getHighestUnmatchedBid, book.getLowestUnmatchedAsk)

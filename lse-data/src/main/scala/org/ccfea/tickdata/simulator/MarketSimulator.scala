@@ -22,13 +22,32 @@ class MarketSimulator(val ticks: Iterable[TickDataEvent], val market: MarketStat
 
   subscribe(market)
 
-  //TODO: Add filters to ignore outliers
+  val realTicksIterator = ticks.iterator
+
+  /**
+   * Create a tick iterator which merges virtual ticks with real ticks.
+   * Virtual ticks take priority and are returned first until the virtual tick iterator is depleted.
+   * @return
+   */
+  def tickIterator(): Iterator[TickDataEvent] = {
+    val virtualTicksIterator = market.virtualTicks.iterator
+    new Iterator[TickDataEvent] {
+      def hasNext = virtualTicksIterator.hasNext || realTicksIterator.hasNext
+      def next() = if (virtualTicksIterator.hasNext) virtualTicksIterator.next else realTicksIterator.next
+    }
+  }
 
   def map[B](f: MarketState => B): Iterable[B] = {
-    ticks.map(tick => {
-      process(tick)
-      f(market)
-    })
+    val it = tickIterator()
+    new Iterable[B] {
+      def iterator: Iterator[B] = new Iterator[B] {
+        def hasNext = it.hasNext
+        def next() = {
+          process(it.next())
+          f(market)
+        }
+      }
+    }
   }
 
   def process(tick: TickDataEvent) = {
