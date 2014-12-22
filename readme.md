@@ -18,8 +18,7 @@ which automate the import process.
 
 ## Pre-requisites
 
-- [Oracle Java JVM 1.7.0 or higher](http://www.oracle.com/technetwork/java/javase/downloads/java-archive-
-downloads-javase7-521261.html).  Note that the default JVM installed on MacOS or 
+- [Oracle Java JVM 1.7.0 or higher](http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html).  Note that the default JVM installed on MacOS or 
 Linux needs to be replaced by the Oracle version in order for the software to 
 work correctly.
 

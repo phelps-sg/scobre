@@ -48,7 +48,7 @@ dataset = get_hf_data('GB0009252882', '2/3/2007', '3/3/2007')
 
 # Plot 1 minute prices for 3/3/2007 between 8am and 4pm
 prices_1min = \
-    dataset.midPrice['2007-03-02 08:00':'2007-03-02 16:00'].resample('1min')
+    dataset.midPrice['2007-03-02 08:00':'2007-03-02 16:00'].resample('5min')
 #prices_1min = \
 #    dataset.midPrice['2007-02-03 08:00':'2007-02-03 16:00'].resample('1min')
 prices_1min.plot()

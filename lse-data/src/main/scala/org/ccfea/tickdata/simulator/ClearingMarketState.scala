@@ -13,6 +13,8 @@ import org.ccfea.tickdata.order.{TradeDirection, LimitOrder, MarketOrder}
 class ClearingMarketState extends MarketState {
 
   override def postProcessing(ev: TickDataEvent): Unit = {
+    //TODO: Build a list of virtual ticks that can later be replayed via OrderFilledEvent and OrderMatchedEvent
+    // handlers.
     book.matchOrders()
     auctionState = AuctionState.continuous
   }

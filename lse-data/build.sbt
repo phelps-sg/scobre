@@ -2,6 +2,10 @@ import AssemblyKeys._
 
 import sbtbuildinfo.Plugin._
 
+import com.typesafe.sbt.SbtNativePackager._
+
+import NativePackagerKeys._
+
 assemblySettings
 
 //publishMavenStyle := true
@@ -20,16 +24,18 @@ name := "lse-data"
 
 organization := "net.sourceforge.jasa"
 
-version := "0.16-SNAPSHOT"
+version := "0.17-SNAPSHOT"
 
 scalaVersion := "2.11.2"
+
+packageArchetype.java_application
 
 publishMavenStyle := true
 
 publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository")))
 
 //scalaSource in Compile := file("src/")
-javaSource in Compile := file("src/main/thrift/gen-java")
+javaSource in Compile := baseDirectory.value / "src/main/thrift/gen-java"
 
 resolvers ++= Seq(
   "Apache HBase" at "http://repository.apache.org/content/repositories/releases",
