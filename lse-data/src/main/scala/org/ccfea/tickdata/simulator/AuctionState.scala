@@ -12,4 +12,5 @@ object AuctionState extends Enumeration {
   val continuous = Value("continuous")
   val batchClose = Value("batch_close")
   val endOfDay = Value("end_of_day")
+  val undefined = Value("undefined")
 }

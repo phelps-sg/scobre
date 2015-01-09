@@ -26,24 +26,20 @@ object ReplayOrders extends ReplayApplication {
 
     // Parse command-line options
     implicit val conf = new ReplayerConf(args)
-    // The method which will fetch the datum of interest from the state of the market
-    val getPropertyMethod = classOf[MarketState].getMethod(conf.property())
 
     simulateAndCollate {
+      // The method which will fetch the datum of interest from the state of the market
+      val getPropertyMethod = classOf[MarketState].getMethod(conf.property())
       getPropertyMethod invoke _
     }
 
     // Alternatively we can hard-code the collation function as follows.
 
     // Simulate and collate the best bid price
-//      simulateAndCollate {
-//        _.quote.bid
-//      }
+//    simulateAndCollate(_.quote.bid)
 
     // Simulate and collate transaction prices in event-time
-//      simulateAndCollate {
-//        _.lastTransactionPrice
-//      }
+//    simulateAndCollate(_.lastTransactionPrice)
   }
 
   /**

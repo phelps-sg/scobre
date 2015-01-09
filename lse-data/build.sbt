@@ -28,7 +28,9 @@ version := "0.17-SNAPSHOT"
 
 scalaVersion := "2.11.2"
 
-packageArchetype.java_application
+packSettings
+
+packMain := Map("replay-orders" -> "org.ccfea.tickdata.ReplayOrders")
 
 publishMavenStyle := true
 
