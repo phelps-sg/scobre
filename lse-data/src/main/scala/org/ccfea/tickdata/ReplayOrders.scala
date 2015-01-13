@@ -27,9 +27,10 @@ object ReplayOrders extends ReplayApplication {
     // Parse command-line options
     implicit val conf = new ReplayerConf(args)
 
+    val getPropertyMethod = classOf[MarketState].getMethod(conf.property())
+
     simulateAndCollate {
       // The method which will fetch the datum of interest from the state of the market
-      val getPropertyMethod = classOf[MarketState].getMethod(conf.property())
       getPropertyMethod invoke _
     }
 
