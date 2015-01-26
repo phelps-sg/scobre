@@ -15,7 +15,7 @@ import org.ccfea.tickdata.storage.rawdata.HasDateTime
  */
 class LseParser(recordType: String) extends DataParser {
 
-  val logger = Logger("org.ccfea.tickdata.storage.rawdata.lse.LseLoader")
+  val logger = Logger("org.ccfea.tickdata.storage.rawdata.lse.LseParser")
 
   def toRecord(values: Array[Option[String]], lineNumber: Long): HasDateTime = {
 
@@ -26,69 +26,72 @@ class LseParser(recordType: String) extends DataParser {
       result
     }
 
+    def optional = next
+    def required = next.get
+
     try {
 
       recordType match {
 
         case "order_history_raw" =>
           i = 0
-          new OrderHistoryRaw(orderCode = next.get,
-            orderActionType = next.get,
-            matchingOrderCode = next,
-            tradeSize = next,
-            tradeCode = next,
-            tiCode = next.get,
-            countryofRegister = next.get,
-            currencyCode = next.get,
-            marketSegmentCode = next.get,
-            aggregateSize = next.get,
-            buySellInd = next.get,
-            marketMechanismType = next.get,
-            messageSequenceNumber = next,
-            date = next.get,
-            time = next.get
+          new OrderHistoryRaw(orderCode = required,
+            orderActionType = required,
+            matchingOrderCode = optional,
+            tradeSize = optional,
+            tradeCode = optional,
+            tiCode = required,
+            countryofRegister = required,
+            currencyCode = required,
+            marketSegmentCode = required,
+            aggregateSize = required,
+            buySellInd = required,
+            marketMechanismType = required,
+            messageSequenceNumber = optional,
+            date = required,
+            time = required
           )
 
         case "trade_reports_raw" =>
           i = 0
-          new TradeReportRaw(messageSequenceNumber = next,
-            tiCode = next.get,
-            marketSegmentCode = next.get,
-            countryOfRegister = next.get,
-            currencyCode = next.get,
-            tradeCode = next,
-            tradePrice = next,
-            tradeSize = next,
-            date = next.get,
-            time = next.get,
-            broadcastUpdateAction = next.get,
-            tradeTypeInd = next.get,
-            tradeTimeInd = next.get,
-            bargainConditions = next.get,
-            convertedPriceInd = next.get,
-            publicationDate = next.get,
-            publicationTime = next.get
+          new TradeReportRaw(messageSequenceNumber = optional,
+            tiCode = required,
+            marketSegmentCode = required,
+            countryOfRegister = required,
+            currencyCode = required,
+            tradeCode = optional,
+            tradePrice = optional,
+            tradeSize = optional,
+            date = required,
+            time = required,
+            broadcastUpdateAction = required,
+            tradeTypeInd = required,
+            tradeTimeInd = required,
+            bargainConditions = required,
+            convertedPriceInd = required,
+            publicationDate = required,
+            publicationTime = required
           )
 
         case "order_detail_raw" =>
           i = 0
-          new OrderDetailRaw(orderCode = next.get,
-            marketSegmentCode = next.get,
-            marketSectorCode = next.get,
-            tiCode = next.get,
-            countryofRegister = next.get,
-            currencyCode = next.get,
-            participantCode = next,
-            buySellInd = next.get,
-            marketMechanismGroup = next.get,
-            marketMechanismType = next.get,
-            price = next.get,
-            aggregateSize = next.get,
-            singleFillInd = next.get,
-            broadcastUpdateAction = next.get,
-            date = next.get,
-            time = next.get,
-            messageSequenceNumber = next.get)
+          new OrderDetailRaw(orderCode = required,
+            marketSegmentCode = required,
+            marketSectorCode = required,
+            tiCode = required,
+            countryofRegister = required,
+            currencyCode = required,
+            participantCode = optional,
+            buySellInd = required,
+            marketMechanismGroup = required,
+            marketMechanismType = required,
+            price = required,
+            aggregateSize = required,
+            singleFillInd = required,
+            broadcastUpdateAction = required,
+            date = required,
+            time = required,
+            messageSequenceNumber = required)
       }
     } catch {
       case nse: NoSuchElementException =>

@@ -15,7 +15,7 @@ import org.ccfea.tickdata.order.Order
  * reconstruct the state of the market at any given time.  Events are represented as a flat
  * tuple in order to maintain high-performance and avoid complicated joins across many tables.
  * They can be converted to an object-oriented representation using the method
- * toOrderReplayEvent.
+ * tick.
  *
  * (c) Steve Phelps 2013
  */
@@ -60,7 +60,7 @@ case class Event(eventID: Option[Long],
 
   val logger = Logger(classOf[Event])
 
-  def toOrderReplayEvent: TickDataEvent = {
+  def tick: TickDataEvent = {
 
     this.eventType match {
 
@@ -104,5 +104,5 @@ case class Event(eventID: Option[Long],
     }
   }
 
-  implicit def nonRelationalToObjectOriented(x: Event): TickDataEvent = x.toOrderReplayEvent
+  implicit def nonRelationalToObjectOriented(x: Event): TickDataEvent = x.tick
 }

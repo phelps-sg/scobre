@@ -37,7 +37,7 @@ object OrderReplayService extends ReplayApplication {
 
   var tickCache = Map[(String, Offsetting.Value), Seq[TickDataEvent]]()
 
-  val logger = Logger("org.ccfea.tickdata.OrderReplayService")
+  val logger = Logger("org.ccmainfea.tickdata.OrderReplayService")
 
   /**
    *    Use reflection to find the method to retrieve the  data for each variable (a function of MarketState).

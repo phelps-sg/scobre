@@ -44,7 +44,7 @@ class ClearingMarketState extends MarketState {
         val lo = new LimitOrder(order.orderCode, order.aggregateSize, order.tradeDirection, p)
         processLimitOrder(lo)
       case None =>
-        logger.info("Ignoring market order because there is no best price: " + order)
+        logger.warn("Ignoring market order because there is no best price: " + order)
         auctionState = AuctionState.undefined
     }
   }

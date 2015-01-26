@@ -33,7 +33,7 @@ class EventIterator(val scanner: ResultScanner) extends Iterator[TickDataEvent] 
 //      } else {
 //        rawEvent
 //      }
-    rawEvent.toOrderReplayEvent
+    rawEvent.tick
   }
 
   /**

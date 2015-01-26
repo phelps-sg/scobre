@@ -1,5 +1,8 @@
 package org.ccfea.tickdata.simulator
 
+import net.sourceforge.jasa.agent.strategy.TradeDirectionPolicy
+import org.ccfea.tickdata.order.TradeDirection
+
 /**
  * A quote in the market.
  *
