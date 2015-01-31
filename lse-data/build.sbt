@@ -30,9 +30,11 @@ scalaVersion := "2.11.2"
 
 packSettings
 
-packMain := Map("replay-orders" -> "org.ccfea.tickdata.ReplayOrders",
-                  "order-replay-service" -> "org.ccfea.tickdata.OrderReplayService",
-                  "import-data" -> "org.ccfea.tickdata.ImportData")
+packMain := Map(  "replay-orders"         -> "org.ccfea.tickdata.ReplayOrders",
+                  "order-replay-service"  -> "org.ccfea.tickdata.OrderReplayService",
+                  "import-data"           -> "org.ccfea.tickdata.ImportData",
+                  "orderbook-snapshot"    -> "org.ccfea.tickdata.OrderBookSnapshot"
+)
 
 publishMavenStyle := true
 

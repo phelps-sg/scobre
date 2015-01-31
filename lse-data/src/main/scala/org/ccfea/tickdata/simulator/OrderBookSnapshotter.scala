@@ -12,7 +12,9 @@ import java.util
 import org.ccfea.tickdata.event.TickDataEvent
 
 /**
- * (C) Steve Phelps 2013
+ * Take a snapshot of the order-book at the specified time, and record it to a CSV file.
+ *
+ * (C) Steve Phelps 2015
  */
 class OrderBookSnapshotter(val eventSource: Iterable[TickDataEvent], val t: SimulationTime,
                             val outFileName: Option[String] = None, val withGui: Boolean = false,
