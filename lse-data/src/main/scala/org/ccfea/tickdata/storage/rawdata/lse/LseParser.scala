@@ -7,7 +7,9 @@ import org.ccfea.tickdata.storage.{DataParser, DataLoader}
 import org.ccfea.tickdata.storage.rawdata.HasDateTime
 
 /**
- *  recordType is
+ * This class represents a parser for the London-Stock Exchange raw data.
+ *
+ *  The recordType attribute is
   * one of "order_history_raw", "order_detail_raw" or "trade_reports_raw" to indicate the
   * source of the data.
  *
@@ -106,7 +108,7 @@ class LseParser(recordType: String) extends DataParser {
 
  /**
    * Convert a row of one of the three LSE tables (order_history, order_detail, trade_reports)
-   * into an Event object which represents a tick.
+   * into an {@link org.ccfea.tickdata.event.Event} object which represents a tick.
    *
    * @param rawEvent  A tuple representation of the raw data in the current row being parsed.
    * @return  A tick whose eventType represents the type of event that has occurred.

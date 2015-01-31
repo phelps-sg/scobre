@@ -15,7 +15,7 @@ import org.ccfea.tickdata.order.Order
  * reconstruct the state of the market at any given time.  Events are represented as a flat
  * tuple in order to maintain high-performance and avoid complicated joins across many tables.
  * They can be converted to an object-oriented representation using the method
- * tick.
+ * {@link org.ccfea.tickdata.event.Event#tick}.
  *
  * (c) Steve Phelps 2013
  */
