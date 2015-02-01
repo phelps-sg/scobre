@@ -1,8 +1,6 @@
 package org.ccfea.tickdata.simulator
 
 import org.ccfea.tickdata.event.TickDataEvent
-import java.io.PrintStream
-import org.ccfea.tickdata.cep.CepObserver
 
 /**
  * Super-class of all order replay classes.  These classes replay events through a simulator
