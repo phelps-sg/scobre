@@ -3,7 +3,7 @@ package org.ccfea.tickdata
 import org.ccfea.tickdata.collector.UnivariateTimeSeriesCollector
 import org.ccfea.tickdata.event.TickDataEvent
 import org.ccfea.tickdata.order.LimitOrder
-import org.ccfea.tickdata.order.offset.{OppositeSideOffsetOrder, MidPriceOffsetOrder, SameSideOffsetOrder}
+import org.ccfea.tickdata.order.offset.SameSideOffsetOrder
 import org.ccfea.tickdata.storage.csv.UnivariateCsvDataCollator
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
 import org.ccfea.tickdata.storage.shuffled.{RandomPermutation, OffsettedTicks}
@@ -16,7 +16,7 @@ import grizzled.slf4j.Logger
 /**
  * The main application for running order-book reconstruction simulations.
  *
- * (C) Steve Phelps 2014
+ * (C) Steve Phelps 2015
  */
 object ReplayOrders extends ReplayApplication {
 

@@ -7,10 +7,20 @@ import org.ccfea.tickdata.conf.ReplayConf
 import org.ccfea.tickdata.simulator.{MarketState, ClearingMarketState}
 
 /**
- * (C) Steve Phelps 2014
+ * Common functionality for all applications which replay tick events and collate data
+ * on the evolving market state.
+ *
+ * (C) Steve Phelps 2015
  */
 trait ReplayApplication {
 
+  /**
+   * Parse a date supplied as a command-line option.
+   *
+   * @param date  An optional date in the standard java short format.
+   *
+   * @return  An optional java.util.Date instance.
+   */
   def parseDate(date: Option[String]): Option[Date] = date match {
     case None => None
     case Some(dateStr) =>  Some(DateFormat.getDateInstance(DateFormat.SHORT).parse(dateStr))
@@ -22,6 +32,15 @@ trait ReplayApplication {
     case None => None
   }
 
+  /**
+   * Construct an initial market state.  This is a factory method
+   * which will create an appropriate class of market-state depending
+   * on command-line options controlling the choice of clearing rules.
+   *
+   * @param conf   The command-line options
+   * @return  Either a MarketState or ClearingMarketState depending on the
+   *          command-line options.
+   */
   def newMarketState(implicit conf: ReplayConf) =
     if (conf.implicitClearing()) new MarketState() else new ClearingMarketState()
 
