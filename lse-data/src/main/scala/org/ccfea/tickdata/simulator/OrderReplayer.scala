@@ -9,9 +9,8 @@ import org.ccfea.tickdata.cep.CepObserver
  * in order to reconstruct the state of the market at a given point in time and collect
  * data on the market state, writing it out to a time-series.
  *
- * (c) Steve Phelps 2013
+ * (c) Steve Phelps 2015
  */
-
 trait OrderReplayer[T] extends Runnable {
 
   /**
@@ -19,6 +18,12 @@ trait OrderReplayer[T] extends Runnable {
    */
   def eventSource: Iterable[TickDataEvent]
 
+  /**
+   * The initial state of the market state.
+   *
+   * @return  A mutable representation of the state of the market,
+   *            which will change over time as subsequent ticks are replayed.
+   */
   def marketState: MarketState
 
   val simulator = new MarketSimulator(eventSource, marketState)
@@ -45,6 +50,11 @@ trait OrderReplayer[T] extends Runnable {
    */
   def replayEvents(): Iterable[T]
 
+  /**
+   * Record the collated variables to a file.
+   *
+   * @param data  An iterable collection of values collated from the state of the market.
+   */
   def outputResult(data: Iterable[T])
 
 }

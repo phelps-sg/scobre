@@ -7,7 +7,6 @@ import org.rogach.scallop.ScallopConf
  *
  * (c) Steve Phelps 2015
  */
-
 class ParseConf(args: Seq[String]) extends ScallopConf(args) {
   banner("""Usage: ParseRawData [OPTION]...
            | Parse raw data records from the LSE and insert them into an Apache HBase database.
