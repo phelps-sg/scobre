@@ -63,7 +63,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    */
   var auctionState = AuctionState.startOfDay
 
-  /**mostRecentTransaction
+  /**
    * The most recent transaction event.
    */
   var mostRecentTransaction: Option[TransactionEvent] = None

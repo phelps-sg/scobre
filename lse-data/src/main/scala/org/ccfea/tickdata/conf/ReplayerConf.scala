@@ -1,7 +1,7 @@
 package org.ccfea.tickdata.conf
 
 /**
- * (C) Steve Phelps 2014
+ * (C) Steve Phelps 2015
  */
 class ReplayerConf(args: Seq[String]) extends ReplayConf(args) {
   banner("""Usage: OrderReplay [OPTION]...

@@ -5,7 +5,7 @@ import org.rogach.scallop.ScallopConf
 /**
  * Command-line arguments parser for parsing-related options
  *
- * (c) Steve Phelps 2013
+ * (c) Steve Phelps 2015
  */
 
 class ParseConf(args: Seq[String]) extends ScallopConf(args) {

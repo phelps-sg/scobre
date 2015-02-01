@@ -8,8 +8,6 @@ import NativePackagerKeys._
 
 assemblySettings
 
-//publishMavenStyle := true
-
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
 buildInfoSettings
