@@ -7,7 +7,7 @@ import org.ccfea.tickdata.event.{EventType, Event}
 /**
  * Store a sequence of {@link org.ccfea.tickdata.event.Event} objects in an Apache HBase table.
  *
- * (c) Steve Phelps 2013
+ * (c) Steve Phelps 2015
  */
 trait HBaseInserter extends HBaseEventConverter {
 
