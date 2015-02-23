@@ -11,4 +11,9 @@ class OppositeSideOffsetOrder(limitOrder: LimitOrder, initialQuote: Quote)
 
   override def bestPrice(quote: Quote): Option[Double] =
     if (this.tradeDirection == TradeDirection.Buy) quote.ask else quote.bid
+
+  override def toString() =
+    "OppositeSideOffsetOrder(" + offset + "," + orderCode + "," + originalPrice + "," +
+      tradeDirection + "," + aggregateSize + "," + initialQuote + ")"
+
 }

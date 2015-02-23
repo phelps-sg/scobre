@@ -32,6 +32,7 @@ class OffsettedTicks(val marketState: MarketState, val ticks: Iterable[TickDataE
         tick
     }
     marketState.newEvent(tick)
+    logger.debug("Converted " + tick + " to " + convertedTick)
     convertedTick
   }
 

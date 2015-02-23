@@ -17,6 +17,14 @@ from scipy.stats.kde import gaussian_kde
 DEFAULT_SERVER = 'localhost'
 DEFAULT_PORT = 9090
 
+def dict_to_df(data, variables):
+    df = pd.DataFrame(data)
+   
+    timestamps = [datetime.datetime.fromtimestamp(t) for t in df.t]
+    for variable in variables:
+        df[variable].index = timestamps
+    return df   
+    
 def get_hf_data(asset, start_date, end_date, 
                 variables = ['midPrice', 'lastTransactionPrice', 'volume'], 
                 server = DEFAULT_SERVER, port = DEFAULT_PORT):
@@ -34,16 +42,15 @@ def get_hf_data(asset, start_date, end_date,
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
     client = OrderReplay.Client(protocol)
     transport.open()
-    df = pd.DataFrame(client.replay(asset, variables, start_date, end_date))
-    if len(df) == 0:
+    raw_data = client.replay(asset, variables, start_date, end_date)
+    if len(raw_data) == 0:
         raise Exception("No data available for " + asset + " between " + \
                             start_date + " and " + end_date)
-    timestamps = [datetime.datetime.fromtimestamp(t) for t in df.t]
-    for variable in variables:
-        df[variable].index = timestamps
-    return df   
+    return dict_to_df(raw_data, variables)
+    
+#dataset = get_hf_data('GB0009252882', '2/3/2007', '3/3/2007', server='cseesp1')
+dataset = get_hf_data('GB0002875804', '2/3/2007', '3/3/2009', server='cseesp1')
 
-dataset = get_hf_data('GB0009252882', '2/3/2007', '3/3/2007')
 #dataset = get_hf_data('BHP', '2/7/2007', '3/7/2007')
 
 mid_price = dataset.midPrice['2007-03-02 08:00':'2007-03-02 16:00'].dropna(how='any')

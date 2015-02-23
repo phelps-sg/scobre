@@ -127,7 +127,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     val orderCode = ev.order.orderCode
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
-      book.remove(order)
+      removeOrder(order)
       order.setPrice(ev.newPrice.doubleValue())
       order.setQuantity(ev.newVolume.toInt)
       insertOrder(order)
@@ -149,7 +149,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
       logger.debug("Removing from book: " + order)
-      book.remove(order)
+      removeOrder(order)
     } else {
       logger.debug("Unknown order code when removing order: " + orderCode)
     }
@@ -160,7 +160,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
       if (orderMap.contains(orderCode)) {
         val order = orderMap(orderCode)
         logger.debug("Removing filled order " + orderCode + " from book: " + order)
-        book.remove(order)
+        removeOrder(order)
       } else {
         logger.debug("Unknown order code when order filled: " + orderCode)
       }
@@ -185,11 +185,14 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     val order = ev.order
     if (orderMap.contains(order.orderCode)) {
       logger.debug("Submission using existing order code: " + order.orderCode)
-      book.remove(orderMap(order.orderCode))
+      removeOrder(orderMap(order.orderCode))
     }
     order match {
        case lo: LimitOrder =>   processLimitOrder(lo)
-       case oo: OffsetOrder =>  processLimitOrder(oo.toLimitOrder(this.quote()))
+       case oo: OffsetOrder =>
+         val convertedOrder = oo.toLimitOrder(this.quote())
+         logger.debug("Converted offset order to: " + convertedOrder)
+         processLimitOrder(convertedOrder)
        case mo: MarketOrder =>  processMarketOrder(mo)
        case other: Any =>       logger.warn("Ignoring unknown order-type " + other)
     }
@@ -226,7 +229,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
 //    assert(jasaOrder.getQuantity >= 0)
     if (jasaOrder.getQuantity <= 0) {
       logger.warn("Removing order with zero or negative volume from book before full match: " + jasaOrder)
-      book.remove(jasaOrder)
+      removeOrder(jasaOrder)
     }
   }
 
@@ -397,6 +400,17 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   }
 
   /**
+   * Remove the specified the order from the book.
+   */
+  def removeOrder(jasaOrder: net.sourceforge.jasa.market.Order) = {
+    var order = jasaOrder
+    while (order != null) {
+      book.remove(order)
+      order = order.getChild
+    }
+  }
+
+  /**
    * Convert an order-replay order into a JASA order.
    *
    * @param o  The order to be converted.
@@ -406,7 +420,10 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     val order = new net.sourceforge.jasa.market.Order()
     o match {
       case lo:LimitOrder =>
-        order.setPrice(lo.price.toDouble)
+        val p = lo.price.toDouble
+        //TODO: Specify tickSize and move the rounding functionality to FourHeapOrderBook
+        val roundedPrice: Double = Math.round(p * 1000) / 1000.0
+        order.setPrice(roundedPrice)
         order.setQuantity(lo.aggregateSize.toInt)
         order.setAgent(new SimpleTradingAgent())
         order.setIsBid(lo.tradeDirection == TradeDirection.Buy)

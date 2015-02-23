@@ -10,4 +10,8 @@ class MidPriceOffsetOrder(limitOrder: LimitOrder, initialQuote: Quote) extends O
 
   override def bestPrice(quote: Quote): Option[Double] = quote.midPrice
 
+  override def toString() =
+    "MidPriceOffsetOrder(" + offset + "," + orderCode + "," + originalPrice + "," +
+      tradeDirection + "," + aggregateSize + "," + initialQuote + ")"
+
 }
