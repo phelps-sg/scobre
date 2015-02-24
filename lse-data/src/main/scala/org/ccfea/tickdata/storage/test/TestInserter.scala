@@ -1,6 +1,6 @@
 package org.ccfea.tickdata.storage.test
 
-import org.ccfea.tickdata.event.Event
+import org.ccfea.tickdata.storage.dao.Event
 
 /**
  * (C) Steve Phelps 2014

@@ -12,6 +12,6 @@ class ReplayConf(args: Seq[String]) extends ScallopConf(args) {
 
   version("org.ccfea.tickdata.OrderReplay " + BuildInfo.version + "-b" + BuildInfo.buildinfoBuildnumber
              + " (c) 2015 Steve Phelps")
-  val implicitClearing = opt[Boolean](default = Some(false), descr="Perform uncrossing explicitly by processing OrderMatchedEvent and OrderFilledEvent")
+  val explicitClearing = opt[Boolean](default = Some(false), descr="Perform uncrossing explicitly by processing OrderMatchedEvent and OrderFilledEvent")
 }
 

@@ -1,11 +1,13 @@
 package org.ccfea.tickdata.storage.hbase
 
-import org.apache.hadoop.hbase.client.Put
+import org.ccfea.tickdata.storage.dao.{Event, EventType}
+
 import collection.JavaConversions._
-import org.ccfea.tickdata.event.{EventType, Event}
+
+import org.apache.hadoop.hbase.client.Put
 
 /**
- * Store a sequence of {@link org.ccfea.tickdata.event.Event} objects in an Apache HBase table.
+ * Store a sequence of {@link org.ccfea.tickdata.storage.dao.Event} objects in an Apache HBase table.
  *
  * (c) Steve Phelps 2015
  */
@@ -13,12 +15,12 @@ trait HBaseInserter extends HBaseEventConverter {
 
   /**
    * The column names of the events table.  These also correspond with the
-   * attributes of {@link org.ccfea.tickdata.event.Event}.
+   * attributes of {@link org.ccfea.tickdata.storage.dao.Event}.
    */
   val fields: List[String] = List("eventType", "marketSegmentCode", "currencyCode", "marketMechanismType",
     "aggregateSize", "tradeDirection", "orderCode", "tradeSize", "broadcastUpdateAction", "marketSectorCode",
     "marketMechanismGroup", "price", "singleFillInd", "matchingOrderCode", "resultingTradeCode", "tradeCode",
-    "tradeTimeInd", "convertedPriceInd" )
+    "tradeTimeInd", "convertedPriceInd")
 
   def store(field: String, data: Array[Byte])(implicit put: Put, timeStamp: Long) {
     put.add(dataFamily, toBytes(field), timeStamp, data)
@@ -36,7 +38,7 @@ trait HBaseInserter extends HBaseEventConverter {
   }
 
   /**
-   * Convert a single {@link org.ccfea.tickdata.event.Event} object into an
+   * Convert a single {@link org.ccfea.tickdata.storage.dao.Event} object into an
    * HBase Put object.
    *
    * @param event   A single tick.

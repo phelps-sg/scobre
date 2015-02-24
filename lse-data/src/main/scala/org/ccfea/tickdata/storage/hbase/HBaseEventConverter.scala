@@ -3,8 +3,9 @@ package org.ccfea.tickdata.storage.hbase
 import org.apache.hadoop.hbase.{CellUtil, HBaseConfiguration}
 import org.apache.hadoop.hbase.client.{Result, HTable, HBaseAdmin}
 import org.apache.hadoop.hbase.util.Bytes
+import org.ccfea.tickdata.storage.dao.{Event, EventType}
 import collection.JavaConversions._
-import org.ccfea.tickdata.event.{EventType, Event}
+import org.ccfea.tickdata.storage.dao.EventType
 import org.ccfea.tickdata.order.{MarketMechanismType, TradeDirection}
 import java.util.Date
 

@@ -3,7 +3,7 @@ package org.ccfea.tickdata.storage.hbase
 import org.apache.hadoop.hbase.client.{ResultScanner, Scan, Result}
 import org.apache.hadoop.hbase.util.Bytes
 import collection.JavaConversions._
-import org.ccfea.tickdata.event.{TickDataEvent, Event}
+import org.ccfea.tickdata.event.TickDataEvent
 import java.util.Date
 import grizzled.slf4j.Logger
 

@@ -1,7 +1,7 @@
 package org.ccfea.tickdata.storage
 
+import org.ccfea.tickdata.storage.dao.Event
 import org.ccfea.tickdata.storage.rawdata.HasDateTime
-import org.ccfea.tickdata.event.Event
 
 /**
  * Parse raw data into a format suitable for replaying through a
@@ -25,7 +25,7 @@ trait DataParser {
 
   /**
    * Convert the data returned from the toRecord method into a canonical
-   * {@link org.ccfea.tickdata.event.Event} object.
+   * {@link org.ccfea.tickdata.storage.dao.Event} object.
    *
    * @param rawEvent A single time-stamped tuple representing the parsed-raw input.
    * @return  A single instance of Event.

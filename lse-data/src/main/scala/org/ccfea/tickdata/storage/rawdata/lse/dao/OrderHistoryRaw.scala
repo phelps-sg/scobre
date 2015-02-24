@@ -1,4 +1,6 @@
-package org.ccfea.tickdata.storage.rawdata.lse
+package org.ccfea.tickdata.storage.rawdata.lse.dao
+
+import org.ccfea.tickdata.storage.rawdata.lse.LseHasDateTime
 
 /**
  * Object representing original order-revision records in original format supplied by LSE.
@@ -20,4 +22,3 @@ case class OrderHistoryRaw(orderCode: String,
                            messageSequenceNumber: Long,
                            date: String,
                            time: String) extends LseHasDateTime
-

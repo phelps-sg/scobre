@@ -1,7 +1,7 @@
 package org.ccfea.tickdata.storage.rawdata.asx
 
-import org.ccfea.tickdata.event.{EventType, Event}
 import org.ccfea.tickdata.order.{TradeDirection, MarketMechanismType}
+import org.ccfea.tickdata.storage.dao.{Event, EventType}
 import org.ccfea.tickdata.storage.{DataParser, DataLoader}
 import org.ccfea.tickdata.storage.rawdata.HasDateTime
 

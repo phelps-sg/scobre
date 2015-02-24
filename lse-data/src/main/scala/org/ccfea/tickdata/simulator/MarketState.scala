@@ -1,16 +1,15 @@
 package org.ccfea.tickdata.simulator
 
 import net.sourceforge.jabm.SimulationTime
+
 import net.sourceforge.jasa.agent.SimpleTradingAgent
-import net.sourceforge.jasa.market.FourHeapOrderBook
+import net.sourceforge.jasa.market.TickOrderBook
 
 import grizzled.slf4j.Logger
 
 import java.util.GregorianCalendar
 
 import org.ccfea.tickdata.event._
-import org.ccfea.tickdata.event.OrderFilledEvent
-import org.ccfea.tickdata.event.OrderMatchedEvent
 import org.ccfea.tickdata.order.offset.OffsetOrder
 import org.ccfea.tickdata.order.{MarketOrder, TradeDirection, AbstractOrder, LimitOrder}
 
@@ -34,7 +33,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    * The current state of the book.
    */
   @BeanProperty
-  val book = new FourHeapOrderBook()
+  val book = new TickOrderBook()
 
   /**
    * Lookup table mapping order-codes to Orders.
@@ -403,11 +402,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    * Remove the specified the order from the book.
    */
   def removeOrder(jasaOrder: net.sourceforge.jasa.market.Order) = {
-    var order = jasaOrder
-    while (order != null) {
-      book.remove(order)
-      order = order.getChild
-    }
+    book.removeAll(jasaOrder);
   }
 
   /**
@@ -420,10 +415,9 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     val order = new net.sourceforge.jasa.market.Order()
     o match {
       case lo:LimitOrder =>
-        val p = lo.price.toDouble
-        //TODO: Specify tickSize and move the rounding functionality to FourHeapOrderBook
-        val roundedPrice: Double = Math.round(p * 1000) / 1000.0
-        order.setPrice(roundedPrice)
+//        val p = lo.price.toDouble
+//        val roundedPrice: Double = Math.round(p * 1000) / 1000.0
+        order.setPrice(lo.price.toDouble)
         order.setQuantity(lo.aggregateSize.toInt)
         order.setAgent(new SimpleTradingAgent())
         order.setIsBid(lo.tradeDirection == TradeDirection.Buy)

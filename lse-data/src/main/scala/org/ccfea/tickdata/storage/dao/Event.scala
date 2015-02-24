@@ -1,13 +1,10 @@
-package org.ccfea.tickdata.event
+package org.ccfea.tickdata.storage.dao
+
+import java.util.Date
 
 import grizzled.slf4j.Logger
-import java.util.Date
+import org.ccfea.tickdata.event._
 import org.ccfea.tickdata.order._
-import org.ccfea.tickdata.order.MarketOrder
-import org.ccfea.tickdata.order.LimitOrder
-import org.ccfea.tickdata.order.OtherOrder
-import scala.Some
-import org.ccfea.tickdata.order.Order
 
 /**
  * A non-relational representation of an event that has occurred in the exchange.

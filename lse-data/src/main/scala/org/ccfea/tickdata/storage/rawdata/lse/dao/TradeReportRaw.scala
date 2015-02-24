@@ -1,4 +1,6 @@
-package org.ccfea.tickdata.storage.rawdata.lse
+package org.ccfea.tickdata.storage.rawdata.lse.dao
+
+import org.ccfea.tickdata.storage.rawdata.lse.LseHasDateTime
 
 /**
  * Object representing transaction records in the original format supplied by LSE.

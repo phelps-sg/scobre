@@ -1,8 +1,9 @@
 package org.ccfea.tickdata.storage.rawdata.lse
 
 import grizzled.slf4j.Logger
-import org.ccfea.tickdata.event.{EventType, Event}
 import org.ccfea.tickdata.order.{TradeDirection, MarketMechanismType}
+import org.ccfea.tickdata.storage.dao.{Event, EventType}
+import org.ccfea.tickdata.storage.rawdata.lse.dao.{OrderHistoryRaw, OrderDetailRaw, TradeReportRaw}
 import org.ccfea.tickdata.storage.{DataParser, DataLoader}
 import org.ccfea.tickdata.storage.rawdata.HasDateTime
 
@@ -108,7 +109,7 @@ class LseParser(recordType: String) extends DataParser {
 
  /**
    * Convert a row of one of the three LSE tables (order_history, order_detail, trade_reports)
-   * into an {@link org.ccfea.tickdata.event.Event} object which represents a tick.
+   * into an {@link org.ccfea.tickdata.storage.dao.Event} object which represents a tick.
    *
    * @param rawEvent  A tuple representation of the raw data in the current row being parsed.
    * @return  A tick whose eventType represents the type of event that has occurred.

@@ -1,4 +1,4 @@
-package org.ccfea.tickdata.event
+package org.ccfea.tickdata.storage.dao
 
 /**
  * The type of event that has occurred in the exchange.
@@ -17,4 +17,3 @@ object EventType extends Enumeration {
   val OrderFilled = Value("order_filled")
   val TransactionLimit = Value("transaction_limit")
 }
-

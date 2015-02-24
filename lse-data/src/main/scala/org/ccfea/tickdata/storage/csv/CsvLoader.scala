@@ -2,7 +2,7 @@ package org.ccfea.tickdata.storage.csv
 
 import java.io.{BufferedReader, InputStreamReader, FileInputStream}
 import grizzled.slf4j.Logger
-import org.ccfea.tickdata.storage.rawdata.lse.{TradeReportRaw, OrderHistoryRaw, OrderDetailRaw}
+import org.ccfea.tickdata.storage.rawdata.lse.dao.OrderDetailRaw
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
