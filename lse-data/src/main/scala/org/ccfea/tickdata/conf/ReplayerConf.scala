@@ -18,6 +18,7 @@ class ReplayerConf(args: Seq[String]) extends ReplayConf(args) {
   val endDate = opt[String](required = false, descr = "The date of the last event to replay")
   val property = opt[String](default = Some("midPrice"), descr = "The data to retrieve")
   val shuffle = opt[Boolean](default = Some(false), descr="Shuffle the order of the events prior to simulation")
+  val offsetting = opt[String](default = Some("none"), descr="One of none, mid, same, opposite")
   val proportionShuffling = opt[Double](default = Some(1.0), descr="Proportion of the events to shuffle")
   val shuffleWindowSize = opt[Int](default = Some(1000), descr="Window size for shuffled replay")
 }
