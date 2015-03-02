@@ -14,6 +14,10 @@ import org.apache.hadoop.hbase.util.Bytes
  */
 trait HBaseInserter extends HBaseEventConverter {
 
+  /**
+   * An internal message-sequence number (MSN) which is appended to time-stamps to
+   * prevent row-key collisions for low-resolution data.
+   */
   var msn: Int = 0
 
   val MSN_MODULO = 1000
