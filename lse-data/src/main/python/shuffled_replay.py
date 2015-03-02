@@ -13,12 +13,12 @@ OFFSETTING_SAME =     1
 OFFSETTING_MID =      2
 OFFSETTING_OPPOSITE = 3
 
-ITERATIONS = 100
+ITERATIONS = 10
 
-def get_shuffled_data(asset, proportion, window_size, intra_window = False,
-                          offsetting = 0,
-                          variables = ['midPrice'],
-                            server = 'cseesp1', port = 9090):
+def get_shuffled_data(asset, proportion, window_size, 
+                      intra_window = False, offsetting = 0, 
+                      variables = ['midPrice'], 
+                        server = 'localhost', port = 9090):
     from thrift.transport import TSocket
     from thrift.protocol import TBinaryProtocol
     from orderreplay import *

@@ -20,15 +20,19 @@ abstract class OffsetOrder(val limitOrder: LimitOrder, val initialQuote: Quote) 
   val originalPrice = limitOrder.price
 
   val offset: Double = bestPrice(initialQuote) match {
-    case Some(best) => (limitOrder.price - best).toDouble
+    case Some(best) => round((limitOrder.price - round(best)).toDouble)
     case None => 0.0
   }
 
   def price(quote: Quote): BigDecimal =
     bestPrice(quote) match {
       case None => originalPrice
-      case Some(p) => p + offset
+      case Some(p) => round(p) + offset
     }
+
+  def round(p: Double): Double = {
+    (p * 1000.0) / 1000.0
+  }
 
   def bestPrice(quote: Quote): Option[Double]
 

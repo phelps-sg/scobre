@@ -1,11 +1,10 @@
 package org.ccfea.tickdata.storage.hbase
 
-import org.apache.hadoop.hbase.{CellUtil, HBaseConfiguration}
+import org.apache.hadoop.hbase.{Cell, CellUtil, HBaseConfiguration}
 import org.apache.hadoop.hbase.client.{Result, HTable, HBaseAdmin}
 import org.apache.hadoop.hbase.util.Bytes
 import org.ccfea.tickdata.storage.dao.{Event, EventType}
 import collection.JavaConversions._
-import org.ccfea.tickdata.storage.dao.EventType
 import org.ccfea.tickdata.order.{MarketMechanismType, TradeDirection}
 import java.util.Date
 
@@ -35,6 +34,7 @@ trait HBaseEventConverter {
    */
   val dataFamily = Bytes.toBytes("data")
 
+
   implicit def toBytes(x: Any): Array[Byte] = x match {
     case s: String => Bytes.toBytes(s)
     case evType: EventType.Value => Bytes.toBytes(evType.id.toShort)
@@ -42,6 +42,7 @@ trait HBaseEventConverter {
     case mmt: MarketMechanismType.Value => Bytes.toBytes(mmt.id.toShort)
     case p: BigDecimal => Bytes.toBytes(new java.math.BigDecimal(p.toString()))
     case l: Long => Bytes.toBytes(l)
+    case i: Int => Bytes.toBytes(i)
   }
 
   implicit def toEventType(raw: Array[Byte]): EventType.Value = EventType(Bytes.toShort(raw))
@@ -95,17 +96,18 @@ trait HBaseEventConverter {
   }
 
   /**
-   * Get the HBase key for an event.  The key design is:
+   * Generate the HBase key for an event.  The key design is:
    *
-   *   <tiCode> (12 bytes) | "0" (1 byte) | <timeStamp> (8 bytes) | <messageSequenceNumber> (8 bytes)
+   *   <tiCode> (12 bytes) | "0" (1 byte) | <timeStamp> (8 bytes) | <messageSequenceNumber> (8 bytes) | <internalMSN> (4 bytes)
    *
-   * The "0" separator allows for partial key scans on tiCode (ie a particular asset).
+   * The "0" separator allows for partial key scans on tiCode (ie a particular asset).  Note
+   * that this method will *not* append the salt.
    *
    * @param event  The event to generate a key for
    * @return       An array of bytes representing the HBase key.
    */
-  def getKey(event: Event): Array[Byte] = {
-    Bytes.add(pad(event.tiCode) + "0", event.timeStamp, event.messageSequenceNumber)
+  def getKey(event: Event, internalMSN: Int): Array[Byte] = {
+    Bytes.add(Bytes.add(pad(event.tiCode) + "0", event.timeStamp, event.messageSequenceNumber), internalMSN)
   }
 
   def pad(s: String, len: Int = TI_LEN) = {
@@ -117,7 +119,7 @@ trait HBaseEventConverter {
   }
 
   def getMessageSequenceNumber(result: Result): Long = {
-    Bytes.toLong(Bytes.tail(result.getRow, 8))
+    Bytes.toLong(Bytes.copy(result.getRow, 12 + 1 + 8, 8))
   }
 
   def getTiCode(result: Result): String = {
@@ -128,15 +130,16 @@ trait HBaseEventConverter {
     val column =  result.getColumnCells(dataFamily, name)
     column.size match {
       case 0 => None
-      case 1 => Some(CellUtil.cloneValue(column(0)))
+      case 1 => Some(CellUtil.cloneValue(column.get(0)))
       case _ => throw new IllegalArgumentException("More than one result in column " + name)
     }
   }
 
   def getTimeStamp(result: Result): Long = {
-    val column = result.getColumnCells(dataFamily, "eventType")
+    val column: java.util.List[Cell] = result.getColumnCells(dataFamily, "eventType")
     assert(column.size == 1)
-    column(0).getTimestamp
+    val firstColumn: Cell = column.get(0)
+    firstColumn.getTimestamp
   }
 
 }

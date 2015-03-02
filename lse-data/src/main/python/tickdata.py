@@ -48,8 +48,8 @@ def get_hf_data(asset, start_date, end_date,
                             start_date + " and " + end_date)
     return dict_to_df(raw_data, variables)
     
-#dataset = get_hf_data('GB0009252882', '2/3/2007', '3/3/2007', server='cseesp1')
-dataset = get_hf_data('GB0002875804', '2/3/2007', '3/3/2009', server='cseesp1')
+dataset = get_hf_data('GB0009252882', '2/3/2007', '3/3/2007', server='localhost')
+#dataset = get_hf_data('GB0002875804', '2/3/2007', '3/3/2009', server='localhost')
 
 #dataset = get_hf_data('BHP', '2/7/2007', '3/7/2007')
 

@@ -5,6 +5,7 @@ import org.ccfea.tickdata.storage.dao.{Event, EventType}
 import collection.JavaConversions._
 
 import org.apache.hadoop.hbase.client.Put
+import org.apache.hadoop.hbase.util.Bytes
 
 /**
  * Store a sequence of {@link org.ccfea.tickdata.storage.dao.Event} objects in an Apache HBase table.
@@ -12,6 +13,13 @@ import org.apache.hadoop.hbase.client.Put
  * (c) Steve Phelps 2015
  */
 trait HBaseInserter extends HBaseEventConverter {
+
+  var msn: Int = 0
+
+  val MSN_MODULO = 1000
+
+  //TODO
+//  val NUM_SALT_BUCKETS = 100
 
   /**
    * The column names of the events table.  These also correspond with the
@@ -37,6 +45,12 @@ trait HBaseInserter extends HBaseEventConverter {
     }
   }
 
+  def internalMessageSequenceNumber(): Int = {
+    // Add private MSN to ensure that there are no row-key collisions- important for LSE data
+    msn = (msn + 1) % MSN_MODULO
+    msn
+  }
+
   /**
    * Convert a single {@link org.ccfea.tickdata.storage.dao.Event} object into an
    * HBase Put object.
@@ -46,7 +60,7 @@ trait HBaseInserter extends HBaseEventConverter {
    */
   implicit def convert(event: Event): Put = {
     implicit val timeStamp = event.timeStamp
-    implicit val put: Put = new Put(getKey(event))
+    implicit val put: Put = new Put(getKey(event, internalMessageSequenceNumber()))
     def getField(f: String): AnyRef = classOf[Event].getMethod(f).invoke(event)
     for(field <- fields) store(field, getField(field))
     put
