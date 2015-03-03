@@ -160,5 +160,5 @@ IDEA), and then directly import the `build.sbt` file as a new project.
 
 ## Contact
 
-(C) [Steve Phelps](mailto:sphelps@sphelps.net) 2014
+(C) [Steve Phelps](mailto:sphelps@sphelps.net) 2015
 
