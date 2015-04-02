@@ -31,7 +31,7 @@ cat_data() {
 import() {
 	FILE=$1
 
-	cat_data $FILE > $PIPE &
+	cat_data $FILE | dos2unix > $PIPE &
 	
 	case $FILE in
 		*[Tt]rade[Rr]eport*) 	import_pipe trade_reports_raw;;

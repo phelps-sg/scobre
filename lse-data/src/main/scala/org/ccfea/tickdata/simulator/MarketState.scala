@@ -129,10 +129,11 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
       removeOrder(order)
       order.setPrice(ev.newPrice.doubleValue())
       order.setQuantity(ev.newVolume.toInt)
+      order.setIsBid(ev.newDirection == TradeDirection.Buy)
       insertOrder(order)
     } else {
-      logger.debug("Unknown order code when amending existing order: " + ev.order.orderCode)
-      logger.debug("Converting OrderRevisedEvent to OrderSubmittedEvent")
+      logger.warn("Unknown order code when amending existing order: " + ev.order.orderCode)
+      logger.warn("Converting OrderRevisedEvent to OrderSubmittedEvent")
       val newOrder = new LimitOrder(ev.order.orderCode, ev.newVolume, ev.newDirection, ev.newPrice)
       process(new OrderSubmittedEvent(ev.timeStamp, ev.messageSequenceNumber, ev.tiCode, newOrder))
     }
@@ -150,7 +151,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
       logger.debug("Removing from book: " + order)
       removeOrder(order)
     } else {
-      logger.debug("Unknown order code when removing order: " + orderCode)
+      logger.warn("Unknown order code when removing order: " + orderCode)
     }
   }
 
@@ -181,6 +182,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   }
 
   def process(ev: OrderSubmittedEvent): Unit = {
+    val quoteSnapshot = this.quote()
     val order = ev.order
     if (orderMap.contains(order.orderCode)) {
       logger.debug("Submission using existing order code: " + order.orderCode)
@@ -189,7 +191,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     order match {
        case lo: LimitOrder =>   processLimitOrder(lo)
        case oo: OffsetOrder =>
-         val convertedOrder = oo.toLimitOrder(this.quote())
+         val convertedOrder = oo.toLimitOrder(quoteSnapshot)
          logger.debug("Converted offset order to: " + convertedOrder)
          processLimitOrder(convertedOrder)
        case mo: MarketOrder =>  processMarketOrder(mo)
