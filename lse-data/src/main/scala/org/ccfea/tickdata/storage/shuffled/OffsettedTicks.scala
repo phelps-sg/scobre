@@ -24,6 +24,9 @@ class OffsettedTicks(val marketState: MarketState, val ticks: Iterable[TickDataE
           case os: OrderSubmittedEvent =>
             os.order match {case lo: LimitOrder => lo}
           case or: OrderRevisedEvent =>
+            // Convert the OrderRevisedEvent into an OrderSubmittedEvent
+            // by first extracting the implied order
+            // TODO:  Ensure that the trader id is the same in the new order
             new LimitOrder(or.order.orderCode, or.newVolume, or.newDirection, or.newPrice)
         }
         val offsetOrder = createOffsetOrder(limitOrder, marketState.quote())

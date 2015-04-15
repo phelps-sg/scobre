@@ -16,44 +16,15 @@ import org.ccfea.tickdata.order._
  *
  * (c) Steve Phelps 2013
  */
-case class Event(eventID: Option[Long],
-
-                 eventType: EventType.Value,
-
-                 messageSequenceNumber: Long,
-                 timeStamp: Long,
-                 tiCode: String,
-                 marketSegmentCode: String,
-//                 countryOfRegister: String,
-                 currencyCode: String,
-
-                 marketMechanismType: Option[MarketMechanismType.Value],
-                 aggregateSize: Option[Long],
-                 tradeDirection: Option[TradeDirection.Value],
-                 orderCode: Option[String],
-
-                 tradeSize: Option[Long],
-                 broadcastUpdateAction: Option[String],
-
-                 marketSectorCode: Option[String],
-//                 participantCode: Option[String],
-                 marketMechanismGroup: Option[String],
-                 price: Option[BigDecimal],
-                 singleFillInd: Option[String],
-
-                 //                 orderActionType: Option[String],
-                 matchingOrderCode: Option[String],
-                 resultingTradeCode: Option[String],
-
-                 tradeCode: Option[String],
-                 //                 tradePrice: Option[BigDecimal],
-                 //                 tradeTypeInd: Option[String],
-                 tradeTimeInd: Option[String],
-                 //                 bargainConditions: Option[String],
-                 convertedPriceInd: Option[String]
-                 //                 publicationTimeStamp: Option[Long]
-
-                  ) {
+case class Event(eventID: Option[Long], eventType: EventType.Value, messageSequenceNumber: Long, timeStamp: Long,
+  tiCode: String, marketSegmentCode: String, currencyCode: String,
+  marketMechanismType: Option[MarketMechanismType.Value], aggregateSize: Option[Long],
+  tradeDirection: Option[TradeDirection.Value], orderCode: Option[String], tradeSize: Option[Long],
+  broadcastUpdateAction: Option[String], marketSectorCode: Option[String], marketMechanismGroup: Option[String],
+  price: Option[BigDecimal], singleFillInd: Option[String], matchingOrderCode: Option[String],
+  resultingTradeCode: Option[String], tradeCode: Option[String], tradeTimeInd: Option[String],
+  convertedPriceInd: Option[String]
+) {
 
   val logger = Logger(classOf[Event])
 
@@ -61,15 +32,15 @@ case class Event(eventID: Option[Long],
 
     this.eventType match {
 
-      case EventType.OrderSubmitted  =>
+      case EventType.OrderSubmitted =>
 
         val order = marketMechanismType.get match {
-            case MarketMechanismType.LimitOrder =>
-              new LimitOrder(orderCode.get, aggregateSize.get, tradeDirection.get, price.get)
-            case MarketMechanismType.MarketOrder =>
-              new MarketOrder(orderCode.get, aggregateSize.get, tradeDirection.get)
-            case _ =>
-              new OtherOrder(orderCode.get, marketMechanismType.get)
+          case MarketMechanismType.LimitOrder =>
+            new LimitOrder(orderCode.get, aggregateSize.get, tradeDirection.get, price.get)
+          case MarketMechanismType.MarketOrder =>
+            new MarketOrder(orderCode.get, aggregateSize.get, tradeDirection.get)
+          case _ =>
+            new OtherOrder(orderCode.get, marketMechanismType.get)
         }
         val date = new Date(timeStamp)
         val orderSubmittedEvent = new OrderSubmittedEvent(date, messageSequenceNumber, tiCode, order)
@@ -80,24 +51,24 @@ case class Event(eventID: Option[Long],
           orderSubmittedEvent
         }
 
-      case EventType.OrderDeleted | EventType.OrderExpired | EventType.TransactionLimit  =>
+      case EventType.OrderDeleted | EventType.OrderExpired | EventType.TransactionLimit =>
         new OrderRemovedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode.get))
 
       case EventType.OrderFilled =>
         new OrderFilledEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode.get),
-                              new Order(matchingOrderCode.get))
+          new Order(matchingOrderCode.get))
 
       case EventType.OrderMatched =>
         new OrderMatchedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode.get),
-                                 new Order(matchingOrderCode.get), resultingTradeCode.get, tradeSize.get)
+          new Order(matchingOrderCode.get), resultingTradeCode.get, tradeSize.get)
 
       case EventType.Transaction =>
         new TransactionEvent(new Date(timeStamp), messageSequenceNumber, tiCode, tradeCode.get, price.get,
-                                  tradeSize.get, orderCode, matchingOrderCode)
+          tradeSize.get, orderCode, matchingOrderCode)
 
       case EventType.OrderRevised =>
         new OrderRevisedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode.get), price.get,
-                                aggregateSize.get, tradeDirection.get)
+          aggregateSize.get, tradeDirection.get)
     }
   }
 
