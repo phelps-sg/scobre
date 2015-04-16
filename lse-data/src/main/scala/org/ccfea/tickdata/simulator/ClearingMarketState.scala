@@ -41,7 +41,7 @@ class ClearingMarketState extends MarketState {
     val bestPrice = if (order.tradeDirection == TradeDirection.Buy) quote.ask else quote.bid
     bestPrice match {
       case Some(p) =>
-        val lo = new LimitOrder(order.orderCode, order.aggregateSize, order.tradeDirection, p)
+        val lo = new LimitOrder(order.orderCode, order.aggregateSize, order.tradeDirection, p, order.trader)
         processLimitOrder(lo)
       case None =>
         logger.warn("Ignoring market order because there is no best price: " + order)

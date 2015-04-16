@@ -1,5 +1,6 @@
 package org.ccfea.tickdata.order
 
+import net.sourceforge.jasa.agent.TradingAgent
 
 /**
  * A limit order with corresponding limit price.
@@ -7,7 +8,7 @@ package org.ccfea.tickdata.order
  * (C) Steve Phelps 2013
  */
 class LimitOrder(val orderCode: String, val aggregateSize: Long, val tradeDirection: TradeDirection.Value,
-                 val price: BigDecimal) extends OrderWithVolume {
+                 val price: BigDecimal, val trader: TradingAgent) extends OrderWithVolume {
 
   override def toString(): String = {
     "LimitOrder(" + orderCode + "," + aggregateSize + "," + tradeDirection + "," + price + ")"

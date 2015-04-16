@@ -1,5 +1,6 @@
 package org.ccfea.tickdata
 
+import java.util.Date
 import java.{lang, util}
 
 import org.ccfea.tickdata.order.LimitOrder
@@ -35,7 +36,7 @@ object OrderReplayService extends ReplayApplication {
                   val marketState: MarketState)
     extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
 
-  var tickCache = Map[(String, Offsetting.Value), Seq[TickDataEvent]]()
+  var tickCache = Map[(String, Offsetting.Value, Option[(Long, Long)]), Seq[TickDataEvent]]()
 
   val logger = Logger("org.ccmainfea.tickdata.OrderReplayService")
 
@@ -68,22 +69,53 @@ object OrderReplayService extends ReplayApplication {
     }
   }
 
-  def getShuffledData(assetId: String, source: Iterable[TickDataEvent],
+  def getShuffledData(assetId: String,
                           proportionShuffling: Double,
                           windowSize: Int, intraWindow: Boolean,
-                          offsetting: Offsetting.Value)(implicit conf: ServerConf): RandomPermutation = {
+                          offsetting: Offsetting.Value,
+                          dateRange: Option[(Long, Long)])(implicit conf: ServerConf): RandomPermutation = {
     val ticks = if (tickCache.contains((assetId, offsetting))) {
-      tickCache((assetId, offsetting))
+      tickCache((assetId, offsetting, dateRange))
     } else {
-      val originalData = new HBaseRetriever(selectedAsset = assetId).toList
+      val start = dateRange match {
+        case None => None
+        case Some((t0, t1)) => Some(new Date(t0))
+      }
+      val end = dateRange match {
+        case None => None
+        case Some((t0, t1)) => Some(new Date(t1))
+      }
+      val originalData = new HBaseRetriever(selectedAsset = assetId, startDate = start, endDate = end).toList
       val offsettedTicks = getOffsettedTicks(originalData, offsetting).toList
-      tickCache += ((assetId, offsetting) -> offsettedTicks)
+      tickCache += ((assetId, offsetting, dateRange) -> offsettedTicks)
       offsettedTicks
     }
     if (intraWindow)
       new IntraWindowRandomPermutation(ticks, proportionShuffling, windowSize)
     else
       new RandomPermutation(ticks, proportionShuffling, windowSize)
+  }
+
+  def executeShuffledReplay(assetId: String, variables: util.List[String],
+                                    proportionShuffling: Double, windowSize: Int, intraWindow: Boolean,
+                                      offsetting: Int, dateRange: Option[(Long, Long)])(implicit conf: ServerConf):
+                                                util.List[util.Map[String, java.lang.Double]] = {
+    logger.info("Shuffled replay for " + assetId + " with windowSize " + windowSize +
+                      ", offsetting " + offsetting + " and percentage " + proportionShuffling)
+    dateRange match {
+      case Some((t0, t1)) =>
+        logger.info("between " + new Date(t0) + " and " + new Date(t1))
+      case None =>
+    }
+    logger.info("Starting simulation... ")
+    val marketState = newMarketState(conf)
+    val shuffledTicks =
+      getShuffledData(assetId, proportionShuffling, windowSize, intraWindow, Offsetting(offsetting), dateRange)
+    val replayer =
+      new Replayer(shuffledTicks, dataCollectors = Map() ++ collectors(variables), marketState)
+    replayer.run()
+    logger.info("done.")
+    replayer.result
   }
 
   def main(args: Array[String]): Unit = {
@@ -108,23 +140,18 @@ object OrderReplayService extends ReplayApplication {
         replayer.result
       }
 
-      override def shuffledReplay(assetId: String, variables: util.List[String],
+      override def shuffledReplayDateRange(assetId: String, variables: util.List[String],
                                     proportionShuffling: Double, windowSize: Int, intraWindow: Boolean,
-                                      offsetting: Int):
+                                      offsetting: Int, startDateTime: Long, endDateTime: Long):
                                                 util.List[util.Map[String, java.lang.Double]] = {
-        logger.info("Shuffled replay for " + assetId + " with windowSize " + windowSize +
-                      ", offsetting " + offsetting + " and percentage " + proportionShuffling)
-        logger.info("Starting simulation... ")
-        val marketState = newMarketState(conf)
-        val ticks = new HBaseRetriever(selectedAsset = assetId)
-        val shuffledTicks =
-          getShuffledData(assetId, ticks, proportionShuffling, windowSize, intraWindow, Offsetting(offsetting))
-        val replayer =
-          new Replayer(shuffledTicks, dataCollectors = Map() ++ collectors(variables), marketState)
-        replayer.run()
-        logger.info("done.")
-        replayer.result
+        executeShuffledReplay(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting,
+                                Some((startDateTime, endDateTime)))
       }
+
+      override def shuffledReplay(assetId: String, variables: util.List[String], proportionShuffling: Double, windowSize: Int, intraWindow: Boolean, offsetting: Int): util.List[util.Map[String, lang.Double]] = {
+        executeShuffledReplay(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, None)
+      }
+
     })
 
     val serverTransport = new TServerSocket(port)

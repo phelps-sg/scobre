@@ -1,6 +1,6 @@
 package org.ccfea.tickdata.order.offset
 
-import org.ccfea.tickdata.order.{LimitOrder, OrderWithVolume}
+import org.ccfea.tickdata.order.{Trader, LimitOrder, OrderWithVolume}
 import org.ccfea.tickdata.simulator.Quote
 
 /**
@@ -18,6 +18,7 @@ abstract class OffsetOrder(val limitOrder: LimitOrder, val initialQuote: Quote) 
   val aggregateSize = limitOrder.aggregateSize
   val tradeDirection = limitOrder.tradeDirection
   val originalPrice = limitOrder.price
+  val trader = limitOrder.trader
 
   val offset: Double = bestPrice(initialQuote) match {
     case Some(best) => round((limitOrder.price - round(best)).toDouble)
@@ -37,7 +38,7 @@ abstract class OffsetOrder(val limitOrder: LimitOrder, val initialQuote: Quote) 
   def bestPrice(quote: Quote): Option[Double]
 
   def toLimitOrder(quote: Quote) = {
-    new LimitOrder(orderCode, aggregateSize, tradeDirection, price(quote))
+    new LimitOrder(orderCode, aggregateSize, tradeDirection, price(quote), new Trader())
   }
 
 }

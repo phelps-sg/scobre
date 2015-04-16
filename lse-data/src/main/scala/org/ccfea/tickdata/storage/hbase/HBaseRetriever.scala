@@ -11,8 +11,8 @@ import grizzled.slf4j.Logger
  * Retrieve time-sorted events for a selected asset from Apache HBase.
  * (c) Steve Phelps 2013
  */
-class HBaseRetriever(val cacheSize: Int = 1000, val selectedAsset: String,
-                      val startDate: Option[Date] = None, val endDate: Option[Date] = None)
+class HBaseRetriever(val selectedAsset: String,
+                      val startDate: Option[Date] = None, val endDate: Option[Date] = None, val cacheSize: Int = 1000)
     extends HBaseEventConverter with Iterable[TickDataEvent] {
 
   val partialKeyScan = new DateKeyRange(selectedAsset, startDate, endDate, cacheSize)

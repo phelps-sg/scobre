@@ -11,7 +11,7 @@ import java.util.GregorianCalendar
 
 import org.ccfea.tickdata.event._
 import org.ccfea.tickdata.order.offset.OffsetOrder
-import org.ccfea.tickdata.order.{MarketOrder, TradeDirection, AbstractOrder, LimitOrder}
+import org.ccfea.tickdata.order._
 
 import scala.beans.BeanProperty
 import collection.JavaConversions._
@@ -134,7 +134,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     } else {
       logger.warn("Unknown order code when amending existing order: " + ev.order.orderCode)
       logger.warn("Converting OrderRevisedEvent to OrderSubmittedEvent")
-      val newOrder = new LimitOrder(ev.order.orderCode, ev.newVolume, ev.newDirection, ev.newPrice)
+      val newOrder = new LimitOrder(ev.order.orderCode, ev.newVolume, ev.newDirection, ev.newPrice, new Trader())
       process(new OrderSubmittedEvent(ev.timeStamp, ev.messageSequenceNumber, ev.tiCode, newOrder))
     }
   }
@@ -421,7 +421,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
 //        val roundedPrice: Double = Math.round(p * 1000) / 1000.0
         order.setPrice(lo.price.toDouble)
         order.setQuantity(lo.aggregateSize.toInt)
-        order.setAgent(new SimpleTradingAgent())
+        order.setAgent(lo.trader)
         order.setIsBid(lo.tradeDirection == TradeDirection.Buy)
     }
     order.setTimeStamp(time.get)

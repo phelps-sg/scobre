@@ -36,11 +36,11 @@ case class Event(eventID: Option[Long], eventType: EventType.Value, messageSeque
 
         val order = marketMechanismType.get match {
           case MarketMechanismType.LimitOrder =>
-            new LimitOrder(orderCode.get, aggregateSize.get, tradeDirection.get, price.get)
+            new LimitOrder(orderCode.get, aggregateSize.get, tradeDirection.get, price.get, new Trader())
           case MarketMechanismType.MarketOrder =>
-            new MarketOrder(orderCode.get, aggregateSize.get, tradeDirection.get)
+            new MarketOrder(orderCode.get, aggregateSize.get, tradeDirection.get, new Trader())
           case _ =>
-            new OtherOrder(orderCode.get, marketMechanismType.get)
+            new OtherOrder(orderCode.get, marketMechanismType.get, new Trader())
         }
         val date = new Date(timeStamp)
         val orderSubmittedEvent = new OrderSubmittedEvent(date, messageSequenceNumber, tiCode, order)
