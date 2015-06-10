@@ -25,7 +25,6 @@ namespace py orderreplay
  */
 service OrderReplay {
 
-
    /**
     * Replay tick events
     **/
@@ -35,4 +34,9 @@ service OrderReplay {
    list<map<string,double>> shuffledReplay(1:string assetId, 2:list<string> variables,
                                                         3:double proportionShuffling, 4:i32 windowSize,
                                                         5:bool intraWindow, 6:i32 offsetting)
+
+   list<map<string,double>> shuffledReplayDateRange(1:string assetId, 2:list<string> variables,
+                                                        3:double proportionShuffling, 4:i32 windowSize,
+                                                        5:bool intraWindow, 6:i32 offsetting,
+                                                        7:i64 startDateTime, 8:i64 endDateTime)
 }
