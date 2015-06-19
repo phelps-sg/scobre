@@ -28,7 +28,7 @@ order to execute the shell scripts.
 - (Optional) In order to build the software from source, you will need the scala build tool (sbt); see the [sbt documentation](http://www.scala-sbt.org/release/docs/Getting-Started/Setup.html).
 
 - (Optional) In order to host the data, you will need to install [Apache HBase
-  version 0.98.8 for Hadoop 2](https://www.apache.org/dyn/closer.cgi/hbase/).  The software
+  version 1.0.1.1](https://www.apache.org/dyn/closer.cgi/hbase/).  The software
 can optionally connect to an existing server which already hosts the data.
 
 - (Optional) The best Integrated Development Environment (IDE) to use for 
@@ -130,7 +130,7 @@ IDEA), and then directly import the `build.sbt` file as a new project.
 
 ## Importing the raw data into Apache HBase
 
-1. Install Apache HBase 0.98.8 for Hadoop 2 in [standalone mode](https://hbase.apache.org/book/quickstart.html).
+1. Install Apache HBase 1.0.1.1 in [standalone mode](https://hbase.apache.org/book/quickstart.html).
 
 2. Modify the file `base-config.xml` in the `etc/` directory of the folder where you unpacked the lse-data distribution as follows:
 
