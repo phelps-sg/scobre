@@ -6,4 +6,4 @@
 
 source config.sh
 
-java org.ccfea.tickdata.OrderReplayService $@
+java -Xmx8g org.ccfea.tickdata.OrderReplayService $@
