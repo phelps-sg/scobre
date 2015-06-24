@@ -75,7 +75,7 @@ def sweep(fn):
     for proportion in numpy.arange(0, 1.1, 0.1):
         fn(proportion, window, intra_window, offsetting)
 
-def submit_shuffling_jobs(job_server, t0):
+def submit_shuffling_jobs(job_server, t0, iterations):
     
     dep_modules = ('pandas', 'orderreplay', 'thrift', 'csv', 'time', 'datetime')
     dep_functions = (get_shuffled_data, date_to_time, )
@@ -97,7 +97,7 @@ def submit_all(num_cpus = 8, iterations = ITERATIONS):
     days = [datetime.datetime(2007, 7, d) for d in [20, 25, 26]]
     jobs = []
     for day in days:
-        jobs.extend(submit_shuffling_jobs(job_server, day))
+        jobs.extend(submit_shuffling_jobs(job_server, day, iterations))
     return (job_server, jobs)    
                        
 def plot_graphs():
