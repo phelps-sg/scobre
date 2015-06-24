@@ -18,8 +18,8 @@ ITERATIONS = 100
 
 BASE_DIR = '/var/data/orderflow-shuffle'
 
-def dir_name(d, base_dir = BASE_DIR):
-    return "%s/one-day/%d-%d-%d" % (base_dir, d.year, d.month, d.day)
+def dir_name(d):
+    return "%s/one-day/%d-%d-%d" % ('/var/data/orderflow-shuffle', d.year, d.month, d.day)
                    
 def date_to_time(d):
     return long(time.mktime(d.timetuple())) * 1000
@@ -78,7 +78,7 @@ def sweep(fn):
 def submit_shuffling_jobs(job_server, t0, iterations):
     
     dep_modules = ('pandas', 'orderreplay', 'thrift', 'csv', 'time', 'datetime')
-    dep_functions = (get_shuffled_data, date_to_time, dir_name,  )
+    dep_functions = (dir_name, get_shuffled_data, date_to_time, )
     jobs = []
     
     t1 = t0 + datetime.timedelta(days = 1)
@@ -87,7 +87,7 @@ def submit_shuffling_jobs(job_server, t0, iterations):
     def submit_job(proportion, window, intra_window, offsetting):
          job = job_server.submit(perform_shuffle, (proportion, window, iterations, intra_window, offsetting, date_range), dep_functions, dep_modules)
          jobs.append(job)
-         time.sleep(randint(0, 3))
+#         time.sleep(randint(0, 3))
          
     sweep(submit_job)
     return jobs
