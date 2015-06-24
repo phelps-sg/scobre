@@ -18,8 +18,8 @@ ITERATIONS = 100
 
 BASE_DIR = '/var/data/orderflow-shuffle'
 
-def dir_name(d):
-    return "%s/one-day/%d-%d-%d" % (BASE_DIR, d.year, d.month, d.day)
+def dir_name(d, base_dir = BASE_DIR):
+    return "%s/one-day/%d-%d-%d" % (base_dir, d.year, d.month, d.day)
                    
 def date_to_time(d):
     return long(time.mktime(d.timetuple())) * 1000
