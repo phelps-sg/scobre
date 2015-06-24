@@ -97,7 +97,7 @@ def submit_all(num_cpus = 8, iterations = ITERATIONS):
     days = [datetime.datetime(2007, 7, d) for d in [20, 25, 26]]
     jobs = []
     for day in days:
-        jobs.append(submit_shuffling_jobs(job_server, day))
+        jobs.extend(submit_shuffling_jobs(job_server, day))
     return (job_server, jobs)    
                        
 def plot_graphs():
