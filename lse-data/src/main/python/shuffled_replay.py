@@ -15,6 +15,11 @@ OFFSETTING_MID =      2
 OFFSETTING_OPPOSITE = 3
 
 ITERATIONS = 100
+
+BASE_DIR = '/var/data/orderflow-shuffle'
+
+def dir_name(d):
+    return "%s/one-day/%d-%d-%d" % (BASE_DIR, d.year, d.month, d.day)
                    
 def date_to_time(d):
     return long(time.mktime(d.timetuple())) * 1000
@@ -44,7 +49,11 @@ def get_shuffled_data(asset, proportion, window_size,
                                     date_to_time(t0), date_to_time(t1))
     return result
     
-def perform_shuffle(proportion, window, n, intra_window, offsetting, date_range, directory='/var/data/orderflow-shuffle'):
+def perform_shuffle(proportion, window, n, intra_window, offsetting, date_range):
+    if date_range is None:
+        directory = BASE_DIR
+    else:
+        directory = dir_name(date_range[0])
     for i in range(n):
         percentage = round(proportion * n)
         dataset = get_shuffled_data('BHP', proportion, window, intra_window, offsetting, date_range = date_range)
@@ -66,7 +75,8 @@ def sweep(fn):
     for proportion in numpy.arange(0, 1.1, 0.1):
         fn(proportion, window, intra_window, offsetting)
 
-def submit_shuffling_jobs(num_cpus = 8, iterations = ITERATIONS):
+def submit_shuffling_jobs(t0 = datetime.datetime(2007, 7, 20), 
+                              num_cpus = 8, iterations = ITERATIONS):
     
     job_server = pp.Server(ncpus=8, secret='shuffle') 
     
@@ -74,10 +84,8 @@ def submit_shuffling_jobs(num_cpus = 8, iterations = ITERATIONS):
     dep_functions = (get_shuffled_data, date_to_time, )
     jobs = []
     
-    t0 = datetime.datetime(2007, 7, 20)
-    t1 = datetime.datetime(2007, 7, 21)
-#    date_range = (t0, t1)
-    date_range = None
+    t1 = t0 + datetime.timedelta(days = 1)
+    date_range = (t0, t1)
     
     def submit_job(proportion, window, intra_window, offsetting):
          job = job_server.submit(perform_shuffle, (proportion, window, iterations, intra_window, offsetting, date_range), dep_functions, dep_modules)
