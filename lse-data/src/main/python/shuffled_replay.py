@@ -78,7 +78,7 @@ def sweep(fn):
 def submit_shuffling_jobs(job_server, t0, iterations):
     
     dep_modules = ('pandas', 'orderreplay', 'thrift', 'csv', 'time', 'datetime')
-    dep_functions = (get_shuffled_data, date_to_time, )
+    dep_functions = (get_shuffled_data, date_to_time, dir_name,  )
     jobs = []
     
     t1 = t0 + datetime.timedelta(days = 1)
@@ -90,7 +90,7 @@ def submit_shuffling_jobs(job_server, t0, iterations):
          time.sleep(randint(0, 3))
          
     sweep(submit_job)
-    return (job_server, jobs)
+    return jobs
 
 def submit_all(num_cpus = 8, iterations = ITERATIONS):
     job_server = pp.Server(ncpus=num_cpus, secret='shuffle')
