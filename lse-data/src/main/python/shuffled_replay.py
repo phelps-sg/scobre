@@ -3,6 +3,7 @@ import pp
 import csv
 import time
 import datetime
+import os
 
 from orderreplay import *
 from numpy.random import randint
@@ -18,9 +19,18 @@ ITERATIONS = 100
 
 BASE_DIR = '/var/data/orderflow-shuffle'
 
+DATE_YEAR = 2007
+DATE_MONTH = 7
+
 def dir_name(d):
     return "%s/one-day/%d-%d-%d" % ('/var/data/orderflow-shuffle', d.year, d.month, d.day)
                    
+def create_dirs(days):
+    for day in days:
+        name = dir_name(day)
+        if not os.path.isdir(name):
+            os.mkdir(name)
+    
 def date_to_time(d):
     return long(time.mktime(d.timetuple())) * 1000
     
@@ -94,9 +104,10 @@ def submit_shuffling_jobs(job_server, t0, iterations):
 
 def submit_all(num_cpus = 8, iterations = ITERATIONS):
     job_server = pp.Server(ncpus=num_cpus, secret='shuffle')
-    days = [datetime.datetime(2007, 7, d) for d in [20, 25, 26]]
+    days_all = [datetime.datetime(DATE_YEAR, DATE_MONTH, d+1) for d in range(30)]
+    week_days = filter(lambda d: d.isoweekday() < 6, days)
     jobs = []
-    for day in days:
+    for day in week_days:
         jobs.extend(submit_shuffling_jobs(job_server, day, iterations))
     return (job_server, jobs)    
                        
@@ -111,4 +122,3 @@ def plot_graphs():
         plot(df.midPrice)    
     
     sweep(plot_graph)     
-     
