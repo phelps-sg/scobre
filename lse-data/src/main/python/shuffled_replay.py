@@ -102,9 +102,13 @@ def submit_shuffling_jobs(job_server, t0, iterations):
     sweep(submit_job)
     return jobs
 
-def submit_all(num_cpus = 8, iterations = ITERATIONS):
+def get_week_days():
+    days = [datetime.datetime(DATE_YEAR, DATE_MONTH, d+1) for d in range(30)]
+    return filter(lambda d: d.isoweekday() < 6, days)
+
+def submit_all(days = get_week_days(), num_cpus = 8, iterations = ITERATIONS):
     job_server = pp.Server(ncpus=num_cpus, secret='shuffle')
-    days_all = [datetime.datetime(DATE_YEAR, DATE_MONTH, d+1) for d in range(30)]
+    days = [datetime.datetime(DATE_YEAR, DATE_MONTH, d+1) for d in range(30)]
     week_days = filter(lambda d: d.isoweekday() < 6, days)
     jobs = []
     for day in week_days:
