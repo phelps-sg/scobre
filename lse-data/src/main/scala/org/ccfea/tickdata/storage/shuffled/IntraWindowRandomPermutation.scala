@@ -9,8 +9,10 @@ import scala.util.Random
  *
  * (C) Steve Phelps 2014
  */
-class IntraWindowRandomPermutation(source: Seq[TickDataEvent], proportion: Double, windowSize: Int)
-  extends RandomPermutation(source, proportion, windowSize) {
+class IntraWindowRandomPermutation[T](source: Seq[TickDataEvent], proportion: Double, windowSize: Int,
+                                      getter: (Int, Array[TickDataEvent]) => T,
+                                       setter: (Int, T, Array[TickDataEvent]) => Unit)
+  extends RandomPermutation(source, proportion, windowSize, getter, setter) {
 
   override def shuffleTicks(): Unit = {
     initialise()

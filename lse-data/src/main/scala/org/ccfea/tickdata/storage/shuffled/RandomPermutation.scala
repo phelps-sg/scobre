@@ -1,6 +1,7 @@
 package org.ccfea.tickdata.storage.shuffled
 
 import org.ccfea.tickdata.event.TickDataEvent
+import org.ccfea.tickdata.storage.rawdata.HasDateTime
 import scala.util.Random
 
 /**
@@ -8,11 +9,14 @@ import scala.util.Random
  *
  * (C) Steve Phelps 2014
  */
-class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, val windowSize: Int = 1)
+class RandomPermutation[T](val source: Seq[TickDataEvent], val proportion: Double, val windowSize: Int = 1,
+                            val getter: (Int, Array[TickDataEvent]) => T,
+                            val setter: (Int, T, Array[TickDataEvent]) => Unit)
       extends Seq[TickDataEvent] {
 
   val n: Int = source.length - (source.length % windowSize)
   var ticks: Array[TickDataEvent] = new Array[TickDataEvent](n)
+
 
   shuffleTicks()
 
@@ -41,10 +45,14 @@ class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, 
     }
   }
 
-  def swap(a: Int, b: Int) = {
-    val tmp = ticks(a)
-    ticks(a) = ticks(b)
-    ticks(b) = tmp
+  def swap(a: Int, b: Int) = swapAttributes(a, b, getter(_, ticks), setter(_, _, ticks))
+
+  def swapAttributes(a: Int, b: Int,
+           get: Int => T,
+           set: (Int, T) => Unit) = {
+    val tmp = get(a)
+    set(a, get(b))
+    set(b, tmp)
   }
 
   def sampleWithoutReplacement(n: Int, N: Int): Seq[Int] = {
