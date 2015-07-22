@@ -17,7 +17,6 @@ class RandomPermutation[T](val source: Seq[TickDataEvent], val proportion: Doubl
   val n: Int = source.length - (source.length % windowSize)
   var ticks: Array[TickDataEvent] = new Array[TickDataEvent](n)
 
-
   shuffleTicks()
 
   def initialise(): Unit = {

@@ -17,7 +17,7 @@ import org.ccfea.tickdata.conf.{BuildInfo, ServerConf}
 import org.ccfea.tickdata.event.{OrderEvent, TickDataEvent}
 import org.ccfea.tickdata.simulator.{Quote, ClearingMarketState, MarketState}
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
-import org.ccfea.tickdata.storage.shuffled.{OffsettedTicks, IntraWindowRandomPermutation, RandomPermutation}
+import org.ccfea.tickdata.storage.shuffled.{RandomPermutationOfVolume, OffsettedTicks, IntraWindowRandomPermutation, RandomPermutation}
 import org.ccfea.tickdata.storage.thrift.MultivariateThriftCollator
 import org.ccfea.tickdata.thrift.OrderReplay
 
@@ -73,7 +73,7 @@ object OrderReplayService extends ReplayApplication {
                           proportionShuffling: Double,
                           windowSize: Int, intraWindow: Boolean,
                           offsetting: Offsetting.Value,
-                          dateRange: Option[(Long, Long)])(implicit conf: ServerConf): RandomPermutation[TickDataEvent] = {
+                          dateRange: Option[(Long, Long)])(implicit conf: ServerConf): Seq[TickDataEvent] = {
     val ticks = if (tickCache.contains((assetId, offsetting))) {
       tickCache((assetId, offsetting, dateRange))
     } else {
@@ -96,9 +96,11 @@ object OrderReplayService extends ReplayApplication {
                                               setter = (a, b, ticks) => ticks(a) = b)
 
     else
-      new RandomPermutation[TickDataEvent](ticks, proportionShuffling, windowSize,
-                                            getter = (i, ticks) => ticks(i),
-                                              setter = (a, b, ticks) => ticks(a) = b)
+//      new RandomPermutation[TickDataEvent](ticks, proportionShuffling, windowSize,
+//                                            getter = (i, ticks) => ticks(i),
+//                                              setter = (a, b, ticks) => ticks(a) = b)
+      new RandomPermutationOfVolume(ticks, proportionShuffling, windowSize)
+
   }
 
   def executeShuffledReplay(assetId: String, variables: util.List[String],

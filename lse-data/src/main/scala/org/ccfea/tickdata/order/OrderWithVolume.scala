@@ -8,3 +8,10 @@ abstract class OrderWithVolume extends AbstractOrder {
   def aggregateSize: Long
   def tradeDirection: TradeDirection.Value
 }
+
+object OrderWithVolume {
+
+  def unapply(order: OrderWithVolume) =
+    Some(order.orderCode, order.aggregateSize, order.tradeDirection, order.trader)
+
+}

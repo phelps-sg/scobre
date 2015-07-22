@@ -16,3 +16,9 @@ class LimitOrder(val orderCode: String, val aggregateSize: Long, val tradeDirect
 
 }
 
+object LimitOrder {
+
+  def unapply(l: LimitOrder) = Some(l.orderCode, l.aggregateSize, l.tradeDirection, l.price, l.trader)
+
+}
+
