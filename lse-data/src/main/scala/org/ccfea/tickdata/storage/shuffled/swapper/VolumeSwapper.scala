@@ -1,4 +1,4 @@
-package org.ccfea.tickdata.storage.shuffled
+package org.ccfea.tickdata.storage.shuffled.swapper
 
 import org.ccfea.tickdata.event._
 import org.ccfea.tickdata.order.{LimitOrder, OrderWithVolume}
@@ -6,18 +6,18 @@ import org.ccfea.tickdata.order.{LimitOrder, OrderWithVolume}
 /**
  * Created by sphelps on 21/07/15.
  */
-class RandomPermutationOfVolume(source: Seq[TickDataEvent], proportion: Double, windowSize: Int = 1)
-    extends RandomPermutation[Option[Long]](source, proportion, windowSize,
+class VolumeSwapper
+    extends Swapper[Option[Long]] {
 
-  getter = (i, ticks) => {
+  override def getter(i: Int, ticks: Array[TickDataEvent]): Option[Long] = {
     ticks(i) match {
       case OrderEvent(_, _, _, OrderWithVolume(_, volume, _, _)) =>
           Some(volume)
       case _ => None
     }
-  },
+  }
 
-  setter = (i, x, ticks) => {
+  override def setter(i: Int, x: Option[Long], ticks: Array[TickDataEvent]) {
     x match {
       case Some(newVolume) =>
         ticks (i) match {
@@ -34,4 +34,4 @@ class RandomPermutationOfVolume(source: Seq[TickDataEvent], proportion: Double, 
     }
   }
 
-)
+}

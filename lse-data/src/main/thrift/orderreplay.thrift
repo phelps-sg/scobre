@@ -29,14 +29,14 @@ service OrderReplay {
     * Replay tick events
     **/
    list<map<string,double>> replay(1:string assetId, 2:list<string> variables,
-                                                        3:string startDate, 4:string endDate),
+                                                        3:i64 startDateTime, 4:i64 endDateTime),
 
    list<map<string,double>> shuffledReplay(1:string assetId, 2:list<string> variables,
                                                         3:double proportionShuffling, 4:i32 windowSize,
-                                                        5:bool intraWindow, 6:i32 offsetting)
+                                                        5:bool intraWindow, 6:i32 offsetting, 7:i32 attribute)
 
    list<map<string,double>> shuffledReplayDateRange(1:string assetId, 2:list<string> variables,
                                                         3:double proportionShuffling, 4:i32 windowSize,
-                                                        5:bool intraWindow, 6:i32 offsetting,
-                                                        7:i64 startDateTime, 8:i64 endDateTime)
+                                                        5:bool intraWindow, 6:i32 offsetting, 7:i32 attribute,
+                                                        8:i64 startDateTime, 9:i64 endDateTime)
 }

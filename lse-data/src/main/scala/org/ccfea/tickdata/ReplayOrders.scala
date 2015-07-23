@@ -6,7 +6,7 @@ import org.ccfea.tickdata.order.LimitOrder
 import org.ccfea.tickdata.order.offset.{OppositeSideOffsetOrder, MidPriceOffsetOrder, SameSideOffsetOrder}
 import org.ccfea.tickdata.storage.csv.UnivariateCsvDataCollator
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
-import org.ccfea.tickdata.storage.shuffled.{RandomPermutationOfTicks, RandomPermutation, OffsettedTicks}
+import org.ccfea.tickdata.storage.shuffled.{RandomPermutation, OffsettedTicks}
 
 import org.ccfea.tickdata.conf.ReplayerConf
 import org.ccfea.tickdata.simulator._
@@ -81,7 +81,7 @@ object ReplayOrders extends ReplayApplication {
         }
         new OffsettedTicks(marketState, ticks, offsetFn)
       }
-    new RandomPermutationOfTicks(offsettedTicks.iterator.toList, conf.proportionShuffling(), conf.shuffleWindowSize())
+    new RandomPermutation(offsettedTicks.iterator.toList, conf.proportionShuffling(), conf.shuffleWindowSize())
   }
 
 }

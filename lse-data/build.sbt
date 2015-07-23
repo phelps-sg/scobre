@@ -22,9 +22,9 @@ name := "lse-data"
 
 organization := "net.sourceforge.jasa"
 
-version := "0.17-SNAPSHOT"
+version := "0.18-SNAPSHOT"
 
-scalaVersion := "2.11.2"
+scalaVersion := "2.11.7"
 
 packSettings
 

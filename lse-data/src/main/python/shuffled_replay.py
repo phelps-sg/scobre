@@ -4,6 +4,7 @@ import csv
 import time
 import datetime
 import os
+import pandas as pd
 
 from orderreplay import *
 from numpy.random import randint
@@ -14,6 +15,11 @@ OFFSETTING_NONE =     0
 OFFSETTING_SAME =     1
 OFFSETTING_MID =      2
 OFFSETTING_OPPOSITE = 3
+
+ATTRIBUTES_ALL =        0
+ATTRIBUTES_VOLUME =     1
+ATTRIBUTES_ORDERSIGN =  2
+ATTRIBUTES_PRICE =      3
 
 ITERATIONS = 100
 
@@ -33,9 +39,10 @@ def create_dirs(days):
     
 def date_to_time(d):
     return long(time.mktime(d.timetuple())) * 1000
-    
-def get_shuffled_data(asset, proportion, window_size, 
-                      intra_window = False, offsetting = 0, 
+
+def get_shuffled_data(asset, proportion, window_size = 1, 
+                      intra_window = False, offsetting = OFFSETTING_NONE,
+                      attributes = ATTRIBUTES_ALL,
                       variables = ['midPrice'], 
                         server = 'localhost', port = 9090,
                         date_range = None):
@@ -49,16 +56,33 @@ def get_shuffled_data(asset, proportion, window_size,
     if date_range is None:
         result = \
             client.shuffledReplay(asset, variables, proportion, window_size, \
-                                    intra_window, offsetting)
+                                    intra_window, offsetting, attributes)
     else:
         t0 = date_range[0]
         t1 = date_range[1]                        
         result = \
             client.shuffledReplayDateRange(asset, variables, proportion, \
                                     window_size, intra_window, offsetting, \
-                                    date_to_time(t0), date_to_time(t1))
+                                    attributes, date_to_time(t0), date_to_time(t1))
     return result
     
+def get_shuffled_data_as_df(asset, proportion, window_size = 1, 
+                      intra_window = False, offsetting = OFFSETTING_NONE,
+                      attributes = ATTRIBUTES_ALL,
+                      variables = ['midPrice'], 
+                        server = 'localhost', port = 9090,
+                        date_range = None):
+    return dict_to_df(get_shuffled_data(asset, proportion, window_size, intra_window, offsetting, attributes, variables, server, port, date_range), variables)
+            
+    
+def dict_to_df(data, variables):
+    df = pd.DataFrame(data)
+   
+    timestamps = [datetime.datetime.fromtimestamp(t) for t in df.t]
+    for variable in variables:
+        df[variable].index = timestamps
+    return df       
+        
 def perform_shuffle(proportion, window, n, intra_window, offsetting, date_range):
     if date_range is None:
         directory = BASE_DIR
