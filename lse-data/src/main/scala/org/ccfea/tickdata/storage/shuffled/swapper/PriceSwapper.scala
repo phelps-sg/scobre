@@ -2,6 +2,7 @@ package org.ccfea.tickdata.storage.shuffled.swapper
 
 import org.ccfea.tickdata.event._
 import org.ccfea.tickdata.order.{LimitOrder, OrderWithVolume}
+import org.ccfea.tickdata.storage.shuffled.RandomPermutation
 
 /**
   * Created by sphelps on 21/07/15.
@@ -9,7 +10,7 @@ import org.ccfea.tickdata.order.{LimitOrder, OrderWithVolume}
 class PriceSwapper
   extends Swapper[Option[BigDecimal]] {
 
-     override def getter(i: Int, ticks: Array[TickDataEvent]): Option[BigDecimal] = {
+     override def getter(i: Int, ticks: RandomPermutation): Option[BigDecimal] = {
        ticks(i) match {
          case OrderEvent(_, _, _, LimitOrder(_, _, _, price, _)) =>
              Some(price)
@@ -17,7 +18,7 @@ class PriceSwapper
        }
      }
 
-     override def setter(i: Int, x: Option[BigDecimal], ticks: Array[TickDataEvent]) {
+     override def setter(i: Int, x: Option[BigDecimal], ticks: RandomPermutation) {
        x match {
          case Some(newPrice) =>
            ticks (i) match {

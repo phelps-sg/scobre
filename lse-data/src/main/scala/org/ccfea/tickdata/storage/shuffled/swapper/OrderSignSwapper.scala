@@ -2,6 +2,7 @@ package org.ccfea.tickdata.storage.shuffled.swapper
 
 import org.ccfea.tickdata.event.{OrderEvent, OrderSubmittedEvent, TickDataEvent}
 import org.ccfea.tickdata.order.{LimitOrder, OrderWithVolume, TradeDirection}
+import org.ccfea.tickdata.storage.shuffled.RandomPermutation
 
 /**
  * Created by sphelps on 23/07/15.
@@ -9,7 +10,7 @@ import org.ccfea.tickdata.order.{LimitOrder, OrderWithVolume, TradeDirection}
 class OrderSignSwapper
     extends Swapper[Option[TradeDirection.Value]] {
 
-  override def getter(i: Int, ticks: Array[TickDataEvent]) =  {
+  override def getter(i: Int, ticks: RandomPermutation) =  {
     ticks(i) match {
       case OrderEvent(_, _, _, OrderWithVolume(_, _, direction, _)) =>
           Some(direction)
@@ -17,7 +18,7 @@ class OrderSignSwapper
     }
   }
 
-  override def setter(i: Int, x: Option[TradeDirection.Value], ticks: Array[TickDataEvent]) = {
+  override def setter(i: Int, x: Option[TradeDirection.Value], ticks: RandomPermutation) = {
     x match {
       case Some(newTradeDirection) =>
         ticks (i) match {

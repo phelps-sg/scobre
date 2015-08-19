@@ -6,7 +6,7 @@ import org.ccfea.tickdata.storage.shuffled.swapper.{Swapper, TickSwapper}
 import scala.util.Random
 
 /**
- * Shuffle the ticks before replaying them.
+ * A random permutation of tick objects.
  *
  * (C) Steve Phelps 2014
  */
@@ -44,7 +44,7 @@ class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, 
     }
   }
 
-  def swap(a: Int, b: Int) = swapper.swapAttributes(a, b, ticks)
+  def swap(a: Int, b: Int) = swapper.swapAttributes(a, b, this)
 
   def sampleWithoutReplacement(n: Int, N: Int): Seq[Int] = {
     var t: Int = 0
@@ -64,5 +64,6 @@ class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, 
 
   override def iterator: Iterator[TickDataEvent] = ticks.iterator
   override def length: Int = ticks.length
-  override def apply(idx: Int): TickDataEvent = ticks(idx)
+  override def apply(i: Int): TickDataEvent = ticks.apply(i)
+  def update(i: Int, x: TickDataEvent) = ticks.update(i, x)
 }

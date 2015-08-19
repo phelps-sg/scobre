@@ -2,6 +2,7 @@ package org.ccfea.tickdata.storage.shuffled.swapper
 
 import org.ccfea.tickdata.event._
 import org.ccfea.tickdata.order.{LimitOrder, Order, OrderWithVolume}
+import org.ccfea.tickdata.storage.shuffled.RandomPermutation
 
 /**
  * Created by sphelps on 21/07/15.
@@ -9,7 +10,7 @@ import org.ccfea.tickdata.order.{LimitOrder, Order, OrderWithVolume}
 class VolumeSwapper
     extends Swapper[Option[Long]] {
 
-  override def getter(i: Int, ticks: Array[TickDataEvent]): Option[Long] = {
+  override def getter(i: Int, ticks: RandomPermutation): Option[Long] = {
     ticks(i) match {
       case OrderEvent(_, _, _, OrderWithVolume(_, volume, _, _)) => Some(volume)
       case OrderRemovedEvent(_, _, _, Order(orderCode)) => None //TODO
@@ -18,7 +19,7 @@ class VolumeSwapper
     }
   }
 
-  override def setter(i: Int, x: Option[Long], ticks: Array[TickDataEvent]) {
+  override def setter(i: Int, x: Option[Long], ticks: RandomPermutation) {
     x match {
       case Some(volumeToSet) =>
         ticks(i) match {
