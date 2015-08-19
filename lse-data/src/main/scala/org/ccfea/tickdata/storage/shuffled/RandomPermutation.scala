@@ -1,9 +1,10 @@
 package org.ccfea.tickdata.storage.shuffled
 
-import org.ccfea.tickdata.event.TickDataEvent
+import org.ccfea.tickdata.event.{OrderSubmittedEvent, TickDataEvent}
 import org.ccfea.tickdata.storage.rawdata.HasDateTime
 import org.ccfea.tickdata.storage.shuffled.swapper.{Swapper, TickSwapper}
 import scala.util.Random
+import scala.collection.mutable.Map
 
 /**
  * A random permutation of tick objects.
@@ -16,11 +17,21 @@ class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, 
 
   val n: Int = source.length - (source.length % windowSize)
   var ticks: Array[TickDataEvent] = new Array[TickDataEvent](n)
+  var orderCodeMap = Map[String, Integer]()
 
   shuffleTicks()
 
   def initialise(): Unit = {
     source.copyToArray(ticks, 0, n)
+    for(i <- 0 to n-1) {
+      val ev = ticks(i)
+      ev match {
+        case os: OrderSubmittedEvent =>
+          orderCodeMap(os.order.orderCode) = i
+        case _ =>
+          // No action
+      }
+    }
   }
 
   def shuffleTicks(): Unit = {
@@ -63,7 +74,15 @@ class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, 
   }
 
   override def iterator: Iterator[TickDataEvent] = ticks.iterator
+
   override def length: Int = ticks.length
-  override def apply(i: Int): TickDataEvent = ticks.apply(i)
-  def update(i: Int, x: TickDataEvent) = ticks.update(i, x)
+
+  override def apply(i: Int): TickDataEvent = ticks(i)
+
+  def apply(orderCode: String): Option[TickDataEvent] =
+    if (ticks.contains(orderCode)) Some(ticks(orderCodeMap(orderCode))) else None
+
+  def update(i: Int, x: TickDataEvent) = ticks(i) = x
+
+  def update(orderCode: String, x: TickDataEvent) = ticks(orderCodeMap(orderCode)) = x
 }
