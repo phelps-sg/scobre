@@ -1,5 +1,6 @@
 package org.ccfea.tickdata.storage.shuffled.swapper
 
+import grizzled.slf4j.Logger
 import org.ccfea.tickdata.event.TickDataEvent
 import org.ccfea.tickdata.storage.shuffled.RandomPermutation
 

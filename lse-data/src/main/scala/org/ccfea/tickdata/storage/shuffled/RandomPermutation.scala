@@ -17,13 +17,18 @@ class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, 
 
   val n: Int = source.length - (source.length % windowSize)
   var ticks: Array[TickDataEvent] = new Array[TickDataEvent](n)
+
+  /**
+   * A map from order-codes to the index of the corresponding OrderSubmittedEvent where
+   * that order-code was first entered.
+   */
   var orderCodeMap = Map[String, Integer]()
 
   shuffleTicks()
 
   def initialise(): Unit = {
     source.copyToArray(ticks, 0, n)
-    for(i <- 0 to n-1) {
+    for(i <- 0 until n) {
       val ev = ticks(i)
       ev match {
         case os: OrderSubmittedEvent =>
@@ -80,7 +85,7 @@ class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, 
   override def apply(i: Int): TickDataEvent = ticks(i)
 
   def apply(orderCode: String): Option[TickDataEvent] =
-    if (ticks.contains(orderCode)) Some(ticks(orderCodeMap(orderCode))) else None
+    if (orderCodeMap.contains(orderCode)) Some(ticks(orderCodeMap(orderCode))) else None
 
   def update(i: Int, x: TickDataEvent) = ticks(i) = x
 
