@@ -83,14 +83,14 @@ def dict_to_df(data, variables):
         df[variable].index = timestamps
     return df       
         
-def perform_shuffle(proportion, window, n, intra_window, offsetting, date_range):
+def perform_shuffle(proportion, window, n, intra_window, offsetting, attributes, date_range):
     if date_range is None:
         directory = BASE_DIR
     else:
         directory = dir_name(date_range[0])
     for i in range(n):
         percentage = round(proportion * n)
-        dataset = get_shuffled_data('BHP', proportion, window, intra_window, offsetting, date_range = date_range)
+        dataset = get_shuffled_data('BHP', proportion, window, intra_window, offsetting, attributes, date_range = date_range)
         filename = '%s/bhp-shuffled-ws%d-p%d-i%d-o%d-%d.csv' % (directory, window, percentage, intra_window, offsetting, i)
         f = open(filename, 'w', buffering=200000)
         csv_writer = csv.writer(f)
@@ -106,8 +106,9 @@ def sweep(fn):
     intra_window = False
 #for window in [4 ** (x + 1) for x in range(6)]:
     window = 1
-    for proportion in numpy.arange(0, 1.1, 0.1):
-        fn(proportion, window, intra_window, offsetting)
+    for attribute in [ATTRIBUTES_ALL, ATTRIBUTES_ORDERSIGN, ATTRIBUTES_PRICE, ATTRIBUTES_VOLUME]:
+        for proportion in numpy.arange(0, 1.1, 0.1):
+            fn(proportion, window, intra_window, offsetting, attribute)
 
 def submit_shuffling_jobs(job_server, t0, iterations):
     
@@ -118,8 +119,8 @@ def submit_shuffling_jobs(job_server, t0, iterations):
     t1 = t0 + datetime.timedelta(days = 1)
     date_range = (t0, t1)
     
-    def submit_job(proportion, window, intra_window, offsetting):
-         job = job_server.submit(perform_shuffle, (proportion, window, iterations, intra_window, offsetting, date_range), dep_functions, dep_modules)
+    def submit_job(proportion, window, intra_window, offsetting, attributes):
+         job = job_server.submit(perform_shuffle, (proportion, window, iterations, intra_window, offsetting, attributes, date_range), dep_functions, dep_modules)
          jobs.append(job)
 #         time.sleep(randint(0, 3))
          
@@ -141,10 +142,10 @@ def submit_all(days = get_week_days(), num_cpus = 8, iterations = ITERATIONS):
                        
 def plot_graphs():
     
-    def plot_graph(proportion, window, intra_window, offsetting):
+    def plot_graph(proportion, window, intra_window, offsetting, attribute):
         t0 = datetime.datetime(2007, 7, 20)
         t1 = datetime.datetime(2007, 7, 21)
-        ds = get_shuffled_data('BHP', proportion, window, intra_window, offsetting, date_range = (t0, t1))    
+        ds = get_shuffled_data('BHP', proportion, window, intra_window, offsetting, attribute, date_range = (t0, t1))
         df = dict_to_df(ds, ['midPrice'])
         figure()
         plot(df.midPrice)    
