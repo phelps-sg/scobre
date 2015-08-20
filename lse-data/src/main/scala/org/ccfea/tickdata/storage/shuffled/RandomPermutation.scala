@@ -16,13 +16,13 @@ class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, 
       extends Seq[TickDataEvent] {
 
   val n: Int = source.length - (source.length % windowSize)
-  var ticks: Array[TickDataEvent] = new Array[TickDataEvent](n)
+  val ticks: Array[TickDataEvent] = new Array[TickDataEvent](n)
 
   /**
    * A map from order-codes to the index of the corresponding OrderSubmittedEvent where
    * that order-code was first entered.
    */
-  var orderCodeMap = Map[String, Integer]()
+  val orderCodeMap = Map[String, Integer]()
 
   shuffleTicks()
 
