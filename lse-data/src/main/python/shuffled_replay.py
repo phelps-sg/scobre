@@ -41,8 +41,8 @@ def date_to_time(d):
     return long(time.mktime(d.timetuple())) * 1000
 
 def get_shuffled_data(asset, proportion, window_size = 1, 
-                      intra_window = False, offsetting = OFFSETTING_NONE,
-                      attributes = ATTRIBUTES_ALL,
+                      intra_window = False, offsetting = 0,
+                      attributes = 0,
                       variables = ['midPrice'], 
                         server = 'localhost', port = 9090,
                         date_range = None):
@@ -91,7 +91,7 @@ def perform_shuffle(proportion, window, n, intra_window, offsetting, attributes,
     for i in range(n):
         percentage = round(proportion * n)
         dataset = get_shuffled_data('BHP', proportion, window, intra_window, offsetting, attributes, date_range = date_range)
-        filename = '%s/bhp-shuffled-ws%d-p%d-i%d-o%d-%d.csv' % (directory, window, percentage, intra_window, offsetting, i)
+        filename = '%s/bhp-shuffled-ws%d-p%d-i%d-o%d-a%d-%d.csv' % (directory, window, percentage, intra_window, offsetting, attributes, i)
         f = open(filename, 'w', buffering=200000)
         csv_writer = csv.writer(f)
         for row in dataset:
