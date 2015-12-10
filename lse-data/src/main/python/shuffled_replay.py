@@ -1,5 +1,4 @@
 import numpy
-import pp
 import csv
 import time
 import datetime
@@ -8,6 +7,7 @@ import pandas as pd
 
 from orderreplay import *
 from numpy.random import randint
+from shuffled_replay import *
 
 import thrift
 
@@ -30,16 +30,16 @@ DATE_MONTH = 7
 
 def dir_name(d):
     return "%s/one-day/%d-%d-%d" % ('/var/data/orderflow-shuffle', d.year, d.month, d.day)
-                   
+    
 def create_dirs(days):
     for day in days:
         name = dir_name(day)
         if not os.path.isdir(name):
             os.mkdir(name)
-    
+
 def date_to_time(d):
     return long(time.mktime(d.timetuple())) * 1000
-
+    
 def get_shuffled_data(asset, proportion, window_size = 1, 
                       intra_window = False, offsetting = 0,
                       attributes = 0,
@@ -58,12 +58,12 @@ def get_shuffled_data(asset, proportion, window_size = 1,
             client.shuffledReplay(asset, variables, proportion, window_size, \
                                     intra_window, offsetting, attributes)
     else:
-        t0 = date_range[0]
-        t1 = date_range[1]                        
+        t0 = date_to_time(date_range[0])
+        t1 = date_to_time(date_range[1])                        
         result = \
             client.shuffledReplayDateRange(asset, variables, proportion, \
                                     window_size, intra_window, offsetting, \
-                                    attributes, date_to_time(t0), date_to_time(t1))
+                                    attributes, t0, t1)
     return result
     
 def get_shuffled_data_as_df(asset, proportion, window_size = 1, 
@@ -77,10 +77,7 @@ def get_shuffled_data_as_df(asset, proportion, window_size = 1,
     
 def dict_to_df(data, variables):
     df = pd.DataFrame(data)
-   
-    timestamps = [datetime.datetime.fromtimestamp(t) for t in df.t]
-    for variable in variables:
-        df[variable].index = timestamps
+    df.index = pd.Series([datetime.datetime.fromtimestamp(t) for t in df.t])
     return df       
         
 def perform_shuffle(proportion, window, n, intra_window, offsetting, attributes, date_range):
@@ -99,7 +96,7 @@ def perform_shuffle(proportion, window, n, intra_window, offsetting, attributes,
         f.close()
     return None
 
-def sweep(fn):
+def sweep(iterations=100, date_range=None):
 #for offsetting in [OFFSETTING_NONE, OFFSETTING_SAME, OFFSETTING_MID, OFFSETTING_OPPOSITE]:
     offsetting = OFFSETTING_NONE
 #for intra_window in [True, False]:
@@ -108,7 +105,11 @@ def sweep(fn):
     window = 1
     for attribute in [ATTRIBUTES_ALL, ATTRIBUTES_ORDERSIGN, ATTRIBUTES_PRICE, ATTRIBUTES_VOLUME]:
         for proportion in numpy.arange(0, 1.1, 0.1):
-            fn(proportion, window, intra_window, offsetting, attribute)
+            yield (proportion, window, iterations, intra_window, offsetting, attribute, date_range)
+
+def run_on_spark(iterations=100, date_range=None):
+    jobs = sc.paralellize(sweep())
+    return jobs.map(lambda x: perform_shuffling(*x)).collect()
 
 def submit_shuffling_jobs(job_server, t0, iterations):
     
