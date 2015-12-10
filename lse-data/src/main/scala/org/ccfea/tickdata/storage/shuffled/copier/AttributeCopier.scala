@@ -1,4 +1,4 @@
-package org.ccfea.tickdata.storage.shuffled.swapper
+package org.ccfea.tickdata.storage.shuffled.copier
 
 import org.ccfea.tickdata.event.{OrderEvent, OrderRemovedEvent, OrderSubmittedEvent, OrderRevisedEvent}
 import org.ccfea.tickdata.order.{LimitOrder, Order}
@@ -8,7 +8,7 @@ import grizzled.slf4j.Logger
 /**
  * Created by sphelps on 20/08/15.
  */
-trait AttributeSwapper[T] extends Swapper[Option[T]] {
+trait AttributeCopier[T] extends Copier[Option[T]] {
 
   def logger: Logger
 
@@ -21,7 +21,6 @@ trait AttributeSwapper[T] extends Swapper[Option[T]] {
           case _ => None
         }
       case ore: OrderRevisedEvent => Some(getAttribute(ore))
-      case _ => None
     }
   }
 
@@ -38,7 +37,7 @@ trait AttributeSwapper[T] extends Swapper[Option[T]] {
               case Some(ose: OrderSubmittedEvent) =>
                 ticks(orderCode) = setAttribute(ose, value)
               case _ =>
-                logger.warn("Unknown order code when swapping prices: " + orderCode)
+                logger.warn("Unknown order code when copying attributes: " + orderCode)
             }
         }
       case None => // Do nothing

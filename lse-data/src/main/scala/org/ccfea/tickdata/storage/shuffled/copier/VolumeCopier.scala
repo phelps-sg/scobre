@@ -1,4 +1,4 @@
-package org.ccfea.tickdata.storage.shuffled.swapper
+package org.ccfea.tickdata.storage.shuffled.copier
 
 import grizzled.slf4j.Logger
 import org.ccfea.tickdata.event._
@@ -8,10 +8,10 @@ import org.ccfea.tickdata.storage.shuffled.RandomPermutation
 /**
  * Created by sphelps on 21/07/15.
  */
-class VolumeSwapper
-  extends AttributeSwapper[Long] {
+class VolumeCopier
+  extends AttributeCopier[Long] {
 
-  val logger = Logger(classOf[VolumeSwapper])
+  val logger = Logger(classOf[VolumeCopier])
 
   def setAttribute(event: OrderRevisedEvent, volumeToSet: Long) = event.copy(newVolume = volumeToSet)
 

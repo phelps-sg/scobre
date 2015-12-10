@@ -5,7 +5,7 @@ import java.{lang, util}
 
 import org.ccfea.tickdata.order.{OrderWithVolume, LimitOrder}
 import org.ccfea.tickdata.order.offset.{OppositeSideOffsetOrder, SameSideOffsetOrder, MidPriceOffsetOrder, Offsetting}
-import org.ccfea.tickdata.storage.shuffled.swapper.{PriceSwapper, VolumeSwapper, TickSwapper, OrderSignSwapper}
+import org.ccfea.tickdata.storage.shuffled.copier.{PriceCopier, VolumeCopier, TickCopier, OrderSignCopier}
 
 import scala.collection.parallel
 
@@ -93,10 +93,10 @@ object OrderReplayService extends ReplayApplication {
     }
 
     val swapper = shuffledAttribute match {
-      case ShuffledAttribute.AllAttributes => new TickSwapper()
-      case ShuffledAttribute.Volume => new VolumeSwapper()
-      case ShuffledAttribute.OrderSign => new OrderSignSwapper()
-      case ShuffledAttribute.Price => new PriceSwapper()
+      case ShuffledAttribute.AllAttributes => new TickCopier()
+      case ShuffledAttribute.Volume => new VolumeCopier()
+      case ShuffledAttribute.OrderSign => new OrderSignCopier()
+      case ShuffledAttribute.Price => new PriceCopier()
     }
 
     if (intraWindow)

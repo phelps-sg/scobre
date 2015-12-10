@@ -1,8 +1,8 @@
 package org.ccfea.tickdata.simulator
 
 import net.sourceforge.jasa.market.Order
-import org.ccfea.tickdata.event.{OrderFilledEvent, OrderMatchedEvent, TickDataEvent}
-import org.ccfea.tickdata.order.{TradeDirection, LimitOrder, MarketOrder}
+import org.ccfea.tickdata.event._
+import org.ccfea.tickdata.order.{Trader, TradeDirection, LimitOrder, MarketOrder}
 
 /**
  * A market-state in which the uncrossing is performed explicitly by the simulator,

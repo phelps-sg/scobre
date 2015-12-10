@@ -2,7 +2,7 @@ package org.ccfea.tickdata.storage.shuffled
 
 import org.ccfea.tickdata.event.{OrderSubmittedEvent, TickDataEvent}
 import org.ccfea.tickdata.storage.rawdata.HasDateTime
-import org.ccfea.tickdata.storage.shuffled.swapper.{Swapper, TickSwapper}
+import org.ccfea.tickdata.storage.shuffled.copier.{Copier, TickCopier}
 import scala.util.Random
 import scala.collection.mutable.Map
 
@@ -12,11 +12,12 @@ import scala.collection.mutable.Map
  * (C) Steve Phelps 2014
  */
 class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, val windowSize: Int = 1,
-                         val swapper: Swapper[_] = new TickSwapper())
+                         val copier: Copier[_] = new TickCopier())
       extends Seq[TickDataEvent] {
 
   val n: Int = source.length - (source.length % windowSize)
   val ticks: Array[TickDataEvent] = new Array[TickDataEvent](n)
+  val shuffledTicks: Array[TickDataEvent] = new Array[TickDataEvent](n)
 
   /**
    * A map from order-codes to the index of the corresponding OrderSubmittedEvent where
@@ -28,6 +29,7 @@ class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, 
 
   def initialise(): Unit = {
     source.copyToArray(ticks, 0, n)
+    source.copyToArray(shuffledTicks, 0, n)
     for(i <- 0 until n) {
       val ev = ticks(i)
       ev match {
@@ -46,21 +48,24 @@ class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, 
       val numShuffledWindows = math.floor(proportion * numWindows).toInt
       val windowsToShuffle = sampleWithoutReplacement(numShuffledWindows, numWindows)
       val shuffledPositions = Random.shuffle(windowsToShuffle)
-      for(i <- 0 until windowsToShuffle.length) {
-        swapWindows(windowsToShuffle(i), shuffledPositions(i))
-      }
+      windowsToShuffle.indices.par.map(
+        i => copyWindows(windowsToShuffle(i), shuffledPositions(i))
+      )
+//      for(i <- 0 until windowsToShuffle.length) {
+//        copyWindows(windowsToShuffle(i), shuffledPositions(i))
+//      }
      }
   }
 
-  def swapWindows(window1: Int, window2: Int) = {
+  def copyWindows(window1: Int, window2: Int) = {
     for(i <- 0 until windowSize) {
       val a = window1 * windowSize + i
       val b = window2 * windowSize + i
-      swap(a, b)
+      copy(a, b)
     }
   }
 
-  def swap(a: Int, b: Int) = swapper.swapAttributes(a, b, this)
+  def copy(a: Int, b: Int) = copier.copyAttributes(a, b, this)
 
   def sampleWithoutReplacement(n: Int, N: Int): Seq[Int] = {
     var t: Int = 0
@@ -78,7 +83,7 @@ class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, 
     samples
   }
 
-  override def iterator: Iterator[TickDataEvent] = ticks.iterator
+  override def iterator: Iterator[TickDataEvent] = shuffledTicks.iterator
 
   override def length: Int = ticks.length
 
@@ -87,7 +92,7 @@ class RandomPermutation(val source: Seq[TickDataEvent], val proportion: Double, 
   def apply(orderCode: String): Option[TickDataEvent] =
     if (orderCodeMap.contains(orderCode)) Some(ticks(orderCodeMap(orderCode))) else None
 
-  def update(i: Int, x: TickDataEvent) = ticks(i) = x
+  def update(i: Int, x: TickDataEvent) = shuffledTicks(i) = x
 
-  def update(orderCode: String, x: TickDataEvent) = ticks(orderCodeMap(orderCode)) = x
+  def update(orderCode: String, x: TickDataEvent) = shuffledTicks(orderCodeMap(orderCode)) = x
 }

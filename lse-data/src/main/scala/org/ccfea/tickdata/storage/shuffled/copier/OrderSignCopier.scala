@@ -1,4 +1,4 @@
-package org.ccfea.tickdata.storage.shuffled.swapper
+package org.ccfea.tickdata.storage.shuffled.copier
 
 import org.ccfea.tickdata.event.{OrderRevisedEvent, OrderEvent, OrderSubmittedEvent, TickDataEvent}
 import org.ccfea.tickdata.order.{LimitOrder, OrderWithVolume, TradeDirection}
@@ -8,10 +8,10 @@ import grizzled.slf4j.Logger
 /**
  * Created by sphelps on 23/07/15.
  */
-class OrderSignSwapper
-    extends AttributeSwapper[TradeDirection.Value] {
+class OrderSignCopier
+    extends AttributeCopier[TradeDirection.Value] {
 
-  val logger = Logger(classOf[OrderSignSwapper])
+  val logger = Logger(classOf[OrderSignCopier])
 
   def getAttribute(order: LimitOrder) = order.tradeDirection
 

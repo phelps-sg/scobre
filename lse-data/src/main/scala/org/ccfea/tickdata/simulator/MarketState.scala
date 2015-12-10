@@ -126,11 +126,16 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     val orderCode = ev.order.orderCode
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
-      removeOrder(order)
+      // ASX reinsertion rule
+      val reinsert = (math.abs(ev.newPrice.doubleValue() - order.getPrice()) > 10e-4) ||
+                        ev.newVolume.toInt > order.getQuantity()
       order.setPrice(ev.newPrice.doubleValue())
       order.setQuantity(ev.newVolume.toInt)
       order.setIsBid(ev.newDirection == TradeDirection.Buy)
-      insertOrder(order)
+      if (reinsert) {
+        removeOrder(order)
+        insertOrder(order)
+      }
     } else {
       logger.warn("Unknown order code when amending existing order: " + ev.order.orderCode)
       logger.warn("Converting OrderRevisedEvent to OrderSubmittedEvent")
@@ -138,6 +143,23 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
       process(new OrderSubmittedEvent(ev.timeStamp, ev.messageSequenceNumber, ev.tiCode, newOrder))
     }
   }
+//
+//  def process(ev: OrderRevisedEvent): Unit = {
+//    val orderCode = ev.order.orderCode
+//    if (orderMap.contains(orderCode)) {
+//      val order = orderMap(orderCode)
+//      removeOrder(order)
+//      order.setPrice(ev.newPrice.doubleValue())
+//      order.setQuantity(ev.newVolume.toInt)
+//      order.setIsBid(ev.newDirection == TradeDirection.Buy)
+//      insertOrder(order)
+//    } else {
+//      logger.warn("Unknown order code when amending existing order: " + ev.order.orderCode)
+//      logger.warn("Converting OrderRevisedEvent to OrderSubmittedEvent")
+//      val newOrder = new LimitOrder(ev.order.orderCode, ev.newVolume, ev.newDirection, ev.newPrice, new Trader())
+//      process(new OrderSubmittedEvent(ev.timeStamp, ev.messageSequenceNumber, ev.tiCode, newOrder))
+//    }
+//  }
 
   def process(ev: TransactionEvent): Unit = {
     this.lastTransactionPrice = Some(ev.transactionPrice.toDouble)

@@ -1,4 +1,4 @@
-package org.ccfea.tickdata.storage.shuffled.swapper
+package org.ccfea.tickdata.storage.shuffled.copier
 
 import grizzled.slf4j.Logger
 import net.sourceforge.jasa.market.Order
@@ -9,10 +9,9 @@ import org.ccfea.tickdata.storage.shuffled.RandomPermutation
 /**
   * Created by sphelps on 21/07/15.
   */
-class PriceSwapper
-  extends AttributeSwapper[BigDecimal] {
+class PriceCopier extends AttributeCopier[BigDecimal] {
 
-  val logger = Logger(classOf[PriceSwapper])
+  val logger = Logger(classOf[PriceCopier])
 
   def setAttribute(event: OrderRevisedEvent, priceToSet: BigDecimal) = event.copy(newPrice = priceToSet)
 
