@@ -8,8 +8,6 @@ import NativePackagerKeys._
 
 assemblySettings
 
-net.virtualvoid.sbt.graph.Plugin.graphSettings
-
 buildInfoSettings
 
 sourceGenerators in Compile <+= buildInfo
@@ -48,16 +46,18 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-	"org.apache.hbase" % "hbase-client" % "0.98.8-hadoop2",
-	"org.apache.hbase" % "hbase-common" % "0.98.8-hadoop2",
-  "org.apache.hadoop" % "hadoop-client" % "2.2.0",
-  "org.apache.hadoop" % "hadoop-common" % "2.2.0",
+  "org.apache.hbase" % "hbase-client" % "1.1.2",
+  "org.apache.hbase" % "hbase-common" % "1.1.2" excludeAll ExclusionRule(organization = "javax.servlet"),
+  "org.apache.hbase" % "hbase-server" % "1.1.2" excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
+//  "org.apache.hadoop" % "hadoop-client" % "2.7.1",
+//  "org.apache.hadoop" % "hadoop-common" % "2.7.1",
   "org.apache.thrift" % "libthrift" % "0.9.2",
   "net.sourceforge.jasa" % "jasa" % "1.2.5-SNAPSHOT",
-  "com.espertech" % "esper" % "4.11.0",
+//  "com.espertech" % "esper" % "4.11.0",
   "org.rogach" %% "scallop" % "0.9.5",
   "org.clapper" % "grizzled-slf4j_2.10" % "1.0.2",
-  "org.slf4j" % "slf4j-log4j12" % "1.7.7"
+  "org.slf4j" % "slf4j-log4j12" % "1.7.7",
+  "org.apache.spark" %% "spark-core" % "1.5.2"
 )
 
 mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
@@ -72,6 +72,8 @@ mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
     case PathList(ps @ _*) if ps.last endsWith "pom.properties" => MergeStrategy.concat
     case PathList(ps @ _*) if ps.last endsWith "spring.tooling" => MergeStrategy.first
     case PathList(ps @ _*) if ps.last endsWith "package-info.class" => MergeStrategy.first
+    case PathList(ps @ _*) if ps.last equals "Present.class" => MergeStrategy.first
+    case PathList(ps @ _*) if ps contains "minlog" => MergeStrategy.first
     case "log4j.xml" => MergeStrategy.first
     case "pom.xml" => MergeStrategy.concat
     case x => old(x)

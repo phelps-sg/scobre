@@ -26,7 +26,7 @@ case class Event(eventID: Option[Long], eventType: EventType.Value, messageSeque
   convertedPriceInd: Option[String]
 ) {
 
-  val logger = Logger(classOf[Event])
+//  val logger = Logger(classOf[Event])
 
   def tick: TickDataEvent = {
 
