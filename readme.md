@@ -28,21 +28,23 @@ order to execute the shell scripts.
 - (Optional) In order to build the software from source, you will need the scala build tool (sbt); see the [sbt documentation](http://www.scala-sbt.org/release/docs/Getting-Started/Setup.html).
 
 - (Optional) In order to host the data, you will need to install [Apache HBase
-  version 1.0.1.1](https://www.apache.org/dyn/closer.cgi/hbase/).  The software
+  version 1.1.2](https://www.apache.org/dyn/closer.cgi/hbase/).  The software
 can optionally connect to an existing server which already hosts the data.
 
 - (Optional) The best Integrated Development Environment (IDE) to use for 
 working on the project is [IntelliJ IDEA](https://www.jetbrains.com/idea/) with 
 the [Scala 
-plugin](http://confluence.jetbrains.com/display/SCA/Scala+Plugin+for+IntelliJ+
-IDEA) installed.
+plugin](https://confluence.jetbrains.com/display/SCA/Scala+Plugin+for+IntelliJ+IDEA)
+ installed.
 
 ## Installation
+
+### 1. Configure the HBase host
 
 Open the file hbase-site.xml in the directory etc/ using a text-editor and
 check that the hbase.master and hbase.zookeeper.quorum properties point to the
 machine running Apache HBase.   For example, the configuration below can be
-used to connect to the machine with hostname cseesp1.essex.ac.uk.
+used to connect to the machine with hostname `cseesp1.essex.ac.uk`.
 Alternatively to connect to your own laptop running HBase in stand-alone mode,
 replace `cseesp1.essex.ac.uk` with `localhost`.
 
@@ -56,41 +58,61 @@ replace `cseesp1.essex.ac.uk` with `localhost`.
 			<value>cseesp1.essex.ac.uk</value>
 		</property>
 	</configuration>
+	
+### 2. Install the shell scripts
+
+Execute the following commands in the shell to install the scripts into the directory `~/local/bin`:
+
+~~~bash
+cd target/pack/bin
+make install
+~~~
+
+If `~/local/bin` is not already in your `PATH` environment variable, add a command similar to the following to
+the file `~/.profile`:
+
+~~~bash
+export PATH=$PATH:~/local/bin
+~~~
 
 ## Running the reconstructor from the shell
 
-The script `replay.sh` in the `scripts/` directory can then be used retrieve a
-univariate time-series of prices.
+The script `replay-orders` can then be used retrieve a univariate time-series of prices.
 
 The following example will replay all recorded events for the asset with given
 [ISIN](http://www.isin.org/isin-database/) and provide a GUI visualisation of
 the order-book.
 
-	cd scripts
-	./replay.sh -t GB0009252882 --with-gui
+~~~bash
+replay-orders -t GB0009252882 --with-gui
+~~~
 
 The following will replay a subset of events over a given date-range:
 
-	cd scripts
-	./replay.sh -t GB0009252882 --with-gui \
+~~~bash
+replay-orders -t GB0009252882 --with-gui \
 		--start-date 5/6/2007 --end-date 6/6/2007
+~~~
 
 The following command will log the mid-price to a CSV file called `hf.csv`, but
 will not provide a GUI:
 
-	cd scripts
-	./replay.sh -t GB0009252882 --property midPrice \
+~~~bash
+replay-orders -t GB0009252882 --property midPrice \
 		--start-date 5/6/2007 --end-date 6/6/2007 -o hf.csv
+~~~
 
 The following command will log transaction prices to a CSV file called hf.csv:
 
-	cd scripts
-	./replay.sh -t GB0009252882 --property lastTransactionPrice -o hf.csv
+~~~bash
+replay-orders -t GB0009252882 --property lastTransactionPrice -o hf.csv
+~~~~
 	
 To get the full list of options use the built-in help:
 
-    cd scripts
-    ./replay.sh --help
+~~~bash
+replay-orders --help
+~~~~
     
 ## Accessing the simulator from a Python client
 
@@ -98,13 +120,15 @@ The simulator provides an [Apache Thrift API](https://thrift.apache.org/) which
 allows clients written in non-JVM languages to call the reconstructor.  To
 start the server, run the following script:
 
-    cd scripts
-    ./start-replay-server.sh
+~~~bash
+order-replay-service
+~~~
     
 By default the server will listen on TCP port 9090.  To see the configurations options, run:
 
-    cd scripts
-    ./start-replay-server.sh --help
+~~~bash
+start-replay-server.sh --help
+~~~
 
 To see an example of using the API from Python see the script 
 [tickdata.py](lse-data/src/main/python/tickdata.py).
@@ -116,21 +140,24 @@ To see an example of using the API from Python see the script
 
 ## Compiling and modifying the code
 
-To compile the source-code to separate .class files, execute the following command.
+To compile the source-code to separate .class files, execute the following command:
 
-	sbt compile
+~~~bash
+sbt compile
+~~~
 
-To compile to a single JAR file use:
+To create jar files and the script files:
 
-	sbt assembly
+~~~bash
+sbt pack
+~~~~
 
 To import the project as an IntelliJ IDEA project, first install the [Scala 
-plugin](http://confluence.jetbrains.com/display/SCA/Scala+Plugin+for+IntelliJ+
-IDEA), and then directly import the `build.sbt` file as a new project.
+plugin](https://confluence.jetbrains.com/display/SCA/Scala+Plugin+for+IntelliJ+IDEA), and then directly import the `build.sbt` file as a new project.
 
 ## Importing the raw data into Apache HBase
 
-1. Install Apache HBase 1.0.1.1 in [standalone mode](https://hbase.apache.org/book/quickstart.html).
+1. Install Apache HBase 1.1.2 in [standalone mode](https://hbase.apache.org/book/quickstart.html).
 
 2. Modify the file `base-config.xml` in the `etc/` directory of the folder where you unpacked the lse-data distribution as follows:
 
@@ -148,17 +175,20 @@ IDEA), and then directly import the `build.sbt` file as a new project.
 
 3. Create an empty table called `events` with column family `data` using the HBase shell:
 
-		cd /opt/hbase-0.98.8-hadoop2/bin
-		./hbase shell
-		create 'events', 'data'
+~~~bash
+cd /opt/hbase/bin
+./hbase shell
+create 'events', 'data'
+~~~
 
 4. Run the shell script `hbase-import.sh` specifying the raw files to import:
 
-		cd ./scripts
-		./importdata-lse.sh ../data/lse/*.CSV.gz
-
+~~~bash
+cd ./scripts
+./import-data-lse.sh ../data/lse/*.CSV.gz
+~~~
 
 ## Contact
 
-(C) [Steve Phelps](mailto:sphelps@sphelps.net) 2015
+(C) [Steve Phelps](mailto:sphelps@sphelps.net) 2016
 
