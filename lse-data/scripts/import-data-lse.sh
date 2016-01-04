@@ -14,7 +14,8 @@ import_pipe() {
 	
 	echo "Importing $TABLE"
 
-	java org.ccfea.tickdata.ImportData -b 2600 -r $TABLE -f $PIPE
+#	java org.ccfea.tickdata.ImportData -b 2600 -r $TABLE -f $PIPE
+	import-data -b 2600 -r $TABLE -f $PIPE
 }
 
 cat_data() {
@@ -45,7 +46,7 @@ import() {
 # Main           #
 ##################
 
-source config.sh
+#source config.sh
 
 # Remove previous named pipe
 rm -f $PIPE
