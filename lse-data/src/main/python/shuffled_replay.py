@@ -8,7 +8,9 @@ import pandas as pd
 from orderreplay import *
 from numpy.random import randint
 from shuffled_replay import *
-
+from thrift.transport import TSocket
+from thrift.protocol import TBinaryProtocol
+from orderreplay import *
 import thrift
 
 OFFSETTING_NONE =     0
@@ -46,9 +48,7 @@ def get_shuffled_data(asset, proportion, window_size = 1,
                       variables = ['midPrice'], 
                         server = 'localhost', port = 9090,
                         date_range = None):
-    from thrift.transport import TSocket
-    from thrift.protocol import TBinaryProtocol
-    from orderreplay import *
+   
     transport = TSocket.TSocket(server, port)
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
     client = OrderReplay.Client(protocol)
