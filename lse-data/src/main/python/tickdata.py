@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime
+import time
 
 from orderreplay import *
 from thrift.protocol import TBinaryProtocol
@@ -17,6 +18,9 @@ from scipy.stats.kde import gaussian_kde
 DEFAULT_SERVER = 'localhost'
 DEFAULT_PORT = 9090
 
+def date_to_time(d):
+    return long(time.mktime(d.timetuple())) * 1000
+ 
 def dict_to_df(data, variables):
     df = pd.DataFrame(data)
    
@@ -42,13 +46,16 @@ def get_hf_data(asset, start_date, end_date,
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
     client = OrderReplay.Client(protocol)
     transport.open()
-    raw_data = client.replay(asset, variables, start_date, end_date)
+    t0 = date_to_time(start_date)
+    t1 = date_to_time(end_date)
+    raw_data = client.replay(asset, variables, t0, t1)
     if len(raw_data) == 0:
         raise Exception("No data available for " + asset + " between " + \
                             start_date + " and " + end_date)
     return dict_to_df(raw_data, variables)
     
-dataset = get_hf_data('GB0009252882', '2/3/2007', '3/3/2007', server='localhost')
+dataset = get_hf_data('GB0009252882', datetime.datetime(2007, 3, 2), 
+                          datetime.datetime(2007, 3, 3), server='localhost')
 #dataset = get_hf_data('GB0002875804', '2/3/2007', '3/3/2009', server='localhost')
 
 #dataset = get_hf_data('BHP', '2/7/2007', '3/7/2007')
