@@ -21,7 +21,7 @@ class Iface:
   """
   Order-book replay service
   """
-  def replay(self, assetId, variables, startDate, endDate):
+  def replay(self, assetId, variables, startDateTime, endDateTime):
     """
     Replay tick events
 
@@ -29,12 +29,12 @@ class Iface:
     Parameters:
      - assetId
      - variables
-     - startDate
-     - endDate
+     - startDateTime
+     - endDateTime
     """
     pass
 
-  def shuffledReplay(self, assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting):
+  def shuffledReplay(self, assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute):
     """
     Parameters:
      - assetId
@@ -43,6 +43,22 @@ class Iface:
      - windowSize
      - intraWindow
      - offsetting
+     - attribute
+    """
+    pass
+
+  def shuffledReplayDateRange(self, assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute, startDateTime, endDateTime):
+    """
+    Parameters:
+     - assetId
+     - variables
+     - proportionShuffling
+     - windowSize
+     - intraWindow
+     - offsetting
+     - attribute
+     - startDateTime
+     - endDateTime
     """
     pass
 
@@ -57,7 +73,7 @@ class Client(Iface):
       self._oprot = oprot
     self._seqid = 0
 
-  def replay(self, assetId, variables, startDate, endDate):
+  def replay(self, assetId, variables, startDateTime, endDateTime):
     """
     Replay tick events
 
@@ -65,19 +81,19 @@ class Client(Iface):
     Parameters:
      - assetId
      - variables
-     - startDate
-     - endDate
+     - startDateTime
+     - endDateTime
     """
-    self.send_replay(assetId, variables, startDate, endDate)
+    self.send_replay(assetId, variables, startDateTime, endDateTime)
     return self.recv_replay()
 
-  def send_replay(self, assetId, variables, startDate, endDate):
+  def send_replay(self, assetId, variables, startDateTime, endDateTime):
     self._oprot.writeMessageBegin('replay', TMessageType.CALL, self._seqid)
     args = replay_args()
     args.assetId = assetId
     args.variables = variables
-    args.startDate = startDate
-    args.endDate = endDate
+    args.startDateTime = startDateTime
+    args.endDateTime = endDateTime
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
@@ -96,7 +112,7 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "replay failed: unknown result");
 
-  def shuffledReplay(self, assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting):
+  def shuffledReplay(self, assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute):
     """
     Parameters:
      - assetId
@@ -105,11 +121,12 @@ class Client(Iface):
      - windowSize
      - intraWindow
      - offsetting
+     - attribute
     """
-    self.send_shuffledReplay(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting)
+    self.send_shuffledReplay(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute)
     return self.recv_shuffledReplay()
 
-  def send_shuffledReplay(self, assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting):
+  def send_shuffledReplay(self, assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute):
     self._oprot.writeMessageBegin('shuffledReplay', TMessageType.CALL, self._seqid)
     args = shuffledReplay_args()
     args.assetId = assetId
@@ -118,6 +135,7 @@ class Client(Iface):
     args.windowSize = windowSize
     args.intraWindow = intraWindow
     args.offsetting = offsetting
+    args.attribute = attribute
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
@@ -136,6 +154,52 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "shuffledReplay failed: unknown result");
 
+  def shuffledReplayDateRange(self, assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute, startDateTime, endDateTime):
+    """
+    Parameters:
+     - assetId
+     - variables
+     - proportionShuffling
+     - windowSize
+     - intraWindow
+     - offsetting
+     - attribute
+     - startDateTime
+     - endDateTime
+    """
+    self.send_shuffledReplayDateRange(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute, startDateTime, endDateTime)
+    return self.recv_shuffledReplayDateRange()
+
+  def send_shuffledReplayDateRange(self, assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute, startDateTime, endDateTime):
+    self._oprot.writeMessageBegin('shuffledReplayDateRange', TMessageType.CALL, self._seqid)
+    args = shuffledReplayDateRange_args()
+    args.assetId = assetId
+    args.variables = variables
+    args.proportionShuffling = proportionShuffling
+    args.windowSize = windowSize
+    args.intraWindow = intraWindow
+    args.offsetting = offsetting
+    args.attribute = attribute
+    args.startDateTime = startDateTime
+    args.endDateTime = endDateTime
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_shuffledReplayDateRange(self, ):
+    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(self._iprot)
+      self._iprot.readMessageEnd()
+      raise x
+    result = shuffledReplayDateRange_result()
+    result.read(self._iprot)
+    self._iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "shuffledReplayDateRange failed: unknown result");
+
 
 class Processor(Iface, TProcessor):
   def __init__(self, handler):
@@ -143,6 +207,7 @@ class Processor(Iface, TProcessor):
     self._processMap = {}
     self._processMap["replay"] = Processor.process_replay
     self._processMap["shuffledReplay"] = Processor.process_shuffledReplay
+    self._processMap["shuffledReplayDateRange"] = Processor.process_shuffledReplayDateRange
 
   def process(self, iprot, oprot):
     (name, type, seqid) = iprot.readMessageBegin()
@@ -164,7 +229,7 @@ class Processor(Iface, TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = replay_result()
-    result.success = self._handler.replay(args.assetId, args.variables, args.startDate, args.endDate)
+    result.success = self._handler.replay(args.assetId, args.variables, args.startDateTime, args.endDateTime)
     oprot.writeMessageBegin("replay", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
@@ -175,8 +240,19 @@ class Processor(Iface, TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = shuffledReplay_result()
-    result.success = self._handler.shuffledReplay(args.assetId, args.variables, args.proportionShuffling, args.windowSize, args.intraWindow, args.offsetting)
+    result.success = self._handler.shuffledReplay(args.assetId, args.variables, args.proportionShuffling, args.windowSize, args.intraWindow, args.offsetting, args.attribute)
     oprot.writeMessageBegin("shuffledReplay", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_shuffledReplayDateRange(self, seqid, iprot, oprot):
+    args = shuffledReplayDateRange_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = shuffledReplayDateRange_result()
+    result.success = self._handler.shuffledReplayDateRange(args.assetId, args.variables, args.proportionShuffling, args.windowSize, args.intraWindow, args.offsetting, args.attribute, args.startDateTime, args.endDateTime)
+    oprot.writeMessageBegin("shuffledReplayDateRange", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -189,23 +265,23 @@ class replay_args:
   Attributes:
    - assetId
    - variables
-   - startDate
-   - endDate
+   - startDateTime
+   - endDateTime
   """
 
   thrift_spec = (
     None, # 0
     (1, TType.STRING, 'assetId', None, None, ), # 1
     (2, TType.LIST, 'variables', (TType.STRING,None), None, ), # 2
-    (3, TType.STRING, 'startDate', None, None, ), # 3
-    (4, TType.STRING, 'endDate', None, None, ), # 4
+    (3, TType.I64, 'startDateTime', None, None, ), # 3
+    (4, TType.I64, 'endDateTime', None, None, ), # 4
   )
 
-  def __init__(self, assetId=None, variables=None, startDate=None, endDate=None,):
+  def __init__(self, assetId=None, variables=None, startDateTime=None, endDateTime=None,):
     self.assetId = assetId
     self.variables = variables
-    self.startDate = startDate
-    self.endDate = endDate
+    self.startDateTime = startDateTime
+    self.endDateTime = endDateTime
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -232,13 +308,13 @@ class replay_args:
         else:
           iprot.skip(ftype)
       elif fid == 3:
-        if ftype == TType.STRING:
-          self.startDate = iprot.readString();
+        if ftype == TType.I64:
+          self.startDateTime = iprot.readI64();
         else:
           iprot.skip(ftype)
       elif fid == 4:
-        if ftype == TType.STRING:
-          self.endDate = iprot.readString();
+        if ftype == TType.I64:
+          self.endDateTime = iprot.readI64();
         else:
           iprot.skip(ftype)
       else:
@@ -262,13 +338,13 @@ class replay_args:
         oprot.writeString(iter6)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
-    if self.startDate is not None:
-      oprot.writeFieldBegin('startDate', TType.STRING, 3)
-      oprot.writeString(self.startDate)
+    if self.startDateTime is not None:
+      oprot.writeFieldBegin('startDateTime', TType.I64, 3)
+      oprot.writeI64(self.startDateTime)
       oprot.writeFieldEnd()
-    if self.endDate is not None:
-      oprot.writeFieldBegin('endDate', TType.STRING, 4)
-      oprot.writeString(self.endDate)
+    if self.endDateTime is not None:
+      oprot.writeFieldBegin('endDateTime', TType.I64, 4)
+      oprot.writeI64(self.endDateTime)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -374,6 +450,7 @@ class shuffledReplay_args:
    - windowSize
    - intraWindow
    - offsetting
+   - attribute
   """
 
   thrift_spec = (
@@ -384,15 +461,17 @@ class shuffledReplay_args:
     (4, TType.I32, 'windowSize', None, None, ), # 4
     (5, TType.BOOL, 'intraWindow', None, None, ), # 5
     (6, TType.I32, 'offsetting', None, None, ), # 6
+    (7, TType.I32, 'attribute', None, None, ), # 7
   )
 
-  def __init__(self, assetId=None, variables=None, proportionShuffling=None, windowSize=None, intraWindow=None, offsetting=None,):
+  def __init__(self, assetId=None, variables=None, proportionShuffling=None, windowSize=None, intraWindow=None, offsetting=None, attribute=None,):
     self.assetId = assetId
     self.variables = variables
     self.proportionShuffling = proportionShuffling
     self.windowSize = windowSize
     self.intraWindow = intraWindow
     self.offsetting = offsetting
+    self.attribute = attribute
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -438,6 +517,11 @@ class shuffledReplay_args:
           self.offsetting = iprot.readI32();
         else:
           iprot.skip(ftype)
+      elif fid == 7:
+        if ftype == TType.I32:
+          self.attribute = iprot.readI32();
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -474,6 +558,10 @@ class shuffledReplay_args:
     if self.offsetting is not None:
       oprot.writeFieldBegin('offsetting', TType.I32, 6)
       oprot.writeI32(self.offsetting)
+      oprot.writeFieldEnd()
+    if self.attribute is not None:
+      oprot.writeFieldBegin('attribute', TType.I32, 7)
+      oprot.writeI32(self.attribute)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -549,6 +637,247 @@ class shuffledReplay_result:
         for kiter44,viter45 in iter43.items():
           oprot.writeString(kiter44)
           oprot.writeDouble(viter45)
+        oprot.writeMapEnd()
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class shuffledReplayDateRange_args:
+  """
+  Attributes:
+   - assetId
+   - variables
+   - proportionShuffling
+   - windowSize
+   - intraWindow
+   - offsetting
+   - attribute
+   - startDateTime
+   - endDateTime
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'assetId', None, None, ), # 1
+    (2, TType.LIST, 'variables', (TType.STRING,None), None, ), # 2
+    (3, TType.DOUBLE, 'proportionShuffling', None, None, ), # 3
+    (4, TType.I32, 'windowSize', None, None, ), # 4
+    (5, TType.BOOL, 'intraWindow', None, None, ), # 5
+    (6, TType.I32, 'offsetting', None, None, ), # 6
+    (7, TType.I32, 'attribute', None, None, ), # 7
+    (8, TType.I64, 'startDateTime', None, None, ), # 8
+    (9, TType.I64, 'endDateTime', None, None, ), # 9
+  )
+
+  def __init__(self, assetId=None, variables=None, proportionShuffling=None, windowSize=None, intraWindow=None, offsetting=None, attribute=None, startDateTime=None, endDateTime=None,):
+    self.assetId = assetId
+    self.variables = variables
+    self.proportionShuffling = proportionShuffling
+    self.windowSize = windowSize
+    self.intraWindow = intraWindow
+    self.offsetting = offsetting
+    self.attribute = attribute
+    self.startDateTime = startDateTime
+    self.endDateTime = endDateTime
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.assetId = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.LIST:
+          self.variables = []
+          (_etype49, _size46) = iprot.readListBegin()
+          for _i50 in xrange(_size46):
+            _elem51 = iprot.readString();
+            self.variables.append(_elem51)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.DOUBLE:
+          self.proportionShuffling = iprot.readDouble();
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.I32:
+          self.windowSize = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.BOOL:
+          self.intraWindow = iprot.readBool();
+        else:
+          iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.I32:
+          self.offsetting = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 7:
+        if ftype == TType.I32:
+          self.attribute = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 8:
+        if ftype == TType.I64:
+          self.startDateTime = iprot.readI64();
+        else:
+          iprot.skip(ftype)
+      elif fid == 9:
+        if ftype == TType.I64:
+          self.endDateTime = iprot.readI64();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('shuffledReplayDateRange_args')
+    if self.assetId is not None:
+      oprot.writeFieldBegin('assetId', TType.STRING, 1)
+      oprot.writeString(self.assetId)
+      oprot.writeFieldEnd()
+    if self.variables is not None:
+      oprot.writeFieldBegin('variables', TType.LIST, 2)
+      oprot.writeListBegin(TType.STRING, len(self.variables))
+      for iter52 in self.variables:
+        oprot.writeString(iter52)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.proportionShuffling is not None:
+      oprot.writeFieldBegin('proportionShuffling', TType.DOUBLE, 3)
+      oprot.writeDouble(self.proportionShuffling)
+      oprot.writeFieldEnd()
+    if self.windowSize is not None:
+      oprot.writeFieldBegin('windowSize', TType.I32, 4)
+      oprot.writeI32(self.windowSize)
+      oprot.writeFieldEnd()
+    if self.intraWindow is not None:
+      oprot.writeFieldBegin('intraWindow', TType.BOOL, 5)
+      oprot.writeBool(self.intraWindow)
+      oprot.writeFieldEnd()
+    if self.offsetting is not None:
+      oprot.writeFieldBegin('offsetting', TType.I32, 6)
+      oprot.writeI32(self.offsetting)
+      oprot.writeFieldEnd()
+    if self.attribute is not None:
+      oprot.writeFieldBegin('attribute', TType.I32, 7)
+      oprot.writeI32(self.attribute)
+      oprot.writeFieldEnd()
+    if self.startDateTime is not None:
+      oprot.writeFieldBegin('startDateTime', TType.I64, 8)
+      oprot.writeI64(self.startDateTime)
+      oprot.writeFieldEnd()
+    if self.endDateTime is not None:
+      oprot.writeFieldBegin('endDateTime', TType.I64, 9)
+      oprot.writeI64(self.endDateTime)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class shuffledReplayDateRange_result:
+  """
+  Attributes:
+   - success
+  """
+
+  thrift_spec = (
+    (0, TType.LIST, 'success', (TType.MAP,(TType.STRING,None,TType.DOUBLE,None)), None, ), # 0
+  )
+
+  def __init__(self, success=None,):
+    self.success = success
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 0:
+        if ftype == TType.LIST:
+          self.success = []
+          (_etype56, _size53) = iprot.readListBegin()
+          for _i57 in xrange(_size53):
+            _elem58 = {}
+            (_ktype60, _vtype61, _size59 ) = iprot.readMapBegin() 
+            for _i63 in xrange(_size59):
+              _key64 = iprot.readString();
+              _val65 = iprot.readDouble();
+              _elem58[_key64] = _val65
+            iprot.readMapEnd()
+            self.success.append(_elem58)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('shuffledReplayDateRange_result')
+    if self.success is not None:
+      oprot.writeFieldBegin('success', TType.LIST, 0)
+      oprot.writeListBegin(TType.MAP, len(self.success))
+      for iter66 in self.success:
+        oprot.writeMapBegin(TType.STRING, TType.DOUBLE, len(iter66))
+        for kiter67,viter68 in iter66.items():
+          oprot.writeString(kiter67)
+          oprot.writeDouble(viter68)
         oprot.writeMapEnd()
       oprot.writeListEnd()
       oprot.writeFieldEnd()

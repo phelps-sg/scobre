@@ -43,20 +43,24 @@ public class OrderReplay {
      * 
      * @param assetId
      * @param variables
-     * @param startDate
-     * @param endDate
+     * @param startDateTime
+     * @param endDateTime
      */
-    public List<Map<String,Double>> replay(String assetId, List<String> variables, String startDate, String endDate) throws org.apache.thrift.TException;
+    public List<Map<String,Double>> replay(String assetId, List<String> variables, long startDateTime, long endDateTime) throws org.apache.thrift.TException;
 
-    public List<Map<String,Double>> shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting) throws org.apache.thrift.TException;
+    public List<Map<String,Double>> shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, int attribute) throws org.apache.thrift.TException;
+
+    public List<Map<String,Double>> shuffledReplayDateRange(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, int attribute, long startDateTime, long endDateTime) throws org.apache.thrift.TException;
 
   }
 
   public interface AsyncIface {
 
-    public void replay(String assetId, List<String> variables, String startDate, String endDate, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.replay_call> resultHandler) throws org.apache.thrift.TException;
+    public void replay(String assetId, List<String> variables, long startDateTime, long endDateTime, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.replay_call> resultHandler) throws org.apache.thrift.TException;
 
-    public void shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.shuffledReplay_call> resultHandler) throws org.apache.thrift.TException;
+    public void shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, int attribute, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.shuffledReplay_call> resultHandler) throws org.apache.thrift.TException;
+
+    public void shuffledReplayDateRange(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, int attribute, long startDateTime, long endDateTime, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.shuffledReplayDateRange_call> resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -80,19 +84,19 @@ public class OrderReplay {
       super(iprot, oprot);
     }
 
-    public List<Map<String,Double>> replay(String assetId, List<String> variables, String startDate, String endDate) throws org.apache.thrift.TException
+    public List<Map<String,Double>> replay(String assetId, List<String> variables, long startDateTime, long endDateTime) throws org.apache.thrift.TException
     {
-      send_replay(assetId, variables, startDate, endDate);
+      send_replay(assetId, variables, startDateTime, endDateTime);
       return recv_replay();
     }
 
-    public void send_replay(String assetId, List<String> variables, String startDate, String endDate) throws org.apache.thrift.TException
+    public void send_replay(String assetId, List<String> variables, long startDateTime, long endDateTime) throws org.apache.thrift.TException
     {
       replay_args args = new replay_args();
       args.setAssetId(assetId);
       args.setVariables(variables);
-      args.setStartDate(startDate);
-      args.setEndDate(endDate);
+      args.setStartDateTime(startDateTime);
+      args.setEndDateTime(endDateTime);
       sendBase("replay", args);
     }
 
@@ -106,13 +110,13 @@ public class OrderReplay {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "replay failed: unknown result");
     }
 
-    public List<Map<String,Double>> shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting) throws org.apache.thrift.TException
+    public List<Map<String,Double>> shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, int attribute) throws org.apache.thrift.TException
     {
-      send_shuffledReplay(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting);
+      send_shuffledReplay(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute);
       return recv_shuffledReplay();
     }
 
-    public void send_shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting) throws org.apache.thrift.TException
+    public void send_shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, int attribute) throws org.apache.thrift.TException
     {
       shuffledReplay_args args = new shuffledReplay_args();
       args.setAssetId(assetId);
@@ -121,6 +125,7 @@ public class OrderReplay {
       args.setWindowSize(windowSize);
       args.setIntraWindow(intraWindow);
       args.setOffsetting(offsetting);
+      args.setAttribute(attribute);
       sendBase("shuffledReplay", args);
     }
 
@@ -132,6 +137,37 @@ public class OrderReplay {
         return result.success;
       }
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "shuffledReplay failed: unknown result");
+    }
+
+    public List<Map<String,Double>> shuffledReplayDateRange(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, int attribute, long startDateTime, long endDateTime) throws org.apache.thrift.TException
+    {
+      send_shuffledReplayDateRange(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute, startDateTime, endDateTime);
+      return recv_shuffledReplayDateRange();
+    }
+
+    public void send_shuffledReplayDateRange(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, int attribute, long startDateTime, long endDateTime) throws org.apache.thrift.TException
+    {
+      shuffledReplayDateRange_args args = new shuffledReplayDateRange_args();
+      args.setAssetId(assetId);
+      args.setVariables(variables);
+      args.setProportionShuffling(proportionShuffling);
+      args.setWindowSize(windowSize);
+      args.setIntraWindow(intraWindow);
+      args.setOffsetting(offsetting);
+      args.setAttribute(attribute);
+      args.setStartDateTime(startDateTime);
+      args.setEndDateTime(endDateTime);
+      sendBase("shuffledReplayDateRange", args);
+    }
+
+    public List<Map<String,Double>> recv_shuffledReplayDateRange() throws org.apache.thrift.TException
+    {
+      shuffledReplayDateRange_result result = new shuffledReplayDateRange_result();
+      receiveBase(result, "shuffledReplayDateRange");
+      if (result.isSetSuccess()) {
+        return result.success;
+      }
+      throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "shuffledReplayDateRange failed: unknown result");
     }
 
   }
@@ -152,9 +188,9 @@ public class OrderReplay {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void replay(String assetId, List<String> variables, String startDate, String endDate, org.apache.thrift.async.AsyncMethodCallback<replay_call> resultHandler) throws org.apache.thrift.TException {
+    public void replay(String assetId, List<String> variables, long startDateTime, long endDateTime, org.apache.thrift.async.AsyncMethodCallback<replay_call> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      replay_call method_call = new replay_call(assetId, variables, startDate, endDate, resultHandler, this, ___protocolFactory, ___transport);
+      replay_call method_call = new replay_call(assetId, variables, startDateTime, endDateTime, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -162,14 +198,14 @@ public class OrderReplay {
     public static class replay_call extends org.apache.thrift.async.TAsyncMethodCall {
       private String assetId;
       private List<String> variables;
-      private String startDate;
-      private String endDate;
-      public replay_call(String assetId, List<String> variables, String startDate, String endDate, org.apache.thrift.async.AsyncMethodCallback<replay_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private long startDateTime;
+      private long endDateTime;
+      public replay_call(String assetId, List<String> variables, long startDateTime, long endDateTime, org.apache.thrift.async.AsyncMethodCallback<replay_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.assetId = assetId;
         this.variables = variables;
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
@@ -177,8 +213,8 @@ public class OrderReplay {
         replay_args args = new replay_args();
         args.setAssetId(assetId);
         args.setVariables(variables);
-        args.setStartDate(startDate);
-        args.setEndDate(endDate);
+        args.setStartDateTime(startDateTime);
+        args.setEndDateTime(endDateTime);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -193,9 +229,9 @@ public class OrderReplay {
       }
     }
 
-    public void shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, org.apache.thrift.async.AsyncMethodCallback<shuffledReplay_call> resultHandler) throws org.apache.thrift.TException {
+    public void shuffledReplay(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, int attribute, org.apache.thrift.async.AsyncMethodCallback<shuffledReplay_call> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      shuffledReplay_call method_call = new shuffledReplay_call(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, resultHandler, this, ___protocolFactory, ___transport);
+      shuffledReplay_call method_call = new shuffledReplay_call(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -207,7 +243,8 @@ public class OrderReplay {
       private int windowSize;
       private boolean intraWindow;
       private int offsetting;
-      public shuffledReplay_call(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, org.apache.thrift.async.AsyncMethodCallback<shuffledReplay_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private int attribute;
+      public shuffledReplay_call(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, int attribute, org.apache.thrift.async.AsyncMethodCallback<shuffledReplay_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.assetId = assetId;
         this.variables = variables;
@@ -215,6 +252,7 @@ public class OrderReplay {
         this.windowSize = windowSize;
         this.intraWindow = intraWindow;
         this.offsetting = offsetting;
+        this.attribute = attribute;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
@@ -226,6 +264,7 @@ public class OrderReplay {
         args.setWindowSize(windowSize);
         args.setIntraWindow(intraWindow);
         args.setOffsetting(offsetting);
+        args.setAttribute(attribute);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -237,6 +276,62 @@ public class OrderReplay {
         org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
         org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
         return (new Client(prot)).recv_shuffledReplay();
+      }
+    }
+
+    public void shuffledReplayDateRange(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, int attribute, long startDateTime, long endDateTime, org.apache.thrift.async.AsyncMethodCallback<shuffledReplayDateRange_call> resultHandler) throws org.apache.thrift.TException {
+      checkReady();
+      shuffledReplayDateRange_call method_call = new shuffledReplayDateRange_call(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute, startDateTime, endDateTime, resultHandler, this, ___protocolFactory, ___transport);
+      this.___currentMethod = method_call;
+      ___manager.call(method_call);
+    }
+
+    public static class shuffledReplayDateRange_call extends org.apache.thrift.async.TAsyncMethodCall {
+      private String assetId;
+      private List<String> variables;
+      private double proportionShuffling;
+      private int windowSize;
+      private boolean intraWindow;
+      private int offsetting;
+      private int attribute;
+      private long startDateTime;
+      private long endDateTime;
+      public shuffledReplayDateRange_call(String assetId, List<String> variables, double proportionShuffling, int windowSize, boolean intraWindow, int offsetting, int attribute, long startDateTime, long endDateTime, org.apache.thrift.async.AsyncMethodCallback<shuffledReplayDateRange_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+        super(client, protocolFactory, transport, resultHandler, false);
+        this.assetId = assetId;
+        this.variables = variables;
+        this.proportionShuffling = proportionShuffling;
+        this.windowSize = windowSize;
+        this.intraWindow = intraWindow;
+        this.offsetting = offsetting;
+        this.attribute = attribute;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
+      }
+
+      public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("shuffledReplayDateRange", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        shuffledReplayDateRange_args args = new shuffledReplayDateRange_args();
+        args.setAssetId(assetId);
+        args.setVariables(variables);
+        args.setProportionShuffling(proportionShuffling);
+        args.setWindowSize(windowSize);
+        args.setIntraWindow(intraWindow);
+        args.setOffsetting(offsetting);
+        args.setAttribute(attribute);
+        args.setStartDateTime(startDateTime);
+        args.setEndDateTime(endDateTime);
+        args.write(prot);
+        prot.writeMessageEnd();
+      }
+
+      public List<Map<String,Double>> getResult() throws org.apache.thrift.TException {
+        if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
+          throw new IllegalStateException("Method call not finished!");
+        }
+        org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
+        org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
+        return (new Client(prot)).recv_shuffledReplayDateRange();
       }
     }
 
@@ -255,6 +350,7 @@ public class OrderReplay {
     private static <I extends Iface> Map<String,  org.apache.thrift.ProcessFunction<I, ? extends  org.apache.thrift.TBase>> getProcessMap(Map<String,  org.apache.thrift.ProcessFunction<I, ? extends  org.apache.thrift.TBase>> processMap) {
       processMap.put("replay", new replay());
       processMap.put("shuffledReplay", new shuffledReplay());
+      processMap.put("shuffledReplayDateRange", new shuffledReplayDateRange());
       return processMap;
     }
 
@@ -273,7 +369,7 @@ public class OrderReplay {
 
       public replay_result getResult(I iface, replay_args args) throws org.apache.thrift.TException {
         replay_result result = new replay_result();
-        result.success = iface.replay(args.assetId, args.variables, args.startDate, args.endDate);
+        result.success = iface.replay(args.assetId, args.variables, args.startDateTime, args.endDateTime);
         return result;
       }
     }
@@ -293,7 +389,27 @@ public class OrderReplay {
 
       public shuffledReplay_result getResult(I iface, shuffledReplay_args args) throws org.apache.thrift.TException {
         shuffledReplay_result result = new shuffledReplay_result();
-        result.success = iface.shuffledReplay(args.assetId, args.variables, args.proportionShuffling, args.windowSize, args.intraWindow, args.offsetting);
+        result.success = iface.shuffledReplay(args.assetId, args.variables, args.proportionShuffling, args.windowSize, args.intraWindow, args.offsetting, args.attribute);
+        return result;
+      }
+    }
+
+    public static class shuffledReplayDateRange<I extends Iface> extends org.apache.thrift.ProcessFunction<I, shuffledReplayDateRange_args> {
+      public shuffledReplayDateRange() {
+        super("shuffledReplayDateRange");
+      }
+
+      public shuffledReplayDateRange_args getEmptyArgsInstance() {
+        return new shuffledReplayDateRange_args();
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public shuffledReplayDateRange_result getResult(I iface, shuffledReplayDateRange_args args) throws org.apache.thrift.TException {
+        shuffledReplayDateRange_result result = new shuffledReplayDateRange_result();
+        result.success = iface.shuffledReplayDateRange(args.assetId, args.variables, args.proportionShuffling, args.windowSize, args.intraWindow, args.offsetting, args.attribute, args.startDateTime, args.endDateTime);
         return result;
       }
     }
@@ -305,8 +421,8 @@ public class OrderReplay {
 
     private static final org.apache.thrift.protocol.TField ASSET_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("assetId", org.apache.thrift.protocol.TType.STRING, (short)1);
     private static final org.apache.thrift.protocol.TField VARIABLES_FIELD_DESC = new org.apache.thrift.protocol.TField("variables", org.apache.thrift.protocol.TType.LIST, (short)2);
-    private static final org.apache.thrift.protocol.TField START_DATE_FIELD_DESC = new org.apache.thrift.protocol.TField("startDate", org.apache.thrift.protocol.TType.STRING, (short)3);
-    private static final org.apache.thrift.protocol.TField END_DATE_FIELD_DESC = new org.apache.thrift.protocol.TField("endDate", org.apache.thrift.protocol.TType.STRING, (short)4);
+    private static final org.apache.thrift.protocol.TField START_DATE_TIME_FIELD_DESC = new org.apache.thrift.protocol.TField("startDateTime", org.apache.thrift.protocol.TType.I64, (short)3);
+    private static final org.apache.thrift.protocol.TField END_DATE_TIME_FIELD_DESC = new org.apache.thrift.protocol.TField("endDateTime", org.apache.thrift.protocol.TType.I64, (short)4);
 
     private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
     static {
@@ -316,15 +432,15 @@ public class OrderReplay {
 
     public String assetId; // required
     public List<String> variables; // required
-    public String startDate; // required
-    public String endDate; // required
+    public long startDateTime; // required
+    public long endDateTime; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
       ASSET_ID((short)1, "assetId"),
       VARIABLES((short)2, "variables"),
-      START_DATE((short)3, "startDate"),
-      END_DATE((short)4, "endDate");
+      START_DATE_TIME((short)3, "startDateTime"),
+      END_DATE_TIME((short)4, "endDateTime");
 
       private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -343,10 +459,10 @@ public class OrderReplay {
             return ASSET_ID;
           case 2: // VARIABLES
             return VARIABLES;
-          case 3: // START_DATE
-            return START_DATE;
-          case 4: // END_DATE
-            return END_DATE;
+          case 3: // START_DATE_TIME
+            return START_DATE_TIME;
+          case 4: // END_DATE_TIME
+            return END_DATE_TIME;
           default:
             return null;
         }
@@ -387,6 +503,9 @@ public class OrderReplay {
     }
 
     // isset id assignments
+    private static final int __STARTDATETIME_ISSET_ID = 0;
+    private static final int __ENDDATETIME_ISSET_ID = 1;
+    private byte __isset_bitfield = 0;
     public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
@@ -395,10 +514,10 @@ public class OrderReplay {
       tmpMap.put(_Fields.VARIABLES, new org.apache.thrift.meta_data.FieldMetaData("variables", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
               new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
-      tmpMap.put(_Fields.START_DATE, new org.apache.thrift.meta_data.FieldMetaData("startDate", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
-      tmpMap.put(_Fields.END_DATE, new org.apache.thrift.meta_data.FieldMetaData("endDate", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.START_DATE_TIME, new org.apache.thrift.meta_data.FieldMetaData("startDateTime", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
+      tmpMap.put(_Fields.END_DATE_TIME, new org.apache.thrift.meta_data.FieldMetaData("endDateTime", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(replay_args.class, metaDataMap);
     }
@@ -409,20 +528,23 @@ public class OrderReplay {
     public replay_args(
       String assetId,
       List<String> variables,
-      String startDate,
-      String endDate)
+      long startDateTime,
+      long endDateTime)
     {
       this();
       this.assetId = assetId;
       this.variables = variables;
-      this.startDate = startDate;
-      this.endDate = endDate;
+      this.startDateTime = startDateTime;
+      setStartDateTimeIsSet(true);
+      this.endDateTime = endDateTime;
+      setEndDateTimeIsSet(true);
     }
 
     /**
      * Performs a deep copy on <i>other</i>.
      */
     public replay_args(replay_args other) {
+      __isset_bitfield = other.__isset_bitfield;
       if (other.isSetAssetId()) {
         this.assetId = other.assetId;
       }
@@ -433,12 +555,8 @@ public class OrderReplay {
         }
         this.variables = __this__variables;
       }
-      if (other.isSetStartDate()) {
-        this.startDate = other.startDate;
-      }
-      if (other.isSetEndDate()) {
-        this.endDate = other.endDate;
-      }
+      this.startDateTime = other.startDateTime;
+      this.endDateTime = other.endDateTime;
     }
 
     public replay_args deepCopy() {
@@ -449,8 +567,10 @@ public class OrderReplay {
     public void clear() {
       this.assetId = null;
       this.variables = null;
-      this.startDate = null;
-      this.endDate = null;
+      setStartDateTimeIsSet(false);
+      this.startDateTime = 0;
+      setEndDateTimeIsSet(false);
+      this.endDateTime = 0;
     }
 
     public String getAssetId() {
@@ -516,52 +636,50 @@ public class OrderReplay {
       }
     }
 
-    public String getStartDate() {
-      return this.startDate;
+    public long getStartDateTime() {
+      return this.startDateTime;
     }
 
-    public replay_args setStartDate(String startDate) {
-      this.startDate = startDate;
+    public replay_args setStartDateTime(long startDateTime) {
+      this.startDateTime = startDateTime;
+      setStartDateTimeIsSet(true);
       return this;
     }
 
-    public void unsetStartDate() {
-      this.startDate = null;
+    public void unsetStartDateTime() {
+      __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __STARTDATETIME_ISSET_ID);
     }
 
-    /** Returns true if field startDate is set (has been assigned a value) and false otherwise */
-    public boolean isSetStartDate() {
-      return this.startDate != null;
+    /** Returns true if field startDateTime is set (has been assigned a value) and false otherwise */
+    public boolean isSetStartDateTime() {
+      return EncodingUtils.testBit(__isset_bitfield, __STARTDATETIME_ISSET_ID);
     }
 
-    public void setStartDateIsSet(boolean value) {
-      if (!value) {
-        this.startDate = null;
-      }
+    public void setStartDateTimeIsSet(boolean value) {
+      __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __STARTDATETIME_ISSET_ID, value);
     }
 
-    public String getEndDate() {
-      return this.endDate;
+    public long getEndDateTime() {
+      return this.endDateTime;
     }
 
-    public replay_args setEndDate(String endDate) {
-      this.endDate = endDate;
+    public replay_args setEndDateTime(long endDateTime) {
+      this.endDateTime = endDateTime;
+      setEndDateTimeIsSet(true);
       return this;
     }
 
-    public void unsetEndDate() {
-      this.endDate = null;
+    public void unsetEndDateTime() {
+      __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __ENDDATETIME_ISSET_ID);
     }
 
-    /** Returns true if field endDate is set (has been assigned a value) and false otherwise */
-    public boolean isSetEndDate() {
-      return this.endDate != null;
+    /** Returns true if field endDateTime is set (has been assigned a value) and false otherwise */
+    public boolean isSetEndDateTime() {
+      return EncodingUtils.testBit(__isset_bitfield, __ENDDATETIME_ISSET_ID);
     }
 
-    public void setEndDateIsSet(boolean value) {
-      if (!value) {
-        this.endDate = null;
-      }
+    public void setEndDateTimeIsSet(boolean value) {
+      __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __ENDDATETIME_ISSET_ID, value);
     }
 
     public void setFieldValue(_Fields field, Object value) {
@@ -582,19 +700,19 @@ public class OrderReplay {
         }
         break;
 
-      case START_DATE:
+      case START_DATE_TIME:
         if (value == null) {
-          unsetStartDate();
+          unsetStartDateTime();
         } else {
-          setStartDate((String)value);
+          setStartDateTime((Long)value);
         }
         break;
 
-      case END_DATE:
+      case END_DATE_TIME:
         if (value == null) {
-          unsetEndDate();
+          unsetEndDateTime();
         } else {
-          setEndDate((String)value);
+          setEndDateTime((Long)value);
         }
         break;
 
@@ -609,11 +727,11 @@ public class OrderReplay {
       case VARIABLES:
         return getVariables();
 
-      case START_DATE:
-        return getStartDate();
+      case START_DATE_TIME:
+        return Long.valueOf(getStartDateTime());
 
-      case END_DATE:
-        return getEndDate();
+      case END_DATE_TIME:
+        return Long.valueOf(getEndDateTime());
 
       }
       throw new IllegalStateException();
@@ -630,10 +748,10 @@ public class OrderReplay {
         return isSetAssetId();
       case VARIABLES:
         return isSetVariables();
-      case START_DATE:
-        return isSetStartDate();
-      case END_DATE:
-        return isSetEndDate();
+      case START_DATE_TIME:
+        return isSetStartDateTime();
+      case END_DATE_TIME:
+        return isSetEndDateTime();
       }
       throw new IllegalStateException();
     }
@@ -669,21 +787,21 @@ public class OrderReplay {
           return false;
       }
 
-      boolean this_present_startDate = true && this.isSetStartDate();
-      boolean that_present_startDate = true && that.isSetStartDate();
-      if (this_present_startDate || that_present_startDate) {
-        if (!(this_present_startDate && that_present_startDate))
+      boolean this_present_startDateTime = true;
+      boolean that_present_startDateTime = true;
+      if (this_present_startDateTime || that_present_startDateTime) {
+        if (!(this_present_startDateTime && that_present_startDateTime))
           return false;
-        if (!this.startDate.equals(that.startDate))
+        if (this.startDateTime != that.startDateTime)
           return false;
       }
 
-      boolean this_present_endDate = true && this.isSetEndDate();
-      boolean that_present_endDate = true && that.isSetEndDate();
-      if (this_present_endDate || that_present_endDate) {
-        if (!(this_present_endDate && that_present_endDate))
+      boolean this_present_endDateTime = true;
+      boolean that_present_endDateTime = true;
+      if (this_present_endDateTime || that_present_endDateTime) {
+        if (!(this_present_endDateTime && that_present_endDateTime))
           return false;
-        if (!this.endDate.equals(that.endDate))
+        if (this.endDateTime != that.endDateTime)
           return false;
       }
 
@@ -723,22 +841,22 @@ public class OrderReplay {
           return lastComparison;
         }
       }
-      lastComparison = Boolean.valueOf(isSetStartDate()).compareTo(typedOther.isSetStartDate());
+      lastComparison = Boolean.valueOf(isSetStartDateTime()).compareTo(typedOther.isSetStartDateTime());
       if (lastComparison != 0) {
         return lastComparison;
       }
-      if (isSetStartDate()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.startDate, typedOther.startDate);
+      if (isSetStartDateTime()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.startDateTime, typedOther.startDateTime);
         if (lastComparison != 0) {
           return lastComparison;
         }
       }
-      lastComparison = Boolean.valueOf(isSetEndDate()).compareTo(typedOther.isSetEndDate());
+      lastComparison = Boolean.valueOf(isSetEndDateTime()).compareTo(typedOther.isSetEndDateTime());
       if (lastComparison != 0) {
         return lastComparison;
       }
-      if (isSetEndDate()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.endDate, typedOther.endDate);
+      if (isSetEndDateTime()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.endDateTime, typedOther.endDateTime);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -779,20 +897,12 @@ public class OrderReplay {
       }
       first = false;
       if (!first) sb.append(", ");
-      sb.append("startDate:");
-      if (this.startDate == null) {
-        sb.append("null");
-      } else {
-        sb.append(this.startDate);
-      }
+      sb.append("startDateTime:");
+      sb.append(this.startDateTime);
       first = false;
       if (!first) sb.append(", ");
-      sb.append("endDate:");
-      if (this.endDate == null) {
-        sb.append("null");
-      } else {
-        sb.append(this.endDate);
-      }
+      sb.append("endDateTime:");
+      sb.append(this.endDateTime);
       first = false;
       sb.append(")");
       return sb.toString();
@@ -813,6 +923,8 @@ public class OrderReplay {
 
     private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
       try {
+        // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
+        __isset_bitfield = 0;
         read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
       } catch (org.apache.thrift.TException te) {
         throw new java.io.IOException(te);
@@ -863,18 +975,18 @@ public class OrderReplay {
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
-            case 3: // START_DATE
-              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-                struct.startDate = iprot.readString();
-                struct.setStartDateIsSet(true);
+            case 3: // START_DATE_TIME
+              if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
+                struct.startDateTime = iprot.readI64();
+                struct.setStartDateTimeIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
-            case 4: // END_DATE
-              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-                struct.endDate = iprot.readString();
-                struct.setEndDateIsSet(true);
+            case 4: // END_DATE_TIME
+              if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
+                struct.endDateTime = iprot.readI64();
+                struct.setEndDateTimeIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
@@ -911,16 +1023,12 @@ public class OrderReplay {
           }
           oprot.writeFieldEnd();
         }
-        if (struct.startDate != null) {
-          oprot.writeFieldBegin(START_DATE_FIELD_DESC);
-          oprot.writeString(struct.startDate);
-          oprot.writeFieldEnd();
-        }
-        if (struct.endDate != null) {
-          oprot.writeFieldBegin(END_DATE_FIELD_DESC);
-          oprot.writeString(struct.endDate);
-          oprot.writeFieldEnd();
-        }
+        oprot.writeFieldBegin(START_DATE_TIME_FIELD_DESC);
+        oprot.writeI64(struct.startDateTime);
+        oprot.writeFieldEnd();
+        oprot.writeFieldBegin(END_DATE_TIME_FIELD_DESC);
+        oprot.writeI64(struct.endDateTime);
+        oprot.writeFieldEnd();
         oprot.writeFieldStop();
         oprot.writeStructEnd();
       }
@@ -945,10 +1053,10 @@ public class OrderReplay {
         if (struct.isSetVariables()) {
           optionals.set(1);
         }
-        if (struct.isSetStartDate()) {
+        if (struct.isSetStartDateTime()) {
           optionals.set(2);
         }
-        if (struct.isSetEndDate()) {
+        if (struct.isSetEndDateTime()) {
           optionals.set(3);
         }
         oprot.writeBitSet(optionals, 4);
@@ -964,11 +1072,11 @@ public class OrderReplay {
             }
           }
         }
-        if (struct.isSetStartDate()) {
-          oprot.writeString(struct.startDate);
+        if (struct.isSetStartDateTime()) {
+          oprot.writeI64(struct.startDateTime);
         }
-        if (struct.isSetEndDate()) {
-          oprot.writeString(struct.endDate);
+        if (struct.isSetEndDateTime()) {
+          oprot.writeI64(struct.endDateTime);
         }
       }
 
@@ -994,12 +1102,12 @@ public class OrderReplay {
           struct.setVariablesIsSet(true);
         }
         if (incoming.get(2)) {
-          struct.startDate = iprot.readString();
-          struct.setStartDateIsSet(true);
+          struct.startDateTime = iprot.readI64();
+          struct.setStartDateTimeIsSet(true);
         }
         if (incoming.get(3)) {
-          struct.endDate = iprot.readString();
-          struct.setEndDateIsSet(true);
+          struct.endDateTime = iprot.readI64();
+          struct.setEndDateTimeIsSet(true);
         }
       }
     }
@@ -1473,6 +1581,7 @@ public class OrderReplay {
     private static final org.apache.thrift.protocol.TField WINDOW_SIZE_FIELD_DESC = new org.apache.thrift.protocol.TField("windowSize", org.apache.thrift.protocol.TType.I32, (short)4);
     private static final org.apache.thrift.protocol.TField INTRA_WINDOW_FIELD_DESC = new org.apache.thrift.protocol.TField("intraWindow", org.apache.thrift.protocol.TType.BOOL, (short)5);
     private static final org.apache.thrift.protocol.TField OFFSETTING_FIELD_DESC = new org.apache.thrift.protocol.TField("offsetting", org.apache.thrift.protocol.TType.I32, (short)6);
+    private static final org.apache.thrift.protocol.TField ATTRIBUTE_FIELD_DESC = new org.apache.thrift.protocol.TField("attribute", org.apache.thrift.protocol.TType.I32, (short)7);
 
     private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
     static {
@@ -1486,6 +1595,7 @@ public class OrderReplay {
     public int windowSize; // required
     public boolean intraWindow; // required
     public int offsetting; // required
+    public int attribute; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -1494,7 +1604,8 @@ public class OrderReplay {
       PROPORTION_SHUFFLING((short)3, "proportionShuffling"),
       WINDOW_SIZE((short)4, "windowSize"),
       INTRA_WINDOW((short)5, "intraWindow"),
-      OFFSETTING((short)6, "offsetting");
+      OFFSETTING((short)6, "offsetting"),
+      ATTRIBUTE((short)7, "attribute");
 
       private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -1521,6 +1632,8 @@ public class OrderReplay {
             return INTRA_WINDOW;
           case 6: // OFFSETTING
             return OFFSETTING;
+          case 7: // ATTRIBUTE
+            return ATTRIBUTE;
           default:
             return null;
         }
@@ -1565,6 +1678,7 @@ public class OrderReplay {
     private static final int __WINDOWSIZE_ISSET_ID = 1;
     private static final int __INTRAWINDOW_ISSET_ID = 2;
     private static final int __OFFSETTING_ISSET_ID = 3;
+    private static final int __ATTRIBUTE_ISSET_ID = 4;
     private byte __isset_bitfield = 0;
     public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
@@ -1582,6 +1696,8 @@ public class OrderReplay {
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.BOOL)));
       tmpMap.put(_Fields.OFFSETTING, new org.apache.thrift.meta_data.FieldMetaData("offsetting", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.ATTRIBUTE, new org.apache.thrift.meta_data.FieldMetaData("attribute", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(shuffledReplay_args.class, metaDataMap);
     }
@@ -1595,7 +1711,8 @@ public class OrderReplay {
       double proportionShuffling,
       int windowSize,
       boolean intraWindow,
-      int offsetting)
+      int offsetting,
+      int attribute)
     {
       this();
       this.assetId = assetId;
@@ -1608,6 +1725,8 @@ public class OrderReplay {
       setIntraWindowIsSet(true);
       this.offsetting = offsetting;
       setOffsettingIsSet(true);
+      this.attribute = attribute;
+      setAttributeIsSet(true);
     }
 
     /**
@@ -1629,6 +1748,7 @@ public class OrderReplay {
       this.windowSize = other.windowSize;
       this.intraWindow = other.intraWindow;
       this.offsetting = other.offsetting;
+      this.attribute = other.attribute;
     }
 
     public shuffledReplay_args deepCopy() {
@@ -1647,6 +1767,8 @@ public class OrderReplay {
       this.intraWindow = false;
       setOffsettingIsSet(false);
       this.offsetting = 0;
+      setAttributeIsSet(false);
+      this.attribute = 0;
     }
 
     public String getAssetId() {
@@ -1804,6 +1926,29 @@ public class OrderReplay {
       __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __OFFSETTING_ISSET_ID, value);
     }
 
+    public int getAttribute() {
+      return this.attribute;
+    }
+
+    public shuffledReplay_args setAttribute(int attribute) {
+      this.attribute = attribute;
+      setAttributeIsSet(true);
+      return this;
+    }
+
+    public void unsetAttribute() {
+      __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __ATTRIBUTE_ISSET_ID);
+    }
+
+    /** Returns true if field attribute is set (has been assigned a value) and false otherwise */
+    public boolean isSetAttribute() {
+      return EncodingUtils.testBit(__isset_bitfield, __ATTRIBUTE_ISSET_ID);
+    }
+
+    public void setAttributeIsSet(boolean value) {
+      __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __ATTRIBUTE_ISSET_ID, value);
+    }
+
     public void setFieldValue(_Fields field, Object value) {
       switch (field) {
       case ASSET_ID:
@@ -1854,6 +1999,14 @@ public class OrderReplay {
         }
         break;
 
+      case ATTRIBUTE:
+        if (value == null) {
+          unsetAttribute();
+        } else {
+          setAttribute((Integer)value);
+        }
+        break;
+
       }
     }
 
@@ -1876,6 +2029,9 @@ public class OrderReplay {
 
       case OFFSETTING:
         return Integer.valueOf(getOffsetting());
+
+      case ATTRIBUTE:
+        return Integer.valueOf(getAttribute());
 
       }
       throw new IllegalStateException();
@@ -1900,6 +2056,8 @@ public class OrderReplay {
         return isSetIntraWindow();
       case OFFSETTING:
         return isSetOffsetting();
+      case ATTRIBUTE:
+        return isSetAttribute();
       }
       throw new IllegalStateException();
     }
@@ -1968,6 +2126,15 @@ public class OrderReplay {
         if (!(this_present_offsetting && that_present_offsetting))
           return false;
         if (this.offsetting != that.offsetting)
+          return false;
+      }
+
+      boolean this_present_attribute = true;
+      boolean that_present_attribute = true;
+      if (this_present_attribute || that_present_attribute) {
+        if (!(this_present_attribute && that_present_attribute))
+          return false;
+        if (this.attribute != that.attribute)
           return false;
       }
 
@@ -2047,6 +2214,16 @@ public class OrderReplay {
           return lastComparison;
         }
       }
+      lastComparison = Boolean.valueOf(isSetAttribute()).compareTo(typedOther.isSetAttribute());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetAttribute()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.attribute, typedOther.attribute);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
       return 0;
     }
 
@@ -2097,6 +2274,10 @@ public class OrderReplay {
       if (!first) sb.append(", ");
       sb.append("offsetting:");
       sb.append(this.offsetting);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("attribute:");
+      sb.append(this.attribute);
       first = false;
       sb.append(")");
       return sb.toString();
@@ -2201,6 +2382,14 @@ public class OrderReplay {
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
+            case 7: // ATTRIBUTE
+              if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+                struct.attribute = iprot.readI32();
+                struct.setAttributeIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
             default:
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
           }
@@ -2245,6 +2434,9 @@ public class OrderReplay {
         oprot.writeFieldBegin(OFFSETTING_FIELD_DESC);
         oprot.writeI32(struct.offsetting);
         oprot.writeFieldEnd();
+        oprot.writeFieldBegin(ATTRIBUTE_FIELD_DESC);
+        oprot.writeI32(struct.attribute);
+        oprot.writeFieldEnd();
         oprot.writeFieldStop();
         oprot.writeStructEnd();
       }
@@ -2281,7 +2473,10 @@ public class OrderReplay {
         if (struct.isSetOffsetting()) {
           optionals.set(5);
         }
-        oprot.writeBitSet(optionals, 6);
+        if (struct.isSetAttribute()) {
+          optionals.set(6);
+        }
+        oprot.writeBitSet(optionals, 7);
         if (struct.isSetAssetId()) {
           oprot.writeString(struct.assetId);
         }
@@ -2306,12 +2501,15 @@ public class OrderReplay {
         if (struct.isSetOffsetting()) {
           oprot.writeI32(struct.offsetting);
         }
+        if (struct.isSetAttribute()) {
+          oprot.writeI32(struct.attribute);
+        }
       }
 
       @Override
       public void read(org.apache.thrift.protocol.TProtocol prot, shuffledReplay_args struct) throws org.apache.thrift.TException {
         TTupleProtocol iprot = (TTupleProtocol) prot;
-        BitSet incoming = iprot.readBitSet(6);
+        BitSet incoming = iprot.readBitSet(7);
         if (incoming.get(0)) {
           struct.assetId = iprot.readString();
           struct.setAssetIdIsSet(true);
@@ -2344,6 +2542,10 @@ public class OrderReplay {
         if (incoming.get(5)) {
           struct.offsetting = iprot.readI32();
           struct.setOffsettingIsSet(true);
+        }
+        if (incoming.get(6)) {
+          struct.attribute = iprot.readI32();
+          struct.setAttributeIsSet(true);
         }
       }
     }
@@ -2799,6 +3001,1632 @@ public class OrderReplay {
                 }
               }
               struct.success.add(_elem47);
+            }
+          }
+          struct.setSuccessIsSet(true);
+        }
+      }
+    }
+
+  }
+
+  public static class shuffledReplayDateRange_args implements org.apache.thrift.TBase<shuffledReplayDateRange_args, shuffledReplayDateRange_args._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("shuffledReplayDateRange_args");
+
+    private static final org.apache.thrift.protocol.TField ASSET_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("assetId", org.apache.thrift.protocol.TType.STRING, (short)1);
+    private static final org.apache.thrift.protocol.TField VARIABLES_FIELD_DESC = new org.apache.thrift.protocol.TField("variables", org.apache.thrift.protocol.TType.LIST, (short)2);
+    private static final org.apache.thrift.protocol.TField PROPORTION_SHUFFLING_FIELD_DESC = new org.apache.thrift.protocol.TField("proportionShuffling", org.apache.thrift.protocol.TType.DOUBLE, (short)3);
+    private static final org.apache.thrift.protocol.TField WINDOW_SIZE_FIELD_DESC = new org.apache.thrift.protocol.TField("windowSize", org.apache.thrift.protocol.TType.I32, (short)4);
+    private static final org.apache.thrift.protocol.TField INTRA_WINDOW_FIELD_DESC = new org.apache.thrift.protocol.TField("intraWindow", org.apache.thrift.protocol.TType.BOOL, (short)5);
+    private static final org.apache.thrift.protocol.TField OFFSETTING_FIELD_DESC = new org.apache.thrift.protocol.TField("offsetting", org.apache.thrift.protocol.TType.I32, (short)6);
+    private static final org.apache.thrift.protocol.TField ATTRIBUTE_FIELD_DESC = new org.apache.thrift.protocol.TField("attribute", org.apache.thrift.protocol.TType.I32, (short)7);
+    private static final org.apache.thrift.protocol.TField START_DATE_TIME_FIELD_DESC = new org.apache.thrift.protocol.TField("startDateTime", org.apache.thrift.protocol.TType.I64, (short)8);
+    private static final org.apache.thrift.protocol.TField END_DATE_TIME_FIELD_DESC = new org.apache.thrift.protocol.TField("endDateTime", org.apache.thrift.protocol.TType.I64, (short)9);
+
+    private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
+    static {
+      schemes.put(StandardScheme.class, new shuffledReplayDateRange_argsStandardSchemeFactory());
+      schemes.put(TupleScheme.class, new shuffledReplayDateRange_argsTupleSchemeFactory());
+    }
+
+    public String assetId; // required
+    public List<String> variables; // required
+    public double proportionShuffling; // required
+    public int windowSize; // required
+    public boolean intraWindow; // required
+    public int offsetting; // required
+    public int attribute; // required
+    public long startDateTime; // required
+    public long endDateTime; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      ASSET_ID((short)1, "assetId"),
+      VARIABLES((short)2, "variables"),
+      PROPORTION_SHUFFLING((short)3, "proportionShuffling"),
+      WINDOW_SIZE((short)4, "windowSize"),
+      INTRA_WINDOW((short)5, "intraWindow"),
+      OFFSETTING((short)6, "offsetting"),
+      ATTRIBUTE((short)7, "attribute"),
+      START_DATE_TIME((short)8, "startDateTime"),
+      END_DATE_TIME((short)9, "endDateTime");
+
+      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
+
+      static {
+        for (_Fields field : EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // ASSET_ID
+            return ASSET_ID;
+          case 2: // VARIABLES
+            return VARIABLES;
+          case 3: // PROPORTION_SHUFFLING
+            return PROPORTION_SHUFFLING;
+          case 4: // WINDOW_SIZE
+            return WINDOW_SIZE;
+          case 5: // INTRA_WINDOW
+            return INTRA_WINDOW;
+          case 6: // OFFSETTING
+            return OFFSETTING;
+          case 7: // ATTRIBUTE
+            return ATTRIBUTE;
+          case 8: // START_DATE_TIME
+            return START_DATE_TIME;
+          case 9: // END_DATE_TIME
+            return END_DATE_TIME;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final String _fieldName;
+
+      _Fields(short thriftId, String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    private static final int __PROPORTIONSHUFFLING_ISSET_ID = 0;
+    private static final int __WINDOWSIZE_ISSET_ID = 1;
+    private static final int __INTRAWINDOW_ISSET_ID = 2;
+    private static final int __OFFSETTING_ISSET_ID = 3;
+    private static final int __ATTRIBUTE_ISSET_ID = 4;
+    private static final int __STARTDATETIME_ISSET_ID = 5;
+    private static final int __ENDDATETIME_ISSET_ID = 6;
+    private byte __isset_bitfield = 0;
+    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.ASSET_ID, new org.apache.thrift.meta_data.FieldMetaData("assetId", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.VARIABLES, new org.apache.thrift.meta_data.FieldMetaData("variables", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
+              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
+      tmpMap.put(_Fields.PROPORTION_SHUFFLING, new org.apache.thrift.meta_data.FieldMetaData("proportionShuffling", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.DOUBLE)));
+      tmpMap.put(_Fields.WINDOW_SIZE, new org.apache.thrift.meta_data.FieldMetaData("windowSize", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.INTRA_WINDOW, new org.apache.thrift.meta_data.FieldMetaData("intraWindow", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.BOOL)));
+      tmpMap.put(_Fields.OFFSETTING, new org.apache.thrift.meta_data.FieldMetaData("offsetting", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.ATTRIBUTE, new org.apache.thrift.meta_data.FieldMetaData("attribute", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.START_DATE_TIME, new org.apache.thrift.meta_data.FieldMetaData("startDateTime", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
+      tmpMap.put(_Fields.END_DATE_TIME, new org.apache.thrift.meta_data.FieldMetaData("endDateTime", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
+      metaDataMap = Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(shuffledReplayDateRange_args.class, metaDataMap);
+    }
+
+    public shuffledReplayDateRange_args() {
+    }
+
+    public shuffledReplayDateRange_args(
+      String assetId,
+      List<String> variables,
+      double proportionShuffling,
+      int windowSize,
+      boolean intraWindow,
+      int offsetting,
+      int attribute,
+      long startDateTime,
+      long endDateTime)
+    {
+      this();
+      this.assetId = assetId;
+      this.variables = variables;
+      this.proportionShuffling = proportionShuffling;
+      setProportionShufflingIsSet(true);
+      this.windowSize = windowSize;
+      setWindowSizeIsSet(true);
+      this.intraWindow = intraWindow;
+      setIntraWindowIsSet(true);
+      this.offsetting = offsetting;
+      setOffsettingIsSet(true);
+      this.attribute = attribute;
+      setAttributeIsSet(true);
+      this.startDateTime = startDateTime;
+      setStartDateTimeIsSet(true);
+      this.endDateTime = endDateTime;
+      setEndDateTimeIsSet(true);
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public shuffledReplayDateRange_args(shuffledReplayDateRange_args other) {
+      __isset_bitfield = other.__isset_bitfield;
+      if (other.isSetAssetId()) {
+        this.assetId = other.assetId;
+      }
+      if (other.isSetVariables()) {
+        List<String> __this__variables = new ArrayList<String>();
+        for (String other_element : other.variables) {
+          __this__variables.add(other_element);
+        }
+        this.variables = __this__variables;
+      }
+      this.proportionShuffling = other.proportionShuffling;
+      this.windowSize = other.windowSize;
+      this.intraWindow = other.intraWindow;
+      this.offsetting = other.offsetting;
+      this.attribute = other.attribute;
+      this.startDateTime = other.startDateTime;
+      this.endDateTime = other.endDateTime;
+    }
+
+    public shuffledReplayDateRange_args deepCopy() {
+      return new shuffledReplayDateRange_args(this);
+    }
+
+    @Override
+    public void clear() {
+      this.assetId = null;
+      this.variables = null;
+      setProportionShufflingIsSet(false);
+      this.proportionShuffling = 0.0;
+      setWindowSizeIsSet(false);
+      this.windowSize = 0;
+      setIntraWindowIsSet(false);
+      this.intraWindow = false;
+      setOffsettingIsSet(false);
+      this.offsetting = 0;
+      setAttributeIsSet(false);
+      this.attribute = 0;
+      setStartDateTimeIsSet(false);
+      this.startDateTime = 0;
+      setEndDateTimeIsSet(false);
+      this.endDateTime = 0;
+    }
+
+    public String getAssetId() {
+      return this.assetId;
+    }
+
+    public shuffledReplayDateRange_args setAssetId(String assetId) {
+      this.assetId = assetId;
+      return this;
+    }
+
+    public void unsetAssetId() {
+      this.assetId = null;
+    }
+
+    /** Returns true if field assetId is set (has been assigned a value) and false otherwise */
+    public boolean isSetAssetId() {
+      return this.assetId != null;
+    }
+
+    public void setAssetIdIsSet(boolean value) {
+      if (!value) {
+        this.assetId = null;
+      }
+    }
+
+    public int getVariablesSize() {
+      return (this.variables == null) ? 0 : this.variables.size();
+    }
+
+    public java.util.Iterator<String> getVariablesIterator() {
+      return (this.variables == null) ? null : this.variables.iterator();
+    }
+
+    public void addToVariables(String elem) {
+      if (this.variables == null) {
+        this.variables = new ArrayList<String>();
+      }
+      this.variables.add(elem);
+    }
+
+    public List<String> getVariables() {
+      return this.variables;
+    }
+
+    public shuffledReplayDateRange_args setVariables(List<String> variables) {
+      this.variables = variables;
+      return this;
+    }
+
+    public void unsetVariables() {
+      this.variables = null;
+    }
+
+    /** Returns true if field variables is set (has been assigned a value) and false otherwise */
+    public boolean isSetVariables() {
+      return this.variables != null;
+    }
+
+    public void setVariablesIsSet(boolean value) {
+      if (!value) {
+        this.variables = null;
+      }
+    }
+
+    public double getProportionShuffling() {
+      return this.proportionShuffling;
+    }
+
+    public shuffledReplayDateRange_args setProportionShuffling(double proportionShuffling) {
+      this.proportionShuffling = proportionShuffling;
+      setProportionShufflingIsSet(true);
+      return this;
+    }
+
+    public void unsetProportionShuffling() {
+      __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __PROPORTIONSHUFFLING_ISSET_ID);
+    }
+
+    /** Returns true if field proportionShuffling is set (has been assigned a value) and false otherwise */
+    public boolean isSetProportionShuffling() {
+      return EncodingUtils.testBit(__isset_bitfield, __PROPORTIONSHUFFLING_ISSET_ID);
+    }
+
+    public void setProportionShufflingIsSet(boolean value) {
+      __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __PROPORTIONSHUFFLING_ISSET_ID, value);
+    }
+
+    public int getWindowSize() {
+      return this.windowSize;
+    }
+
+    public shuffledReplayDateRange_args setWindowSize(int windowSize) {
+      this.windowSize = windowSize;
+      setWindowSizeIsSet(true);
+      return this;
+    }
+
+    public void unsetWindowSize() {
+      __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __WINDOWSIZE_ISSET_ID);
+    }
+
+    /** Returns true if field windowSize is set (has been assigned a value) and false otherwise */
+    public boolean isSetWindowSize() {
+      return EncodingUtils.testBit(__isset_bitfield, __WINDOWSIZE_ISSET_ID);
+    }
+
+    public void setWindowSizeIsSet(boolean value) {
+      __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __WINDOWSIZE_ISSET_ID, value);
+    }
+
+    public boolean isIntraWindow() {
+      return this.intraWindow;
+    }
+
+    public shuffledReplayDateRange_args setIntraWindow(boolean intraWindow) {
+      this.intraWindow = intraWindow;
+      setIntraWindowIsSet(true);
+      return this;
+    }
+
+    public void unsetIntraWindow() {
+      __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __INTRAWINDOW_ISSET_ID);
+    }
+
+    /** Returns true if field intraWindow is set (has been assigned a value) and false otherwise */
+    public boolean isSetIntraWindow() {
+      return EncodingUtils.testBit(__isset_bitfield, __INTRAWINDOW_ISSET_ID);
+    }
+
+    public void setIntraWindowIsSet(boolean value) {
+      __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __INTRAWINDOW_ISSET_ID, value);
+    }
+
+    public int getOffsetting() {
+      return this.offsetting;
+    }
+
+    public shuffledReplayDateRange_args setOffsetting(int offsetting) {
+      this.offsetting = offsetting;
+      setOffsettingIsSet(true);
+      return this;
+    }
+
+    public void unsetOffsetting() {
+      __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __OFFSETTING_ISSET_ID);
+    }
+
+    /** Returns true if field offsetting is set (has been assigned a value) and false otherwise */
+    public boolean isSetOffsetting() {
+      return EncodingUtils.testBit(__isset_bitfield, __OFFSETTING_ISSET_ID);
+    }
+
+    public void setOffsettingIsSet(boolean value) {
+      __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __OFFSETTING_ISSET_ID, value);
+    }
+
+    public int getAttribute() {
+      return this.attribute;
+    }
+
+    public shuffledReplayDateRange_args setAttribute(int attribute) {
+      this.attribute = attribute;
+      setAttributeIsSet(true);
+      return this;
+    }
+
+    public void unsetAttribute() {
+      __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __ATTRIBUTE_ISSET_ID);
+    }
+
+    /** Returns true if field attribute is set (has been assigned a value) and false otherwise */
+    public boolean isSetAttribute() {
+      return EncodingUtils.testBit(__isset_bitfield, __ATTRIBUTE_ISSET_ID);
+    }
+
+    public void setAttributeIsSet(boolean value) {
+      __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __ATTRIBUTE_ISSET_ID, value);
+    }
+
+    public long getStartDateTime() {
+      return this.startDateTime;
+    }
+
+    public shuffledReplayDateRange_args setStartDateTime(long startDateTime) {
+      this.startDateTime = startDateTime;
+      setStartDateTimeIsSet(true);
+      return this;
+    }
+
+    public void unsetStartDateTime() {
+      __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __STARTDATETIME_ISSET_ID);
+    }
+
+    /** Returns true if field startDateTime is set (has been assigned a value) and false otherwise */
+    public boolean isSetStartDateTime() {
+      return EncodingUtils.testBit(__isset_bitfield, __STARTDATETIME_ISSET_ID);
+    }
+
+    public void setStartDateTimeIsSet(boolean value) {
+      __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __STARTDATETIME_ISSET_ID, value);
+    }
+
+    public long getEndDateTime() {
+      return this.endDateTime;
+    }
+
+    public shuffledReplayDateRange_args setEndDateTime(long endDateTime) {
+      this.endDateTime = endDateTime;
+      setEndDateTimeIsSet(true);
+      return this;
+    }
+
+    public void unsetEndDateTime() {
+      __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __ENDDATETIME_ISSET_ID);
+    }
+
+    /** Returns true if field endDateTime is set (has been assigned a value) and false otherwise */
+    public boolean isSetEndDateTime() {
+      return EncodingUtils.testBit(__isset_bitfield, __ENDDATETIME_ISSET_ID);
+    }
+
+    public void setEndDateTimeIsSet(boolean value) {
+      __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __ENDDATETIME_ISSET_ID, value);
+    }
+
+    public void setFieldValue(_Fields field, Object value) {
+      switch (field) {
+      case ASSET_ID:
+        if (value == null) {
+          unsetAssetId();
+        } else {
+          setAssetId((String)value);
+        }
+        break;
+
+      case VARIABLES:
+        if (value == null) {
+          unsetVariables();
+        } else {
+          setVariables((List<String>)value);
+        }
+        break;
+
+      case PROPORTION_SHUFFLING:
+        if (value == null) {
+          unsetProportionShuffling();
+        } else {
+          setProportionShuffling((Double)value);
+        }
+        break;
+
+      case WINDOW_SIZE:
+        if (value == null) {
+          unsetWindowSize();
+        } else {
+          setWindowSize((Integer)value);
+        }
+        break;
+
+      case INTRA_WINDOW:
+        if (value == null) {
+          unsetIntraWindow();
+        } else {
+          setIntraWindow((Boolean)value);
+        }
+        break;
+
+      case OFFSETTING:
+        if (value == null) {
+          unsetOffsetting();
+        } else {
+          setOffsetting((Integer)value);
+        }
+        break;
+
+      case ATTRIBUTE:
+        if (value == null) {
+          unsetAttribute();
+        } else {
+          setAttribute((Integer)value);
+        }
+        break;
+
+      case START_DATE_TIME:
+        if (value == null) {
+          unsetStartDateTime();
+        } else {
+          setStartDateTime((Long)value);
+        }
+        break;
+
+      case END_DATE_TIME:
+        if (value == null) {
+          unsetEndDateTime();
+        } else {
+          setEndDateTime((Long)value);
+        }
+        break;
+
+      }
+    }
+
+    public Object getFieldValue(_Fields field) {
+      switch (field) {
+      case ASSET_ID:
+        return getAssetId();
+
+      case VARIABLES:
+        return getVariables();
+
+      case PROPORTION_SHUFFLING:
+        return Double.valueOf(getProportionShuffling());
+
+      case WINDOW_SIZE:
+        return Integer.valueOf(getWindowSize());
+
+      case INTRA_WINDOW:
+        return Boolean.valueOf(isIntraWindow());
+
+      case OFFSETTING:
+        return Integer.valueOf(getOffsetting());
+
+      case ATTRIBUTE:
+        return Integer.valueOf(getAttribute());
+
+      case START_DATE_TIME:
+        return Long.valueOf(getStartDateTime());
+
+      case END_DATE_TIME:
+        return Long.valueOf(getEndDateTime());
+
+      }
+      throw new IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new IllegalArgumentException();
+      }
+
+      switch (field) {
+      case ASSET_ID:
+        return isSetAssetId();
+      case VARIABLES:
+        return isSetVariables();
+      case PROPORTION_SHUFFLING:
+        return isSetProportionShuffling();
+      case WINDOW_SIZE:
+        return isSetWindowSize();
+      case INTRA_WINDOW:
+        return isSetIntraWindow();
+      case OFFSETTING:
+        return isSetOffsetting();
+      case ATTRIBUTE:
+        return isSetAttribute();
+      case START_DATE_TIME:
+        return isSetStartDateTime();
+      case END_DATE_TIME:
+        return isSetEndDateTime();
+      }
+      throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof shuffledReplayDateRange_args)
+        return this.equals((shuffledReplayDateRange_args)that);
+      return false;
+    }
+
+    public boolean equals(shuffledReplayDateRange_args that) {
+      if (that == null)
+        return false;
+
+      boolean this_present_assetId = true && this.isSetAssetId();
+      boolean that_present_assetId = true && that.isSetAssetId();
+      if (this_present_assetId || that_present_assetId) {
+        if (!(this_present_assetId && that_present_assetId))
+          return false;
+        if (!this.assetId.equals(that.assetId))
+          return false;
+      }
+
+      boolean this_present_variables = true && this.isSetVariables();
+      boolean that_present_variables = true && that.isSetVariables();
+      if (this_present_variables || that_present_variables) {
+        if (!(this_present_variables && that_present_variables))
+          return false;
+        if (!this.variables.equals(that.variables))
+          return false;
+      }
+
+      boolean this_present_proportionShuffling = true;
+      boolean that_present_proportionShuffling = true;
+      if (this_present_proportionShuffling || that_present_proportionShuffling) {
+        if (!(this_present_proportionShuffling && that_present_proportionShuffling))
+          return false;
+        if (this.proportionShuffling != that.proportionShuffling)
+          return false;
+      }
+
+      boolean this_present_windowSize = true;
+      boolean that_present_windowSize = true;
+      if (this_present_windowSize || that_present_windowSize) {
+        if (!(this_present_windowSize && that_present_windowSize))
+          return false;
+        if (this.windowSize != that.windowSize)
+          return false;
+      }
+
+      boolean this_present_intraWindow = true;
+      boolean that_present_intraWindow = true;
+      if (this_present_intraWindow || that_present_intraWindow) {
+        if (!(this_present_intraWindow && that_present_intraWindow))
+          return false;
+        if (this.intraWindow != that.intraWindow)
+          return false;
+      }
+
+      boolean this_present_offsetting = true;
+      boolean that_present_offsetting = true;
+      if (this_present_offsetting || that_present_offsetting) {
+        if (!(this_present_offsetting && that_present_offsetting))
+          return false;
+        if (this.offsetting != that.offsetting)
+          return false;
+      }
+
+      boolean this_present_attribute = true;
+      boolean that_present_attribute = true;
+      if (this_present_attribute || that_present_attribute) {
+        if (!(this_present_attribute && that_present_attribute))
+          return false;
+        if (this.attribute != that.attribute)
+          return false;
+      }
+
+      boolean this_present_startDateTime = true;
+      boolean that_present_startDateTime = true;
+      if (this_present_startDateTime || that_present_startDateTime) {
+        if (!(this_present_startDateTime && that_present_startDateTime))
+          return false;
+        if (this.startDateTime != that.startDateTime)
+          return false;
+      }
+
+      boolean this_present_endDateTime = true;
+      boolean that_present_endDateTime = true;
+      if (this_present_endDateTime || that_present_endDateTime) {
+        if (!(this_present_endDateTime && that_present_endDateTime))
+          return false;
+        if (this.endDateTime != that.endDateTime)
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    public int compareTo(shuffledReplayDateRange_args other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      shuffledReplayDateRange_args typedOther = (shuffledReplayDateRange_args)other;
+
+      lastComparison = Boolean.valueOf(isSetAssetId()).compareTo(typedOther.isSetAssetId());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetAssetId()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.assetId, typedOther.assetId);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetVariables()).compareTo(typedOther.isSetVariables());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetVariables()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.variables, typedOther.variables);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetProportionShuffling()).compareTo(typedOther.isSetProportionShuffling());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetProportionShuffling()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.proportionShuffling, typedOther.proportionShuffling);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetWindowSize()).compareTo(typedOther.isSetWindowSize());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetWindowSize()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.windowSize, typedOther.windowSize);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetIntraWindow()).compareTo(typedOther.isSetIntraWindow());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetIntraWindow()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.intraWindow, typedOther.intraWindow);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetOffsetting()).compareTo(typedOther.isSetOffsetting());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetOffsetting()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.offsetting, typedOther.offsetting);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetAttribute()).compareTo(typedOther.isSetAttribute());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetAttribute()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.attribute, typedOther.attribute);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetStartDateTime()).compareTo(typedOther.isSetStartDateTime());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetStartDateTime()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.startDateTime, typedOther.startDateTime);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetEndDateTime()).compareTo(typedOther.isSetEndDateTime());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetEndDateTime()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.endDateTime, typedOther.endDateTime);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("shuffledReplayDateRange_args(");
+      boolean first = true;
+
+      sb.append("assetId:");
+      if (this.assetId == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.assetId);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("variables:");
+      if (this.variables == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.variables);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("proportionShuffling:");
+      sb.append(this.proportionShuffling);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("windowSize:");
+      sb.append(this.windowSize);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("intraWindow:");
+      sb.append(this.intraWindow);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("offsetting:");
+      sb.append(this.offsetting);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("attribute:");
+      sb.append(this.attribute);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("startDateTime:");
+      sb.append(this.startDateTime);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("endDateTime:");
+      sb.append(this.endDateTime);
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+      try {
+        // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
+        __isset_bitfield = 0;
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class shuffledReplayDateRange_argsStandardSchemeFactory implements SchemeFactory {
+      public shuffledReplayDateRange_argsStandardScheme getScheme() {
+        return new shuffledReplayDateRange_argsStandardScheme();
+      }
+    }
+
+    private static class shuffledReplayDateRange_argsStandardScheme extends StandardScheme<shuffledReplayDateRange_args> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, shuffledReplayDateRange_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // ASSET_ID
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.assetId = iprot.readString();
+                struct.setAssetIdIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 2: // VARIABLES
+              if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
+                {
+                  org.apache.thrift.protocol.TList _list52 = iprot.readListBegin();
+                  struct.variables = new ArrayList<String>(_list52.size);
+                  for (int _i53 = 0; _i53 < _list52.size; ++_i53)
+                  {
+                    String _elem54; // required
+                    _elem54 = iprot.readString();
+                    struct.variables.add(_elem54);
+                  }
+                  iprot.readListEnd();
+                }
+                struct.setVariablesIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 3: // PROPORTION_SHUFFLING
+              if (schemeField.type == org.apache.thrift.protocol.TType.DOUBLE) {
+                struct.proportionShuffling = iprot.readDouble();
+                struct.setProportionShufflingIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 4: // WINDOW_SIZE
+              if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+                struct.windowSize = iprot.readI32();
+                struct.setWindowSizeIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 5: // INTRA_WINDOW
+              if (schemeField.type == org.apache.thrift.protocol.TType.BOOL) {
+                struct.intraWindow = iprot.readBool();
+                struct.setIntraWindowIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 6: // OFFSETTING
+              if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+                struct.offsetting = iprot.readI32();
+                struct.setOffsettingIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 7: // ATTRIBUTE
+              if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+                struct.attribute = iprot.readI32();
+                struct.setAttributeIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 8: // START_DATE_TIME
+              if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
+                struct.startDateTime = iprot.readI64();
+                struct.setStartDateTimeIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 9: // END_DATE_TIME
+              if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
+                struct.endDateTime = iprot.readI64();
+                struct.setEndDateTimeIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, shuffledReplayDateRange_args struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.assetId != null) {
+          oprot.writeFieldBegin(ASSET_ID_FIELD_DESC);
+          oprot.writeString(struct.assetId);
+          oprot.writeFieldEnd();
+        }
+        if (struct.variables != null) {
+          oprot.writeFieldBegin(VARIABLES_FIELD_DESC);
+          {
+            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.variables.size()));
+            for (String _iter55 : struct.variables)
+            {
+              oprot.writeString(_iter55);
+            }
+            oprot.writeListEnd();
+          }
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldBegin(PROPORTION_SHUFFLING_FIELD_DESC);
+        oprot.writeDouble(struct.proportionShuffling);
+        oprot.writeFieldEnd();
+        oprot.writeFieldBegin(WINDOW_SIZE_FIELD_DESC);
+        oprot.writeI32(struct.windowSize);
+        oprot.writeFieldEnd();
+        oprot.writeFieldBegin(INTRA_WINDOW_FIELD_DESC);
+        oprot.writeBool(struct.intraWindow);
+        oprot.writeFieldEnd();
+        oprot.writeFieldBegin(OFFSETTING_FIELD_DESC);
+        oprot.writeI32(struct.offsetting);
+        oprot.writeFieldEnd();
+        oprot.writeFieldBegin(ATTRIBUTE_FIELD_DESC);
+        oprot.writeI32(struct.attribute);
+        oprot.writeFieldEnd();
+        oprot.writeFieldBegin(START_DATE_TIME_FIELD_DESC);
+        oprot.writeI64(struct.startDateTime);
+        oprot.writeFieldEnd();
+        oprot.writeFieldBegin(END_DATE_TIME_FIELD_DESC);
+        oprot.writeI64(struct.endDateTime);
+        oprot.writeFieldEnd();
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class shuffledReplayDateRange_argsTupleSchemeFactory implements SchemeFactory {
+      public shuffledReplayDateRange_argsTupleScheme getScheme() {
+        return new shuffledReplayDateRange_argsTupleScheme();
+      }
+    }
+
+    private static class shuffledReplayDateRange_argsTupleScheme extends TupleScheme<shuffledReplayDateRange_args> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, shuffledReplayDateRange_args struct) throws org.apache.thrift.TException {
+        TTupleProtocol oprot = (TTupleProtocol) prot;
+        BitSet optionals = new BitSet();
+        if (struct.isSetAssetId()) {
+          optionals.set(0);
+        }
+        if (struct.isSetVariables()) {
+          optionals.set(1);
+        }
+        if (struct.isSetProportionShuffling()) {
+          optionals.set(2);
+        }
+        if (struct.isSetWindowSize()) {
+          optionals.set(3);
+        }
+        if (struct.isSetIntraWindow()) {
+          optionals.set(4);
+        }
+        if (struct.isSetOffsetting()) {
+          optionals.set(5);
+        }
+        if (struct.isSetAttribute()) {
+          optionals.set(6);
+        }
+        if (struct.isSetStartDateTime()) {
+          optionals.set(7);
+        }
+        if (struct.isSetEndDateTime()) {
+          optionals.set(8);
+        }
+        oprot.writeBitSet(optionals, 9);
+        if (struct.isSetAssetId()) {
+          oprot.writeString(struct.assetId);
+        }
+        if (struct.isSetVariables()) {
+          {
+            oprot.writeI32(struct.variables.size());
+            for (String _iter56 : struct.variables)
+            {
+              oprot.writeString(_iter56);
+            }
+          }
+        }
+        if (struct.isSetProportionShuffling()) {
+          oprot.writeDouble(struct.proportionShuffling);
+        }
+        if (struct.isSetWindowSize()) {
+          oprot.writeI32(struct.windowSize);
+        }
+        if (struct.isSetIntraWindow()) {
+          oprot.writeBool(struct.intraWindow);
+        }
+        if (struct.isSetOffsetting()) {
+          oprot.writeI32(struct.offsetting);
+        }
+        if (struct.isSetAttribute()) {
+          oprot.writeI32(struct.attribute);
+        }
+        if (struct.isSetStartDateTime()) {
+          oprot.writeI64(struct.startDateTime);
+        }
+        if (struct.isSetEndDateTime()) {
+          oprot.writeI64(struct.endDateTime);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, shuffledReplayDateRange_args struct) throws org.apache.thrift.TException {
+        TTupleProtocol iprot = (TTupleProtocol) prot;
+        BitSet incoming = iprot.readBitSet(9);
+        if (incoming.get(0)) {
+          struct.assetId = iprot.readString();
+          struct.setAssetIdIsSet(true);
+        }
+        if (incoming.get(1)) {
+          {
+            org.apache.thrift.protocol.TList _list57 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+            struct.variables = new ArrayList<String>(_list57.size);
+            for (int _i58 = 0; _i58 < _list57.size; ++_i58)
+            {
+              String _elem59; // required
+              _elem59 = iprot.readString();
+              struct.variables.add(_elem59);
+            }
+          }
+          struct.setVariablesIsSet(true);
+        }
+        if (incoming.get(2)) {
+          struct.proportionShuffling = iprot.readDouble();
+          struct.setProportionShufflingIsSet(true);
+        }
+        if (incoming.get(3)) {
+          struct.windowSize = iprot.readI32();
+          struct.setWindowSizeIsSet(true);
+        }
+        if (incoming.get(4)) {
+          struct.intraWindow = iprot.readBool();
+          struct.setIntraWindowIsSet(true);
+        }
+        if (incoming.get(5)) {
+          struct.offsetting = iprot.readI32();
+          struct.setOffsettingIsSet(true);
+        }
+        if (incoming.get(6)) {
+          struct.attribute = iprot.readI32();
+          struct.setAttributeIsSet(true);
+        }
+        if (incoming.get(7)) {
+          struct.startDateTime = iprot.readI64();
+          struct.setStartDateTimeIsSet(true);
+        }
+        if (incoming.get(8)) {
+          struct.endDateTime = iprot.readI64();
+          struct.setEndDateTimeIsSet(true);
+        }
+      }
+    }
+
+  }
+
+  public static class shuffledReplayDateRange_result implements org.apache.thrift.TBase<shuffledReplayDateRange_result, shuffledReplayDateRange_result._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("shuffledReplayDateRange_result");
+
+    private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.LIST, (short)0);
+
+    private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
+    static {
+      schemes.put(StandardScheme.class, new shuffledReplayDateRange_resultStandardSchemeFactory());
+      schemes.put(TupleScheme.class, new shuffledReplayDateRange_resultTupleSchemeFactory());
+    }
+
+    public List<Map<String,Double>> success; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      SUCCESS((short)0, "success");
+
+      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
+
+      static {
+        for (_Fields field : EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 0: // SUCCESS
+            return SUCCESS;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final String _fieldName;
+
+      _Fields(short thriftId, String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
+              new org.apache.thrift.meta_data.MapMetaData(org.apache.thrift.protocol.TType.MAP, 
+                  new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING), 
+                  new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.DOUBLE)))));
+      metaDataMap = Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(shuffledReplayDateRange_result.class, metaDataMap);
+    }
+
+    public shuffledReplayDateRange_result() {
+    }
+
+    public shuffledReplayDateRange_result(
+      List<Map<String,Double>> success)
+    {
+      this();
+      this.success = success;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public shuffledReplayDateRange_result(shuffledReplayDateRange_result other) {
+      if (other.isSetSuccess()) {
+        List<Map<String,Double>> __this__success = new ArrayList<Map<String,Double>>();
+        for (Map<String,Double> other_element : other.success) {
+          Map<String,Double> __this__success_copy = new HashMap<String,Double>();
+          for (Map.Entry<String, Double> other_element_element : other_element.entrySet()) {
+
+            String other_element_element_key = other_element_element.getKey();
+            Double other_element_element_value = other_element_element.getValue();
+
+            String __this__success_copy_copy_key = other_element_element_key;
+
+            Double __this__success_copy_copy_value = other_element_element_value;
+
+            __this__success_copy.put(__this__success_copy_copy_key, __this__success_copy_copy_value);
+          }
+          __this__success.add(__this__success_copy);
+        }
+        this.success = __this__success;
+      }
+    }
+
+    public shuffledReplayDateRange_result deepCopy() {
+      return new shuffledReplayDateRange_result(this);
+    }
+
+    @Override
+    public void clear() {
+      this.success = null;
+    }
+
+    public int getSuccessSize() {
+      return (this.success == null) ? 0 : this.success.size();
+    }
+
+    public java.util.Iterator<Map<String,Double>> getSuccessIterator() {
+      return (this.success == null) ? null : this.success.iterator();
+    }
+
+    public void addToSuccess(Map<String,Double> elem) {
+      if (this.success == null) {
+        this.success = new ArrayList<Map<String,Double>>();
+      }
+      this.success.add(elem);
+    }
+
+    public List<Map<String,Double>> getSuccess() {
+      return this.success;
+    }
+
+    public shuffledReplayDateRange_result setSuccess(List<Map<String,Double>> success) {
+      this.success = success;
+      return this;
+    }
+
+    public void unsetSuccess() {
+      this.success = null;
+    }
+
+    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    public boolean isSetSuccess() {
+      return this.success != null;
+    }
+
+    public void setSuccessIsSet(boolean value) {
+      if (!value) {
+        this.success = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, Object value) {
+      switch (field) {
+      case SUCCESS:
+        if (value == null) {
+          unsetSuccess();
+        } else {
+          setSuccess((List<Map<String,Double>>)value);
+        }
+        break;
+
+      }
+    }
+
+    public Object getFieldValue(_Fields field) {
+      switch (field) {
+      case SUCCESS:
+        return getSuccess();
+
+      }
+      throw new IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new IllegalArgumentException();
+      }
+
+      switch (field) {
+      case SUCCESS:
+        return isSetSuccess();
+      }
+      throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof shuffledReplayDateRange_result)
+        return this.equals((shuffledReplayDateRange_result)that);
+      return false;
+    }
+
+    public boolean equals(shuffledReplayDateRange_result that) {
+      if (that == null)
+        return false;
+
+      boolean this_present_success = true && this.isSetSuccess();
+      boolean that_present_success = true && that.isSetSuccess();
+      if (this_present_success || that_present_success) {
+        if (!(this_present_success && that_present_success))
+          return false;
+        if (!this.success.equals(that.success))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    public int compareTo(shuffledReplayDateRange_result other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      shuffledReplayDateRange_result typedOther = (shuffledReplayDateRange_result)other;
+
+      lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(typedOther.isSetSuccess());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetSuccess()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, typedOther.success);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
+      }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("shuffledReplayDateRange_result(");
+      boolean first = true;
+
+      sb.append("success:");
+      if (this.success == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.success);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class shuffledReplayDateRange_resultStandardSchemeFactory implements SchemeFactory {
+      public shuffledReplayDateRange_resultStandardScheme getScheme() {
+        return new shuffledReplayDateRange_resultStandardScheme();
+      }
+    }
+
+    private static class shuffledReplayDateRange_resultStandardScheme extends StandardScheme<shuffledReplayDateRange_result> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, shuffledReplayDateRange_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 0: // SUCCESS
+              if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
+                {
+                  org.apache.thrift.protocol.TList _list60 = iprot.readListBegin();
+                  struct.success = new ArrayList<Map<String,Double>>(_list60.size);
+                  for (int _i61 = 0; _i61 < _list60.size; ++_i61)
+                  {
+                    Map<String,Double> _elem62; // required
+                    {
+                      org.apache.thrift.protocol.TMap _map63 = iprot.readMapBegin();
+                      _elem62 = new HashMap<String,Double>(2*_map63.size);
+                      for (int _i64 = 0; _i64 < _map63.size; ++_i64)
+                      {
+                        String _key65; // required
+                        double _val66; // required
+                        _key65 = iprot.readString();
+                        _val66 = iprot.readDouble();
+                        _elem62.put(_key65, _val66);
+                      }
+                      iprot.readMapEnd();
+                    }
+                    struct.success.add(_elem62);
+                  }
+                  iprot.readListEnd();
+                }
+                struct.setSuccessIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, shuffledReplayDateRange_result struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.success != null) {
+          oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
+          {
+            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.MAP, struct.success.size()));
+            for (Map<String,Double> _iter67 : struct.success)
+            {
+              {
+                oprot.writeMapBegin(new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.DOUBLE, _iter67.size()));
+                for (Map.Entry<String, Double> _iter68 : _iter67.entrySet())
+                {
+                  oprot.writeString(_iter68.getKey());
+                  oprot.writeDouble(_iter68.getValue());
+                }
+                oprot.writeMapEnd();
+              }
+            }
+            oprot.writeListEnd();
+          }
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class shuffledReplayDateRange_resultTupleSchemeFactory implements SchemeFactory {
+      public shuffledReplayDateRange_resultTupleScheme getScheme() {
+        return new shuffledReplayDateRange_resultTupleScheme();
+      }
+    }
+
+    private static class shuffledReplayDateRange_resultTupleScheme extends TupleScheme<shuffledReplayDateRange_result> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, shuffledReplayDateRange_result struct) throws org.apache.thrift.TException {
+        TTupleProtocol oprot = (TTupleProtocol) prot;
+        BitSet optionals = new BitSet();
+        if (struct.isSetSuccess()) {
+          optionals.set(0);
+        }
+        oprot.writeBitSet(optionals, 1);
+        if (struct.isSetSuccess()) {
+          {
+            oprot.writeI32(struct.success.size());
+            for (Map<String,Double> _iter69 : struct.success)
+            {
+              {
+                oprot.writeI32(_iter69.size());
+                for (Map.Entry<String, Double> _iter70 : _iter69.entrySet())
+                {
+                  oprot.writeString(_iter70.getKey());
+                  oprot.writeDouble(_iter70.getValue());
+                }
+              }
+            }
+          }
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, shuffledReplayDateRange_result struct) throws org.apache.thrift.TException {
+        TTupleProtocol iprot = (TTupleProtocol) prot;
+        BitSet incoming = iprot.readBitSet(1);
+        if (incoming.get(0)) {
+          {
+            org.apache.thrift.protocol.TList _list71 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.MAP, iprot.readI32());
+            struct.success = new ArrayList<Map<String,Double>>(_list71.size);
+            for (int _i72 = 0; _i72 < _list71.size; ++_i72)
+            {
+              Map<String,Double> _elem73; // required
+              {
+                org.apache.thrift.protocol.TMap _map74 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.DOUBLE, iprot.readI32());
+                _elem73 = new HashMap<String,Double>(2*_map74.size);
+                for (int _i75 = 0; _i75 < _map74.size; ++_i75)
+                {
+                  String _key76; // required
+                  double _val77; // required
+                  _key76 = iprot.readString();
+                  _val77 = iprot.readDouble();
+                  _elem73.put(_key76, _val77);
+                }
+              }
+              struct.success.add(_elem73);
             }
           }
           struct.setSuccessIsSet(true);
