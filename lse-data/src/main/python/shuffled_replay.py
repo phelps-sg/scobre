@@ -85,7 +85,7 @@ def perform_shuffle(proportion, window, i, intra_window, offsetting, attributes,
         directory = BASE_DIR
     else:
         directory = dir_name(date_range[0])
-        percentage = round(proportion * n)
+        percentage = round(proportion * 100)
         dataset = get_shuffled_data('BHP', proportion, window, intra_window, offsetting, attributes, date_range = date_range)
         filename = '%s/bhp-shuffled-ws%d-p%d-i%d-o%d-a%d-%d.csv' % (directory, window, percentage, intra_window, offsetting, attributes, i)
         f = open(filename, 'w', buffering=200000)
