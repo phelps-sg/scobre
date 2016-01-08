@@ -80,7 +80,7 @@ def dict_to_df(data, variables):
     df.index = pd.Series([datetime.datetime.fromtimestamp(t) for t in df.t])
     return df       
         
-def perform_shuffle(proportion, window, n, intra_window, offsetting, attributes, date_range):
+def perform_shuffle(proportion, window, i, intra_window, offsetting, attributes, date_range):
     if date_range is None:
         directory = BASE_DIR
     else:
