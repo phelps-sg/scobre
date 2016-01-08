@@ -85,7 +85,6 @@ def perform_shuffle(proportion, window, n, intra_window, offsetting, attributes,
         directory = BASE_DIR
     else:
         directory = dir_name(date_range[0])
-    for i in range(n):
         percentage = round(proportion * n)
         dataset = get_shuffled_data('BHP', proportion, window, intra_window, offsetting, attributes, date_range = date_range)
         filename = '%s/bhp-shuffled-ws%d-p%d-i%d-o%d-a%d-%d.csv' % (directory, window, percentage, intra_window, offsetting, attributes, i)
@@ -94,23 +93,29 @@ def perform_shuffle(proportion, window, n, intra_window, offsetting, attributes,
         for row in dataset:
             csv_writer.writerow([ round(row['midPrice'], 4) ])
         f.close()
-    return None
+    return True
 
-def sweep(iterations=100, date_range=None):
+def sweep(date_ranges, iterations):
 #for offsetting in [OFFSETTING_NONE, OFFSETTING_SAME, OFFSETTING_MID, OFFSETTING_OPPOSITE]:
     offsetting = OFFSETTING_NONE
 #for intra_window in [True, False]:
     intra_window = False
 #for window in [4 ** (x + 1) for x in range(6)]:
     window = 1
-    for attribute in [ATTRIBUTES_ALL, ATTRIBUTES_ORDERSIGN, ATTRIBUTES_PRICE, ATTRIBUTES_VOLUME]:
-        for proportion in numpy.arange(0, 1.1, 0.1):
-            yield (proportion, window, iterations, intra_window, offsetting, attribute, date_range)
+    for date_range in date_ranges:
+        for attribute in [ATTRIBUTES_ALL, ATTRIBUTES_ORDERSIGN, ATTRIBUTES_PRICE, ATTRIBUTES_VOLUME]:
+            for proportion in numpy.arange(0, 1.1, 0.1):
+                for i in range(iterations):
+                    yield (proportion, window, i, intra_window, offsetting, attribute, date_range)
 
-def run_on_spark(iterations=100, date_range=None):
-    jobs = sc.paralellize(sweep())
-    return jobs.map(lambda x: perform_shuffling(*x)).collect()
+def run_on_spark(sc, iterations=100):
+    jobs = sc.parallelize(sweep(all_periods(), iterations))
+    return jobs.map(lambda x: perform_shuffle(*x)).collect()
 
+def all_periods():
+    days = [datetime.datetime(DATE_YEAR, DATE_MONTH, d+1) for d in range(30)]
+    return [(d, d+datetime.timedelta(days=1)) for d in days if d.isoweekday() < 6]
+    
 def submit_shuffling_jobs(job_server, t0, iterations):
     
     dep_modules = ('pandas', 'orderreplay', 'thrift', 'csv', 'time', 'datetime')
@@ -133,9 +138,7 @@ def get_week_days():
     return filter(lambda d: d.isoweekday() < 6, days)
 
 def submit_all(days = get_week_days(), num_cpus = 8, iterations = ITERATIONS):
-    job_server = pp.Server(ncpus=num_cpus, secret='shuffle')
-    days = [datetime.datetime(DATE_YEAR, DATE_MONTH, d+1) for d in range(30)]
-    week_days = filter(lambda d: d.isoweekday() < 6, days)
+
     jobs = []
     for day in week_days:
         jobs.extend(submit_shuffling_jobs(job_server, day, iterations))
