@@ -39,7 +39,10 @@ publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.
 //scalaSource in Compile := file("src/")
 javaSource in Compile := baseDirectory.value / "src/main/thrift/gen-java"
 
+//resolvers := ("Local Maven Repository" at "file:///" + Path.userHome.absolutePath + "/.m2/repository") +: resolvers.value
+
 resolvers ++= Seq(
+  "Local Maven Repository" at "file:///" + Path.userHome.absolutePath + "/.m2/repository",
   "Apache HBase" at "http://repository.apache.org/content/repositories/releases",
   "JASA" at "http://jasa.sourceforge.net/mvn-repo/jasa",
   "JABM" at "http://jabm.sourceforge.net/mvn-repo/jabm"
@@ -52,7 +55,7 @@ libraryDependencies ++= Seq(
 //  "org.apache.hadoop" % "hadoop-client" % "2.7.1",
 //  "org.apache.hadoop" % "hadoop-common" % "2.7.1",
   "org.apache.thrift" % "libthrift" % "0.9.2",
-  "net.sourceforge.jasa" % "jasa" % "1.2.5-SNAPSHOT",
+  "net.sourceforge.jasa" % "jasa" % "1.2.6-SNAPSHOT",
 //  "com.espertech" % "esper" % "4.11.0",
   "org.rogach" %% "scallop" % "0.9.5",
   "org.clapper" % "grizzled-slf4j_2.10" % "1.0.2",
