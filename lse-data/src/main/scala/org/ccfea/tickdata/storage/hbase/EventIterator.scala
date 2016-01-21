@@ -39,10 +39,10 @@ class EventIterator(val scanner: ResultScanner) extends Iterator[TickDataEvent] 
    * @return  A tuple of optional Strings identifying the orders that resulted
    *            in this trade.
    */
-  def lookupOrderCodes(tradeCode: String): (Option[String], Option[String]) = {
-    val get = new Get(tradeCode)
-    val result: Result = transactionsTable.get(new Get(tradeCode))
-    ( getColumn(result, "orderCode"), getColumn(result, "matchingOrderCode") )
-  }
+//  def lookupOrderCodes(tradeCode: String): (Option[String], Option[String]) = {
+//    val get = new Get(tradeCode)
+//    val result: Result = transactionsTable.get(new Get(tradeCode))
+//    ( getColumn(result, "orderCode"), getColumn(result, "matchingOrderCode") )
+//  }
 
 }

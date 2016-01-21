@@ -1,7 +1,8 @@
 package org.ccfea.tickdata.storage.hbase
 
+import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.{Cell, CellUtil, HBaseConfiguration}
-import org.apache.hadoop.hbase.client.{Result, HTable, HBaseAdmin}
+import org.apache.hadoop.hbase.client.{Connection, Result, HTable, HBaseAdmin}
 import org.apache.hadoop.hbase.util.Bytes
 import org.ccfea.tickdata.storage.dao.{Event, EventType}
 import collection.JavaConversions._
@@ -12,22 +13,19 @@ import java.util.Date
  * Misc. functionality for converting events to/from byte arrays.
  * (c) Steve Phelps 2013
  */
-trait HBaseEventConverter {
+trait HBaseEventConverter extends java.io.Serializable {
 
   val TI_LEN = 12
 
-  val conf = HBaseConfiguration.create()
-  val admin = new HBaseAdmin(conf)
+  @scala.transient val conf = HBaseConfiguration.create()
+  conf.set(TableInputFormat.INPUT_TABLE, "events")
+
+//  val admin = new HBaseAdmin(conf)
 
   /**
    * The table containing the time-series of tick events.
    */
-  val eventsTable = new HTable(conf, "events")
-
-  /**
-   * A table mapping from trade codes to corresponding order codes.
-   */
-  val transactionsTable = new HTable(conf, "transactions")
+  @scala.transient val eventsTable = new HTable(conf, "events")
 
   /**
    * Each table contains a single column-family called 'data'.

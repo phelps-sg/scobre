@@ -9,7 +9,7 @@ import net.sourceforge.jasa.agent.TradingAgent
  * (C) Steve Phelps 2013
  */
 class MarketOrder(val orderCode: String, val aggregateSize: Long, val tradeDirection: TradeDirection.Value, val trader: TradingAgent)
-  extends OrderWithVolume {
+  extends OrderWithVolume with Serializable {
 
   override def toString() = {
     "MarketOrder(" + orderCode + "," + aggregateSize + "," + tradeDirection + ")"

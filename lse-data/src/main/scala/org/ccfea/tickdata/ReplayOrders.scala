@@ -12,6 +12,7 @@ import org.ccfea.tickdata.conf.ReplayerConf
 import org.ccfea.tickdata.simulator._
 
 import grizzled.slf4j.Logger
+import org.ccfea.tickdata.storage.spark.SparkHadoopRetriever
 
 /**
  * The main application for running order-book reconstruction simulations.
@@ -56,6 +57,8 @@ object ReplayOrders extends ReplayApplication {
       new HBaseRetriever(selectedAsset = conf.tiCode(),
                           startDate =  parseDate(conf.startDate.get),
                           endDate = parseDate(conf.endDate.get))
+
+//    val hbaseTicks: Iterable[TickDataEvent] = new SparkHadoopRetriever()
 
     class Replayer(val eventSource: Iterable[TickDataEvent],
                     val outFileName: Option[String],

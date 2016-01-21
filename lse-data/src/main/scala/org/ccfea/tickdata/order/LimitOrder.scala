@@ -8,7 +8,7 @@ import net.sourceforge.jasa.agent.TradingAgent
  * (C) Steve Phelps 2013
  */
 class LimitOrder(val orderCode: String, val aggregateSize: Long, val tradeDirection: TradeDirection.Value,
-                 val price: BigDecimal, val trader: TradingAgent) extends OrderWithVolume {
+                 val price: BigDecimal, val trader: TradingAgent) extends OrderWithVolume with Serializable {
 
   override def toString(): String = {
     "LimitOrder(" + orderCode + "," + aggregateSize + "," + tradeDirection + "," + price + ")"
