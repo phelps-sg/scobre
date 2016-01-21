@@ -23,11 +23,8 @@ def date_to_time(d):
  
 def dict_to_df(data, variables):
     df = pd.DataFrame(data)
-   
-    timestamps = [datetime.datetime.fromtimestamp(t) for t in df.t]
-    for variable in variables:
-        df[variable].index = timestamps
-    return df   
+    df.index = pd.Series([datetime.datetime.fromtimestamp(t) for t in df.t])
+    return df         
     
 def get_hf_data(asset, start_date, end_date, 
                 variables = ['midPrice', 'lastTransactionPrice', 'volume'], 
@@ -35,8 +32,8 @@ def get_hf_data(asset, start_date, end_date,
     '''
     Retrieve the specified data from the order-book reconstructor as a pandas DataFrame.
     :param asset:           The ISIN of the asset
-    :param start_date:      The start date as a string
-    :param end_date:        The end date as a string
+    :param start_date:      The start date as a datetime object
+    :param end_date:        The end date as a a datetime object
     :param variables:       The variables to retrieve
     :param server:          The host-name of the server hosting the tick-data
     :param port:            The port-number of the server
@@ -50,8 +47,7 @@ def get_hf_data(asset, start_date, end_date,
     t1 = date_to_time(end_date)
     raw_data = client.replay(asset, variables, t0, t1)
     if len(raw_data) == 0:
-        raise Exception("No data available for " + asset + " between " + \
-                            start_date + " and " + end_date)
+        raise Exception("No data available")
     return dict_to_df(raw_data, variables)
     
 dataset = get_hf_data('GB0009252882', datetime.datetime(2007, 3, 2), 
