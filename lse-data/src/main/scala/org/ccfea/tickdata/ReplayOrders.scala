@@ -53,12 +53,12 @@ object ReplayOrders extends ReplayApplication {
   def simulateAndCollate(dataCollector: MarketState => Option[AnyVal])
                           (implicit conf: ReplayerConf) = {
 
-//    val hbaseTicks: Iterable[TickDataEvent] =
-//      new HBaseRetriever(selectedAsset = conf.tiCode(),
-//                          startDate =  parseDate(conf.startDate.get),
-//                          endDate = parseDate(conf.endDate.get))
+    val hbaseTicks: Iterable[TickDataEvent] =
+      new HBaseRetriever(selectedAsset = conf.tiCode(),
+                          startDate =  parseDate(conf.startDate.get),
+                          endDate = parseDate(conf.endDate.get))
 
-    val hbaseTicks: Iterable[TickDataEvent] = new SparkHadoopRetriever()
+//    val hbaseTicks: Iterable[TickDataEvent] = new SparkHadoopRetriever()
 
     class Replayer(val eventSource: Iterable[TickDataEvent],
                     val outFileName: Option[String],
