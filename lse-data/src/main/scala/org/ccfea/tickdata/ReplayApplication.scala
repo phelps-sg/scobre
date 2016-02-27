@@ -42,7 +42,7 @@ trait ReplayApplication {
    *          command-line options.
    */
   def newMarketState(implicit conf: ReplayConf) =
-    if (conf.explicitClearing()) new MarketState() else new ClearingMarketState()
+    if (conf.explicitClearing()) new ClearingMarketState() else new MarketState()
 
   def main(args:Array[String])
 
