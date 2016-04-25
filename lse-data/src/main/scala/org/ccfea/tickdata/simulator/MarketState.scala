@@ -68,6 +68,11 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   var mostRecentTransaction: Option[TransactionEvent] = None
 
   /**
+    * The most recent event.
+    */
+  var mostRecentEvent: Option[TickDataEvent] = None
+
+  /**
    * The most recent uncrossing price.
    */
   var uncrossingPrice: Option[BigDecimal] = None
@@ -96,6 +101,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     val newTime = new SimulationTime(ev.timeStamp.getTime)
     this.time = Some(newTime)
     this.volume = Some(0)
+    this.mostRecentEvent = Some(ev)
   }
 
   def postProcessing(ev: TickDataEvent): Unit = {
@@ -308,26 +314,38 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   implicit def price(order: net.sourceforge.jasa.market.Order) = if (order != null) Some(order.getPrice) else None
 
   def quote() = new Quote(book.getHighestUnmatchedBid, book.getLowestUnmatchedAsk)
-
   def midPrice: Option[Double] = quote().midPrice
+  def quoteAsk(): Option[Double] = quote().ask
+  def quoteBid(): Option[Double] = quote().bid
 
   def calendar = {
     val cal = new GregorianCalendar()
     cal.setTime(new java.util.Date(time.get.getTicks))
     cal
   }
+  def day = calendar.get(java.util.Calendar.DAY_OF_MONTH)
+  def hour = calendar.get(java.util.Calendar.HOUR_OF_DAY)
+  def minute = calendar.get(java.util.Calendar.MINUTE)
 
-  def day = {
-    calendar.get(java.util.Calendar.DAY_OF_MONTH)
+  def lastOrderVolume: Option[Long] = mostRecentEvent match {
+    case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, vol, _, _, _))) => Some(vol)
+    case Some(OrderSubmittedEvent(_, _, _, MarketOrder(_, vol, _, _))) => Some(vol)
+    case _ => None
   }
 
-  def hour = {
-    calendar.get(java.util.Calendar.HOUR_OF_DAY)
+  def lastOrderType: Option[Long] = mostRecentEvent match {
+    case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, vol, _, _, _))) => Some(0L)
+    case Some(OrderSubmittedEvent(_, _, _, MarketOrder(_, vol, _, _))) => Some(1L)
+    case _ => None
   }
 
-  def minute = {
-    calendar.get(java.util.Calendar.MINUTE)
+  def lastOrderPrice: Option[BigDecimal] = mostRecentEvent match {
+    case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, _, _, price, _))) => Some(price)
+    case _ => None
   }
+
+  def askDepth = book.getUnmatchedAsks.map(_.aggregateVolume()).sum
+  def bidDepth = book.getUnmatchedBids.map(_.aggregateVolume()).sum
 
   /**
    * Bean-compatible getter for Java clients.

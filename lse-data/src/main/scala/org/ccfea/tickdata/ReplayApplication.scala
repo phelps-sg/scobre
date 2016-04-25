@@ -29,6 +29,11 @@ trait ReplayApplication {
   implicit def AnyRefToOptionAnyVal(x: AnyRef): Option[AnyVal] = x match {
     case Some(double: Double) => Some(double)
     case Some(long: Long) => Some(long)
+    case Some(int: Int) => Some(int)
+    case Some(bd: BigDecimal) => Some(bd.doubleValue())
+    case l: java.lang.Long => Some(l.longValue())
+    case d: java.lang.Double => Some(d.doubleValue())
+    case Some(ch: Char) => Some(ch)
     case None => None
   }
 

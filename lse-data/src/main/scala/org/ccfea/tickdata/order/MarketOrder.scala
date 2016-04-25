@@ -16,3 +16,8 @@ class MarketOrder(val orderCode: String, val aggregateSize: Long, val tradeDirec
   }
 
 }
+
+object MarketOrder {
+
+  def unapply(m : MarketOrder) = Some(m.orderCode, m.aggregateSize, m.tradeDirection, m.trader)
+}
