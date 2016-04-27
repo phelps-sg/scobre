@@ -34,7 +34,7 @@ class OffsettedTicks(val marketState: MarketState, val ticks: Iterable[TickDataE
             }
             new LimitOrder(or.order.orderCode, or.newVolume, or.newDirection, or.newPrice, trader)
         }
-        val offsetOrder = createOffsetOrder(limitOrder, marketState.quote())
+        val offsetOrder = createOffsetOrder(limitOrder, marketState.quote)
         new OrderSubmittedEvent(tick.timeStamp, tick.messageSequenceNumber, tick.tiCode, offsetOrder)
       case other =>
         tick

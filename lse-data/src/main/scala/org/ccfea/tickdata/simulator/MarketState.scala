@@ -56,6 +56,11 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   var volume: Option[Long] = None
 
   /**
+    * The current market quote.
+    */
+  var quote = new Quote(None, None)
+
+  /**
    * The current state of the auction.  Typically market variables
    * such as the mid-price will only be collated when the auction
    * is in continuous mode.
@@ -106,6 +111,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
 
   def postProcessing(ev: TickDataEvent): Unit = {
     stateTransition(ev)
+    this.quote = generateQuote()
     checkConsistency(ev)
   }
 
@@ -210,7 +216,6 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   }
 
   def process(ev: OrderSubmittedEvent): Unit = {
-    val quoteSnapshot = this.quote()
     val order = ev.order
     if (orderMap.contains(order.orderCode)) {
       logger.debug("Submission using existing order code: " + order.orderCode)
@@ -219,7 +224,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     order match {
        case lo: LimitOrder =>   processLimitOrder(lo)
        case oo: OffsetOrder =>
-         val convertedOrder = oo.toLimitOrder(quoteSnapshot)
+         val convertedOrder = oo.toLimitOrder(quote)
          logger.debug("Converted offset order to: " + convertedOrder)
          processLimitOrder(convertedOrder)
        case mo: MarketOrder =>  processMarketOrder(mo)
@@ -270,23 +275,24 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    */
   def checkConsistency(ev: TickDataEvent): Unit = {
     if (this.auctionState == AuctionState.continuous) {
-//      logger.debug("quote = " + quote)
-//      if (hour > 8) {
-//        var consistent = false
-//        do {
-//          quote match {
-//            case Quote(Some(bid), Some(ask)) =>
-//              if (bid > ask) {
-//                logger.warn("Artificially clearing book to maintain consistency following event " + ev)
-//                book.remove(book.getHighestUnmatchedBid)
-//                book.remove(book.getLowestUnmatchedAsk)
-//              } else {
-//                consistent = true
-//              }
-//            case _ => consistent = true
-//          }
-//        } while (!consistent)
-//      }
+      logger.debug("quote = " + quote)
+      if (hour > 8) {
+        var consistent = false
+        do {
+          quote match {
+            case Quote(Some(bid), Some(ask)) =>
+              if (bid > ask) {
+                logger.warn("Artificially clearing book to maintain consistency following event " + ev)
+                book.remove(book.getHighestUnmatchedBid)
+                book.remove(book.getLowestUnmatchedAsk)
+              } else {
+                consistent = true
+              }
+            case _ => consistent = true
+          }
+          this.quote = generateQuote()
+        } while (!consistent)
+      }
     }
   }
 
@@ -302,6 +308,11 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     book.printState()
   }
 
+  implicit def price(order: net.sourceforge.jasa.market.Order) =
+    if (order != null) Some(order.getPrice) else None
+
+  def generateQuote() = new Quote(book.getHighestUnmatchedBid, book.getLowestUnmatchedAsk)
+
   /**
    * When replaying ticks the simulator may inject "virtual" ticks
    * into the replay process.  By default there are no virtual ticks,
@@ -311,12 +322,10 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    */
   def virtualTicks: Seq[TickDataEvent] = List()
 
-  implicit def price(order: net.sourceforge.jasa.market.Order) = if (order != null) Some(order.getPrice) else None
 
-  def quote() = new Quote(book.getHighestUnmatchedBid, book.getLowestUnmatchedAsk)
-  def midPrice: Option[Double] = quote().midPrice
-  def quoteAsk(): Option[Double] = quote().ask
-  def quoteBid(): Option[Double] = quote().bid
+  def midPrice: Option[Double] = quote.midPrice
+  def quoteAsk(): Option[Double] = quote.ask
+  def quoteBid(): Option[Double] = quote.bid
 
   def calendar = {
     val cal = new GregorianCalendar()
@@ -334,8 +343,14 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   }
 
   def lastOrderType: Option[Long] = mostRecentEvent match {
-    case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, vol, _, _, _))) => Some(0L)
-    case Some(OrderSubmittedEvent(_, _, _, MarketOrder(_, vol, _, _))) => Some(1L)
+    case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, _, _, _, _))) => Some(0L)
+    case Some(OrderSubmittedEvent(_, _, _, MarketOrder(_, _, _, _))) => Some(1L)
+    case _ => None
+  }
+
+  def lastOrderDirection: Option[Long] = mostRecentEvent match {
+    case Some(OrderSubmittedEvent(_, _, _, order:OrderWithVolume)) =>
+      if (order.tradeDirection == TradeDirection.Buy) Some(0) else Some(1)
     case _ => None
   }
 
@@ -344,8 +359,11 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     case _ => None
   }
 
-  def askDepth = book.getUnmatchedAsks.map(_.aggregateVolume()).sum
-  def bidDepth = book.getUnmatchedBids.map(_.aggregateVolume()).sum
+  def askDepthTotal = book.getUnmatchedAsks.map(_.aggregateUnfilledVolume()).sum
+  def bidDepthTotal = book.getUnmatchedBids.map(_.aggregateUnfilledVolume()).sum
+
+  def bestAskDepth = if (book.getLowestUnmatchedAsk != null) Some(book.getLowestUnmatchedAsk.aggregateUnfilledVolume()) else None
+  def bestBidDepth = if (book.getHighestUnmatchedBid != null) Some(book.getHighestUnmatchedBid.aggregateUnfilledVolume()) else None
 
   /**
    * Bean-compatible getter for Java clients.

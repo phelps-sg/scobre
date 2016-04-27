@@ -14,7 +14,11 @@ class ClearingMarketState extends MarketState {
 
   override def postProcessing(ev: TickDataEvent): Unit = {
     book.matchOrders()
+    super.postProcessing(ev)
     //TODO optionally record most recent transaction price as a result of clearing
+  }
+
+  override def checkConsistency(ev: TickDataEvent): Unit = {
   }
 
   override def insertOrder(order: Order): Unit = {
@@ -37,7 +41,7 @@ class ClearingMarketState extends MarketState {
   }
 
   override def processMarketOrder(order: MarketOrder) = {
-    val quote: Quote = this.quote()
+//    val quote: Quote = this.quote()
     val bestPrice = if (order.tradeDirection == TradeDirection.Buy) quote.ask else quote.bid
     bestPrice match {
       case Some(p) =>

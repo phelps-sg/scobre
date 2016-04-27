@@ -49,30 +49,29 @@ def get_hf_data(asset, start_date, end_date,
     if len(raw_data) == 0:
         raise Exception("No data available")
     return dict_to_df(raw_data, variables)
-    
-dataset = get_hf_data('GB0009252882', datetime.datetime(2007, 3, 2), 
+
+def test():
+
+    dataset = get_hf_data('GB0009252882', datetime.datetime(2007, 3, 2), 
                           datetime.datetime(2007, 3, 3), server='localhost')
-#dataset = get_hf_data('GB0002875804', '2/3/2007', '3/3/2009', server='localhost')
 
-#dataset = get_hf_data('BHP', '2/7/2007', '3/7/2007')
-
-mid_price = dataset.midPrice['2007-03-02 08:00':'2007-03-02 16:00'].dropna(how='any')
-
-# Plot 1 minute prices for 3/3/2007 between 8am and 4pm
-prices_1min = mid_price.resample('3min')
-#prices_1min = \
-#    dataset.midPrice['2007-02-03 08:00':'2007-02-03 16:00'].resample('1min')
-prices_1min.plot()
-
-# Plot 1 minute returns
-rets_1min = diff(log(prices_1min))
-plt.figure()
-plt.plot(rets_1min)
-
-# Kernel-density estimate of 1-min return distribution
-plt.figure()
-matrix.sort(rets_1min)
-density = gaussian_kde(rets_1min)
-plt.fill(rets_1min, density(rets_1min))
+    mid_price = dataset.midPrice['2007-03-02 08:00':'2007-03-02 16:00'].dropna(how='any')
+    
+    # Plot 1 minute prices for 3/3/2007 between 8am and 4pm
+    prices_1min = mid_price.resample('3min')
+    #prices_1min = \
+    #    dataset.midPrice['2007-02-03 08:00':'2007-02-03 16:00'].resample('1min')
+    prices_1min.plot()
+    
+    # Plot 1 minute returns
+    rets_1min = diff(log(prices_1min))
+    plt.figure()
+    plt.plot(rets_1min)
+    
+    # Kernel-density estimate of 1-min return distribution
+    plt.figure()
+    matrix.sort(rets_1min)
+    density = gaussian_kde(rets_1min)
+    plt.fill(rets_1min, density(rets_1min))
 
 
