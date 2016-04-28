@@ -20,7 +20,7 @@ name := "lse-data"
 
 organization := "net.sourceforge.jasa"
 
-version := "0.18-SNAPSHOT"
+version := "0.19-SNAPSHOT"
 
 scalaVersion := "2.11.7"
 
