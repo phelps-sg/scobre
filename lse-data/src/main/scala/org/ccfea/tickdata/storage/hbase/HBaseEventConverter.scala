@@ -1,10 +1,11 @@
 package org.ccfea.tickdata.storage.hbase
 
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
-import org.apache.hadoop.hbase.{Cell, CellUtil, HBaseConfiguration}
-import org.apache.hadoop.hbase.client.{Connection, Result, HTable, HBaseAdmin}
+import org.apache.hadoop.hbase.{Cell, CellUtil, HBaseConfiguration, TableName}
+import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.util.Bytes
 import org.ccfea.tickdata.storage.dao.{Event, EventType}
+
 import collection.JavaConversions._
 import org.ccfea.tickdata.order.{MarketMechanismType, TradeDirection}
 import java.util.Date
@@ -22,10 +23,15 @@ trait HBaseEventConverter extends java.io.Serializable {
 
 //  val admin = new HBaseAdmin(conf)
 
+
+  @scala.transient val connection = ConnectionFactory.createConnection()
+
+  val eventsTableName = TableName.valueOf("events")
+
   /**
    * The table containing the time-series of tick events.
    */
-  @scala.transient val eventsTable = new HTable(conf, "events")
+  @scala.transient val eventsTable = connection.getTable(eventsTableName)
 
   /**
    * Each table contains a single column-family called 'data'.

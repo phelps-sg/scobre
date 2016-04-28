@@ -52,15 +52,15 @@ libraryDependencies ++= Seq(
   "org.apache.hbase" % "hbase-client" % "1.1.2",
   "org.apache.hbase" % "hbase-common" % "1.1.2" excludeAll ExclusionRule(organization = "javax.servlet"),
   "org.apache.hbase" % "hbase-server" % "1.1.2" excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
-//  "org.apache.hadoop" % "hadoop-client" % "2.7.1",
-//  "org.apache.hadoop" % "hadoop-common" % "2.7.1",
+  "org.apache.hadoop" % "hadoop-client" % "2.7.1",
+  "org.apache.hadoop" % "hadoop-common" % "2.7.1",
   "org.apache.thrift" % "libthrift" % "0.9.2",
   "net.sourceforge.jasa" % "jasa" % "1.2.6-SNAPSHOT",
 //  "com.espertech" % "esper" % "4.11.0",
   "org.rogach" %% "scallop" % "0.9.5",
   "org.clapper" % "grizzled-slf4j_2.10" % "1.0.2",
-  "org.slf4j" % "slf4j-log4j12" % "1.7.7",
-  "org.apache.spark" %% "spark-core" % "1.5.2"
+  //  "org.apache.spark" %% "spark-core" % "1.5.2",
+  "org.slf4j" % "slf4j-log4j12" % "1.7.7"
 )
 
 mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
