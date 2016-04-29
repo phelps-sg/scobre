@@ -49,9 +49,9 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.apache.hbase" % "hbase-client" % "1.1.2",
-  "org.apache.hbase" % "hbase-common" % "1.1.2" excludeAll ExclusionRule(organization = "javax.servlet"),
-  "org.apache.hbase" % "hbase-server" % "1.1.2" excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
+  "org.apache.hbase" % "hbase-client" % "1.1.4",
+  "org.apache.hbase" % "hbase-common" % "1.1.4" excludeAll ExclusionRule(organization = "javax.servlet"),
+  "org.apache.hbase" % "hbase-server" % "1.1.4" excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
   "org.apache.hadoop" % "hadoop-client" % "2.7.1",
   "org.apache.hadoop" % "hadoop-common" % "2.7.1",
   "org.apache.thrift" % "libthrift" % "0.9.2",
@@ -63,23 +63,4 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-log4j12" % "1.7.7"
 )
 
-mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
-  {
-    case PathList("org", "apache", "jasper", xs @ _*)   => MergeStrategy.first
-    case PathList("org", "apache", "commons", xs @ _*) => MergeStrategy.first
-    case PathList("javax", "xml", xs @ _*)   => MergeStrategy.first
-    case PathList("javax", "servlet", xs @ _*)         => MergeStrategy.first
-    case PathList("net", "sf", "cglib", xs @ _*)         => MergeStrategy.first
-    case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
-    case PathList(ps @ _*) if ps.last endsWith "pom.xml" => MergeStrategy.concat
-    case PathList(ps @ _*) if ps.last endsWith "pom.properties" => MergeStrategy.concat
-    case PathList(ps @ _*) if ps.last endsWith "spring.tooling" => MergeStrategy.first
-    case PathList(ps @ _*) if ps.last endsWith "package-info.class" => MergeStrategy.first
-    case PathList(ps @ _*) if ps.last equals "Present.class" => MergeStrategy.first
-    case PathList(ps @ _*) if ps contains "minlog" => MergeStrategy.first
-    case "log4j.xml" => MergeStrategy.first
-    case "pom.xml" => MergeStrategy.concat
-    case x => old(x)
-  }
-}
 
