@@ -98,6 +98,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     preProcessing(ev)
     process(ev)
     postProcessing(ev)
+    logger.info("Book size = " + book.size())
     publish(ev)
   }
 
