@@ -82,7 +82,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    */
   var uncrossingPrice: Option[BigDecimal] = None
 
-  var startOfData: Boolean = false
+  var startOfData: Boolean = true
 
   val logger = Logger(classOf[MarketState])
 
