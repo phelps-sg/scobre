@@ -101,6 +101,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     process(ev)
     postProcessing(ev)
     logger.info("Book size = " + book.size())
+    logger.info("startOfData = " + this.startOfData)
     publish(ev)
   }
 
@@ -139,6 +140,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   }
 
   def process(ev: StartOfDataMarker): Unit = {
+    logger.info(ev)
     if (this.startOfData) {
       logger.info("Reseting book on " + ev)
       this.book.reset()
