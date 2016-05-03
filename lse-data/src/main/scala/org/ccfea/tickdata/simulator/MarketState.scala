@@ -133,7 +133,16 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
       case me: MultipleEvent              =>  process(me)
       case om: OrderMatchedEvent          =>  process(om)
       case or: OrderRevisedEvent          =>  process(or)
+      case sd: StartOfDataMarker          =>  process(sd)
       case _ => logger.error("Unknown event type: " + ev)
+    }
+  }
+
+  def process(ev: StartOfDataMarker): Unit = {
+    if (this.startOfData) {
+      logger.info("Reseting book on " + ev)
+      this.book.reset()
+      startOfData = false
     }
   }
 
@@ -236,20 +245,10 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   }
 
   def process(ev: MultipleEvent): Unit = {
-    ev.events match {
-      case Nil =>
-        // Do nothing
-      case (head:StartOfDataMarker) :: (tail:List[TickDataEvent]) =>
-        logger.info("Reseting book on " + head)
-        book.reset()
-        this.startOfData = false
-        process(tail)
-      case events: List[TickDataEvent] =>
-        process(events)
-    }
+    process(ev.events)
   }
 
-  def process(events: List[TickDataEvent]): Unit = {
+  def process(events: Seq[TickDataEvent]): Unit = {
     for (event <- events) process(event)
   }
 
