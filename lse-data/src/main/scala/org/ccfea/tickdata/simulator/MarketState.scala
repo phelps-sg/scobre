@@ -82,6 +82,8 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    */
   var uncrossingPrice: Option[BigDecimal] = None
 
+  var startOfData: Boolean = false
+
   val logger = Logger(classOf[MarketState])
 
 
@@ -235,14 +237,20 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
 
   def process(ev: MultipleEvent): Unit = {
     ev.events match {
-      case Nil => // Do nothing
-      case (head:StartOfDataMarker) :: tail =>
-        logger.debug("Ignoring events tagged with broadCastUpdateAction='F'")
-        logger.debug("Ignoring events: " + tail)
-      case head :: tail =>
-        process(head)
-        process(new MultipleEvent(tail))
+      case Nil =>
+        // Do nothing
+      case (head:StartOfDataMarker) :: (tail:List[TickDataEvent]) =>
+        logger.info("Reseting book on " + head)
+        book.reset()
+        this.startOfData = false
+        process(tail)
+      case events: List[TickDataEvent] =>
+        process(events)
     }
+  }
+
+  def process(events: List[TickDataEvent]): Unit = {
+    for (event <- events) process(event)
   }
 
   def processLimitOrder(order: LimitOrder) = {
@@ -432,9 +440,10 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
         //    endOfDay if it is later than 16:30
         //
         case AuctionState.continuous =>
-          if (this.hour >= 16 && this.minute >= 30)
+          if (this.hour >= 16 && this.minute >= 30) {
+            this.startOfData = true
             AuctionState.endOfDay
-          else
+          } else
             AuctionState.continuous
 
         case AuctionState.endOfDay =>
