@@ -44,11 +44,12 @@ case class Event(eventID: Option[Long], eventType: EventType.Value, messageSeque
         }
         val date = new Date(timeStamp)
         val orderSubmittedEvent = new OrderSubmittedEvent(date, messageSequenceNumber, tiCode, order)
-        if (broadcastUpdateAction == "F") {
-          val markerEvent = new StartOfDataMarker(date, messageSequenceNumber, tiCode)
-          new MultipleEvent(List(markerEvent, orderSubmittedEvent))
-        } else {
-          orderSubmittedEvent
+        broadcastUpdateAction match {
+          case Some("F") =>
+            val markerEvent = new StartOfDataMarker(date, messageSequenceNumber, tiCode)
+            new MultipleEvent(List(markerEvent, orderSubmittedEvent))
+          case _ =>
+            orderSubmittedEvent
         }
 
       case EventType.OrderDeleted | EventType.OrderExpired | EventType.TransactionLimit =>

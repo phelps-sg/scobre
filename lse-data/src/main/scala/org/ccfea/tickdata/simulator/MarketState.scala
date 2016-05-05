@@ -100,8 +100,6 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     preProcessing(ev)
     process(ev)
     postProcessing(ev)
-    logger.info("Book size = " + book.size())
-    logger.info("startOfData = " + this.startOfData)
     publish(ev)
   }
 
@@ -375,6 +373,8 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   def bestAskDepth = if (book.getLowestUnmatchedAsk != null) Some(book.getLowestUnmatchedAsk.aggregateUnfilledVolume()) else None
   def bestBidDepth = if (book.getHighestUnmatchedBid != null) Some(book.getHighestUnmatchedBid.aggregateUnfilledVolume()) else None
 
+  def bookSize = book.size()
+
   /**
    * Bean-compatible getter for Java clients.
    *
@@ -473,7 +473,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    * Remove the specified the order from the book.
    */
   def removeOrder(jasaOrder: net.sourceforge.jasa.market.Order) = {
-    book.removeAll(jasaOrder);
+    book.removeAll(jasaOrder)
   }
 
   /**
