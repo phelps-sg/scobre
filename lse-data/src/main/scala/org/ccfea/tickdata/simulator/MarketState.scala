@@ -442,15 +442,15 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
         //
         case AuctionState.continuous =>
           if (this.hour >= 16 && this.minute >= 30) {
-            this.startOfData = true
             AuctionState.endOfDay
           } else
             AuctionState.continuous
 
         case AuctionState.endOfDay =>
-          if (this.hour < 8)
+          if (this.hour < 8) {
+            this.startOfData = true
             AuctionState.startOfDay
-          else
+          } else
             AuctionState.endOfDay
 
         // Transition from uncrossing to continuous
