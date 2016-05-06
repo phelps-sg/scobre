@@ -305,11 +305,12 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   }
 
   def insertOrder(order: net.sourceforge.jasa.market.Order) = {
-    if (order.isBid) {
-      book.insertUnmatchedBid(order)
-    } else {
-      book.insertUnmatchedAsk(order)
-    }
+//    if (order.isBid) {
+//      book.insertUnmatchedBid(order)
+//    } else {
+//      book.insertUnmatchedAsk(order)
+//    }
+    book.add(order)
   }
 
   def printState() = {
