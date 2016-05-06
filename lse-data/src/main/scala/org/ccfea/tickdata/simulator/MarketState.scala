@@ -141,7 +141,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     logger.info(ev)
     if (this.startOfData) {
       logger.info("Reseting book on " + ev)
-      this.book.reset()
+//      this.book.reset()
       startOfData = false
     }
   }
