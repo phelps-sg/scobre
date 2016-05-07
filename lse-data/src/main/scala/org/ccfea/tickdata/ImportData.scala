@@ -17,7 +17,13 @@ object ImportData extends ImportApplication {
   def getParser(implicit conf: ParseConf) = {
     conf.parser() match {
       case "ASX" => new AsxParser()
-      case "LSE" => new LseParser(conf.recordType())
+      case "LSE" => {
+        val startDate: Long = parseDate(conf.startDate.get) match {
+          case Some(d) => d.getTime
+          case None => 0L
+        }
+        new LseParser(conf.recordType(), startDate)
+      }
     }
   }
 

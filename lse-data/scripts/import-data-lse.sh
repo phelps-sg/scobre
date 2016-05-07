@@ -15,7 +15,7 @@ import_pipe() {
 	echo "Importing $TABLE"
 
 #	java org.ccfea.tickdata.ImportData -b 2600 -r $TABLE -f $PIPE
-	import-data -b 2600 -r $TABLE -f $PIPE
+	import-data -s 1/3/2008 -b 2600 -r $TABLE -f $PIPE
 }
 
 cat_data() {

@@ -1,12 +1,9 @@
 package org.ccfea.tickdata.simulator
 
 import net.sourceforge.jabm.SimulationTime
-
 import net.sourceforge.jasa.agent.SimpleTradingAgent
 import net.sourceforge.jasa.market.TickOrderBook
-
 import grizzled.slf4j.Logger
-
 import java.util.GregorianCalendar
 
 import org.ccfea.tickdata.event._
@@ -15,8 +12,8 @@ import org.ccfea.tickdata.order._
 
 import scala.beans.BeanProperty
 import collection.JavaConversions._
-
-import scala.collection.mutable.{Publisher, Subscriber, Map}
+import scala.collection.mutable
+import scala.collection.mutable.{Publisher, Subscriber}
 
 /**
  * The state of the market at a single point in time.  This class contains a mutable
@@ -38,7 +35,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   /**
    * Lookup table mapping order-codes to Orders.
    */
-  val orderMap = Map[String, net.sourceforge.jasa.market.Order]()
+  val orderMap = mutable.Map[String, net.sourceforge.jasa.market.Order]()
 
   /**
    * The time of the most recent event.
@@ -150,9 +147,10 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     val orderCode = ev.order.orderCode
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
-      // ASX reinsertion rule
-      val reinsert = (math.abs(ev.newPrice.doubleValue() - order.getPrice()) > 10e-4) ||
-                        ev.newVolume.toInt > order.getQuantity()
+//      // ASX reinsertion rule
+//      val reinsert = (math.abs(ev.newPrice.doubleValue() - order.getPrice()) > 10e-4) ||
+//                        ev.newVolume.toInt > order.getQuantity()
+      val reinsert = true
       order.setPrice(ev.newPrice.doubleValue())
       order.setQuantity(ev.newVolume.toInt)
       order.setIsBid(ev.newDirection == TradeDirection.Buy)

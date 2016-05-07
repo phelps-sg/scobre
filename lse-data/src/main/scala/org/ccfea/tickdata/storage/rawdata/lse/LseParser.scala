@@ -16,7 +16,7 @@ import org.ccfea.tickdata.storage.rawdata.HasDateTime
  *
   * (C) Steve Phelps 2014
  */
-class LseParser(recordType: String) extends DataParser {
+class LseParser(recordType: String, startOfDataTimeStamp: Long = 0) extends DataParser {
 
   val logger = Logger("org.ccfea.tickdata.storage.rawdata.lse.LseParser")
 
@@ -133,6 +133,7 @@ class LseParser(recordType: String) extends DataParser {
         case "P" => EventType.OrderMatched
         case "M" => EventType.OrderFilled
         case "T" => EventType.TransactionLimit
+        case _ => EventType.None
       }
     }
 
@@ -156,8 +157,10 @@ class LseParser(recordType: String) extends DataParser {
 
       case od: OrderDetailRaw  =>
 
+          val timeStamp = if (od.broadcastUpdateAction != 'F') od.timeStamp else startOfDataTimeStamp
+
           Event(None, EventType.OrderSubmitted, od.messageSequenceNumber,
-            od.timeStamp, od.tiCode, od.marketSegmentCode, od.currencyCode,
+            timeStamp, od.tiCode, od.marketSegmentCode, od.currencyCode,
             Some(od.marketMechanismType), Some(od.aggregateSize), Some(od.buySellInd),
             Some(od.orderCode), None, Some(od.broadcastUpdateAction),
             Some(od.marketSectorCode), Some(od.marketMechanismGroup), Some(od.price), Some(od.singleFillInd),

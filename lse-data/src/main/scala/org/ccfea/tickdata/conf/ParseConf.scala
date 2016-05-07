@@ -16,4 +16,5 @@ class ParseConf(args: Seq[String]) extends ScallopConf(args) {
   val fileName = opt[String](required=true, descr="The name of the CSV file containing the raw data")
   val parser = opt[String](required=false, default = Some("LSE"), descr="The format of the data being imported; either LSE or ASX")
   val recordType = opt[String](required=false, descr="For LSE data: one of order_detail, order_history or trade_report")
+  val startDate = opt[String](required=false, descr="For LSE data: the date of the first event in the batch (used to provide a time-stamp for broadcastUpdateAction=F events)")
 }
