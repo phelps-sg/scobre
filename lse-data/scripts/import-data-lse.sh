@@ -5,17 +5,17 @@ PIPE=/tmp/tickdata.pipe
 # Import CSV files into Apache HBase.
 
 if [ $# -lt 1 ]; then
-	echo "Usage: importdata-lse.sh <FILENAMES>"
+	echo "Usage: importdata-lse.sh <DATE> <FILENAMES>"
 	exit 1
 fi
 
 import_pipe() {
 	TABLE=$1
 	
-	echo "Importing $TABLE"
+	echo "Importing $TABLE using date $DATE"
 
 #	java org.ccfea.tickdata.ImportData -b 2600 -r $TABLE -f $PIPE
-	import-data -s 1/3/2008 -b 2600 -r $TABLE -f $PIPE
+	import-data -s $DATE -b 2600 -r $TABLE -f $PIPE
 }
 
 cat_data() {
@@ -31,7 +31,7 @@ cat_data() {
 # Import the specified CSV file into the appropriate table
 import() {
 	FILE=$1
-
+        DATE=`echo $FILE | perl -n -e'/([0-9]{4})([0-9]{2})/ && print "1/$2/$1"'`
 	cat_data $FILE | dos2unix > $PIPE &
 	
 	case $FILE in
@@ -53,6 +53,8 @@ rm -f $PIPE
 
 # Create a named pipe to the importing process
 mkfifo $PIPE
+
+shift
 
 for filename in $*
 do

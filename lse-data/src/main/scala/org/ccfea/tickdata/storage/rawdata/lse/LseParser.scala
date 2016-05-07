@@ -157,7 +157,7 @@ class LseParser(recordType: String, startOfDataTimeStamp: Long = 0) extends Data
 
       case od: OrderDetailRaw  =>
 
-          val timeStamp = if (od.broadcastUpdateAction != 'F') od.timeStamp else startOfDataTimeStamp
+          val timeStamp = if (od.broadcastUpdateAction.equals("F")) startOfDataTimeStamp else od.timeStamp
 
           Event(None, EventType.OrderSubmitted, od.messageSequenceNumber,
             timeStamp, od.tiCode, od.marketSegmentCode, od.currencyCode,

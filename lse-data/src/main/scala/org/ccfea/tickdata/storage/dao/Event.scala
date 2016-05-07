@@ -71,6 +71,8 @@ case class Event(eventID: Option[Long], eventType: EventType.Value, messageSeque
         new OrderRevisedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode.get), price.get,
           aggregateSize.get, tradeDirection.get)
 
+      case EventType.None =>
+        new NoopEvent(new Date(timeStamp), messageSequenceNumber, tiCode)
     }
   }
 
