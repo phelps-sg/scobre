@@ -37,7 +37,7 @@ trait HBaseInserter extends HBaseEventConverter {
     "tradeTimeInd", "convertedPriceInd")
 
   def store(field: String, data: Array[Byte])(implicit put: Put, timeStamp: Long) {
-    put.add(dataFamily, toBytes(field), timeStamp, data)
+    put.addColumn(dataFamily, toBytes(field), timeStamp, data)
   }
 
   def store(field: String, data: AnyRef)(implicit put: Put, timeStamp: Long) {
@@ -81,9 +81,7 @@ trait HBaseInserter extends HBaseEventConverter {
    *                        into the events table.
    */
   def insertData(parsedEvents: Seq[Event]): Int = {
-    eventsTable.put(
-      for(event <- parsedEvents) yield convert(event)
-    )
+    eventsTable.put( for(event <- parsedEvents) yield convert(event) )
     parsedEvents.length
   }
 }
