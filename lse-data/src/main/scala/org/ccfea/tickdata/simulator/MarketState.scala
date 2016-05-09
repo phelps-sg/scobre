@@ -130,6 +130,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
       case om: OrderMatchedEvent          =>  process(om)
       case or: OrderRevisedEvent          =>  process(or)
       case sd: StartOfDataMarker          =>  process(sd)
+      case ne: NoopEvent                  =>  logger.debug("Taking no action for " + ne)
       case _ => logger.error("Unknown event type: " + ev)
     }
   }
@@ -214,7 +215,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     val orderCode = ev.order.orderCode
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
-      adjustQuantity(order, ev)
+//      adjustQuantity(order, ev)
       logger.debug("partially filled order " + order)
       val matchedOrder =
           if (orderMap.contains(ev.matchingOrder.orderCode))
@@ -472,7 +473,8 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    * Remove the specified the order from the book.
    */
   def removeOrder(jasaOrder: net.sourceforge.jasa.market.Order) = {
-    book.removeAll(jasaOrder)
+//    book.removeAll(jasaOrder)
+    book.remove(jasaOrder)
   }
 
   /**

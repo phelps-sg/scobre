@@ -1,9 +1,9 @@
 package org.ccfea.tickdata.storage.hbase
 
+import grizzled.slf4j.Logger
 import org.ccfea.tickdata.storage.dao.{Event, EventType}
 
 import collection.JavaConversions._
-
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.util.Bytes
 
@@ -21,6 +21,8 @@ trait HBaseInserter extends HBaseEventConverter {
   var msn: Int = 0
 
   val MSN_MODULO = 1000
+
+  val logger = Logger(classOf[HBaseInserter])
 
   //TODO
 //  val NUM_SALT_BUCKETS = 100
@@ -63,6 +65,7 @@ trait HBaseInserter extends HBaseEventConverter {
    * @return        An HBase Put object which can be inserted into the database.
    */
   implicit def convert(event: Event): Put = {
+    logger.debug("Inserting " + event)
     implicit val timeStamp = event.timeStamp
     implicit val put: Put = new Put(getKey(event, internalMessageSequenceNumber()))
     def getField(f: String): AnyRef = classOf[Event].getMethod(f).invoke(event)
