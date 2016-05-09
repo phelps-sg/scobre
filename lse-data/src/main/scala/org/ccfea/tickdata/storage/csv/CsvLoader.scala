@@ -47,7 +47,7 @@ trait CsvLoader extends DataLoader {
                 logger.error(line)
 //                logger.error(e.getMessage)
                 e.printStackTrace()
-                throw new IllegalArgumentException(e)
+//                throw new IllegalArgumentException(e)
             }
             if (events.size > batchSize) {
               parseAndInsert(events)
