@@ -54,8 +54,6 @@ rm -f $PIPE
 # Create a named pipe to the importing process
 mkfifo $PIPE
 
-shift
-
 for filename in $*
 do
 	echo "Processing $filename... "
