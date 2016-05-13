@@ -36,7 +36,7 @@ trait CsvLoader extends DataLoader {
       while (next) {
         val line = reader.readLine()
         lineNumber = lineNumber + 1
-        if (line != null) {
+        if (line != null && line.length > 0) {
           if (!(line.charAt(0) == '#')) {
             try {
               val event = toRecord(parse(line), lineNumber)
