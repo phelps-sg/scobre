@@ -75,6 +75,12 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   var mostRecentEvent: Option[TickDataEvent] = None
 
   /**
+    * The previous event.
+    */
+
+  var previousEvent: Option[TickDataEvent] = None
+
+  /**
    * The most recent uncrossing price.
    */
   var uncrossingPrice: Option[BigDecimal] = None
@@ -105,6 +111,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     val newTime = new SimulationTime(ev.timeStamp.getTime)
     this.time = Some(newTime)
     this.volume = Some(0)
+    this.previousEvent = this.mostRecentEvent
     this.mostRecentEvent = Some(ev)
   }
 
@@ -344,25 +351,25 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   def hour = calendar.get(java.util.Calendar.HOUR_OF_DAY)
   def minute = calendar.get(java.util.Calendar.MINUTE)
 
-  def lastOrderVolume: Option[Long] = mostRecentEvent match {
+  def lastOrderVolume: Option[Long] = previousEvent match {
     case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, vol, _, _, _))) => Some(vol)
     case Some(OrderSubmittedEvent(_, _, _, MarketOrder(_, vol, _, _))) => Some(vol)
     case _ => None
   }
 
-  def lastOrderType: Option[Long] = mostRecentEvent match {
+  def lastOrderType: Option[Long] = previousEvent match {
     case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, _, _, _, _))) => Some(0L)
     case Some(OrderSubmittedEvent(_, _, _, MarketOrder(_, _, _, _))) => Some(1L)
     case _ => None
   }
 
-  def lastOrderDirection: Option[Long] = mostRecentEvent match {
+  def lastOrderDirection: Option[Long] = previousEvent match {
     case Some(OrderSubmittedEvent(_, _, _, order:OrderWithVolume)) =>
       if (order.tradeDirection == TradeDirection.Buy) Some(0) else Some(1)
     case _ => None
   }
 
-  def lastOrderPrice: Option[BigDecimal] = mostRecentEvent match {
+  def lastOrderPrice: Option[BigDecimal] = previousEvent match {
     case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, _, _, price, _))) => Some(price)
     case _ => None
   }
