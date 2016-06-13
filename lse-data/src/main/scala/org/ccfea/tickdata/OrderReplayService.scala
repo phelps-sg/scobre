@@ -110,7 +110,7 @@ object OrderReplayService extends ReplayApplication {
                                       proportionShuffling: Double, windowSize: Int, intraWindow: Boolean,
                                       offsetting: Int, attribute: Int,
                                       dateRange: Option[(Long, Long)])(implicit conf: ServerConf):
-                                                util.List[util.Map[String, java.lang.Double]] = {
+                                                util.Map[String, util.List[java.lang.Double]] = {
     logger.info("Shuffled replay for " + assetId + " with windowSize " + windowSize +
                       ", offsetting " + offsetting + " and percentage " + proportionShuffling)
     dateRange match {
@@ -139,7 +139,7 @@ object OrderReplayService extends ReplayApplication {
 
       override def replay(assetId: String, variables: java.util.List[String],
                             startDateTime: Long,
-                            endDateTime: Long): java.util.List[java.util.Map[String,java.lang.Double]] = {
+                            endDateTime: Long): java.util.Map[String, java.util.List[java.lang.Double]] = {
         val startDate = new Date(startDateTime)
         val endDate = new Date(endDateTime)
         logger.info("Using data for " + assetId + " between " + startDate + " and " + endDate)
@@ -156,13 +156,16 @@ object OrderReplayService extends ReplayApplication {
       override def shuffledReplayDateRange(assetId: String, variables: util.List[String],
                                     proportionShuffling: Double, windowSize: Int, intraWindow: Boolean,
                                       offsetting: Int, attribute: Int, startDateTime: Long, endDateTime: Long):
-                                                util.List[util.Map[String, java.lang.Double]] = {
+                                                java.util.Map[String, java.util.List[java.lang.Double]] = {
         executeShuffledReplay(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute,
                                 Some((startDateTime, endDateTime)))
       }
 
-      override def shuffledReplay(assetId: String, variables: util.List[String], proportionShuffling: Double, windowSize: Int, intraWindow: Boolean, offsetting: Int, attribute: Int): util.List[util.Map[String, lang.Double]] = {
-        executeShuffledReplay(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute, None)
+      override def shuffledReplay(assetId: String, variables: util.List[String], proportionShuffling: Double,
+                                    windowSize: Int, intraWindow: Boolean,
+                                    offsetting: Int, attribute: Int): util.Map[String, util.List[java.lang.Double]] = {
+        executeShuffledReplay(assetId, variables, proportionShuffling, windowSize,
+                                intraWindow, offsetting, attribute, None)
       }
 
     })
@@ -170,7 +173,7 @@ object OrderReplayService extends ReplayApplication {
     val serverTransport = new TServerSocket(port)
     val server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor))
 
-    logger.info("CCFEA order-replay server version " + BuildInfo.version)
+    logger.info("SCOBRE order-replay server version " + BuildInfo.version)
     logger.info("Server running on port " + port + "... ")
     server.serve()
     logger.info("Server terminated.")

@@ -11,20 +11,27 @@ import collection.JavaConversions._
 trait MultivariateThriftCollator
     extends MarketStateDataCollector[(Option[SimulationTime], Map[String,Option[AnyVal]])] {
 
-  val result: java.util.List[java.util.Map[java.lang.String, java.lang.Double]] = new java.util.LinkedList()
+  val result: java.util.Map[String, java.util.List[java.lang.Double]] = new java.util.HashMap()
 
-  def outputResult(data: Iterable[(Option[SimulationTime], Map[String,Option[AnyVal]])]) = {
+  def addDatum(variable: String, value: Option[AnyVal]) = {
+    val valueList = if (result.containsKey(variable)) {
+      result.get(variable)
+    } else {
+      val emptyList = new java.util.ArrayList[java.lang.Double]()
+      result.put(variable, emptyList)
+      emptyList
+    }
+    valueList.add(value match {
+      case Some(p:Double) => p
+      case Some(l:Long) => l.toDouble
+      case _ => Double.NaN
+    })
+  }
+
+  def outputResult(data: Iterable[(Option[SimulationTime], Map[String, Option[AnyVal]])]) = {
     for ((t, bindings) <- data) {
-      val javaBindings = new java.util.HashMap[java.lang.String,java.lang.Double]()
-      for((variable, value) <- bindings) {
-        javaBindings.put(variable, value match {
-          case Some(p:Double) => p
-          case Some(l:Long) => l.toDouble
-          case _ => Double.NaN
-        })
-      }
-      javaBindings.put("t", t.get.getTicks.toDouble / 1000)
-      result.add(javaBindings)
+      for((variable, value) <- bindings) addDatum(variable, value)
+      addDatum("t", Some(t.get.getTicks.toDouble / 1000))
     }
   }
 
