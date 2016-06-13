@@ -145,8 +145,8 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   def process(ev: StartOfDataMarker): Unit = {
     logger.info(ev)
     if (this.startOfData) {
-      logger.info("Reseting book on " + ev)
-      this.book.reset()
+//      logger.info("Reseting book on " + ev)
+//      this.book.reset()
       startOfData = false
     }
   }
@@ -351,25 +351,25 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   def hour = calendar.get(java.util.Calendar.HOUR_OF_DAY)
   def minute = calendar.get(java.util.Calendar.MINUTE)
 
-  def lastOrderVolume: Option[Long] = previousEvent match {
+  def lastOrderVolume: Option[Long] = mostRecentEvent match {
     case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, vol, _, _, _))) => Some(vol)
     case Some(OrderSubmittedEvent(_, _, _, MarketOrder(_, vol, _, _))) => Some(vol)
     case _ => None
   }
 
-  def lastOrderType: Option[Long] = previousEvent match {
+  def lastOrderType: Option[Long] = mostRecentEvent match {
     case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, _, _, _, _))) => Some(0L)
     case Some(OrderSubmittedEvent(_, _, _, MarketOrder(_, _, _, _))) => Some(1L)
     case _ => None
   }
 
-  def lastOrderDirection: Option[Long] = previousEvent match {
+  def lastOrderDirection: Option[Long] = mostRecentEvent match {
     case Some(OrderSubmittedEvent(_, _, _, order:OrderWithVolume)) =>
       if (order.tradeDirection == TradeDirection.Buy) Some(0) else Some(1)
     case _ => None
   }
 
-  def lastOrderPrice: Option[BigDecimal] = previousEvent match {
+  def lastOrderPrice: Option[BigDecimal] = mostRecentEvent match {
     case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, _, _, price, _))) => Some(price)
     case _ => None
   }
