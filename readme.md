@@ -59,7 +59,21 @@ replace `cseesp1.essex.ac.uk` with `localhost`.
 		</property>
 	</configuration>
 	
-### 2. Install the shell scripts
+### 2. Compile the code
+
+To compile the source-code to separate .class files, execute the following command:
+
+~~~bash
+sbt compile
+~~~
+
+To create jar files and the script files:
+
+~~~bash
+sbt pack
+~~~~
+
+### 3. Install the shell scripts
 
 Execute the following commands in the shell to install the scripts into the directory `~/local/bin`:
 
@@ -138,19 +152,7 @@ To see an example of using the API from Python see the script
 - The [data description](file:./lse-data/doc/data.pdf) provided by the LSE
 - The [API documentation](file:./lse-data/target/scala-2.11/api/index.html)
 
-## Compiling and modifying the code
-
-To compile the source-code to separate .class files, execute the following command:
-
-~~~bash
-sbt compile
-~~~
-
-To create jar files and the script files:
-
-~~~bash
-sbt pack
-~~~~
+## Working on the project using an IDE
 
 To import the project as an IntelliJ IDEA project, first install the [Scala 
 plugin](https://confluence.jetbrains.com/display/SCA/Scala+Plugin+for+IntelliJ+IDEA), and then directly import the `build.sbt` file as a new project.
