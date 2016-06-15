@@ -1,4 +1,4 @@
-# CCFEA Order-Book Rebuilder
+# SCala OrderBook REconstructor (SCOBRE)
 
 This software allows the user to reconstruct the state of the limit order-book 
 from low-level tick-data provided by the London Stock-Exchange (LSE).  The 
