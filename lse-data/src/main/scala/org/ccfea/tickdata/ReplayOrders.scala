@@ -16,40 +16,27 @@ import grizzled.slf4j.Logger
 /**
  * The main application for running order-book reconstruction simulations.
  *
- * (C) Steve Phelps 2015
+ * (C) Steve Phelps 2016
  */
 object ReplayOrders extends ReplayApplication {
 
   val logger = Logger("org.ccfea.tickdata.OrderReplayer")
 
   def main(args: Array[String]) {
-
-    // Parse command-line options
     implicit val conf = new ReplayerConf(args)
-
-    val getPropertyMethod = classOf[MarketState].getMethod(conf.property())
-    simulateAndCollate {
-      // The method which will fetch the datum of interest from the state of the market
-      getPropertyMethod invoke _
-    }
-
-    // Alternatively we can hard-code the collation function as follows.
-
-    // Simulate and collate the best bid price
-//    simulateAndCollate(_.quote.bid)
-
-    // Simulate and collate transaction prices in event-time
-//    simulateAndCollate(_.lastTransactionPrice)
+    replayAndCollate(classOf[MarketState].getMethod(conf.property()) invoke _)
   }
 
   /**
    * Simulate the matching and submission of orders to the LOB and
    * collate properties of the market as a time-series.
    *
+   *  e.g. replayAndCollate(_.lastTransactionPrice)
+   *
    * @param dataCollector   A function for fetching the data of interest
    * @param conf            Command-line options
    */
-  def simulateAndCollate(dataCollector: MarketState => Option[AnyVal])
+  def replayAndCollate(dataCollector: MarketState => Option[AnyVal])
                           (implicit conf: ReplayerConf) = {
 
     val hbaseTicks: Iterable[TickDataEvent] =
