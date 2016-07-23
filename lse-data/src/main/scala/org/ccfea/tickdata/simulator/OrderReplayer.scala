@@ -17,7 +17,7 @@ trait OrderReplayer[T] extends Runnable {
   def eventSource: Iterable[TickDataEvent]
 
   /**
-   * The initial state of the market state.
+   * The initial market state.
    *
    * @return  A mutable representation of the state of the market,
    *            which will change over time as subsequent ticks are replayed.
