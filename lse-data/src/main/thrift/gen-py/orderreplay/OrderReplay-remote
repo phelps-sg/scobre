@@ -24,6 +24,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print ''
   print 'Functions:'
   print '   replay(string assetId,  variables, i64 startDateTime, i64 endDateTime)'
+  print '  i64 replayToCsv(string assetId,  variables, i64 startDateTime, i64 endDateTime, string csvFileName)'
   print '   shuffledReplay(string assetId,  variables, double proportionShuffling, i32 windowSize, bool intraWindow, i32 offsetting, i32 attribute)'
   print '   shuffledReplayDateRange(string assetId,  variables, double proportionShuffling, i32 windowSize, bool intraWindow, i32 offsetting, i32 attribute, i64 startDateTime, i64 endDateTime)'
   print ''
@@ -82,6 +83,12 @@ if cmd == 'replay':
     print 'replay requires 4 args'
     sys.exit(1)
   pp.pprint(client.replay(args[0],eval(args[1]),eval(args[2]),eval(args[3]),))
+
+elif cmd == 'replayToCsv':
+  if len(args) != 5:
+    print 'replayToCsv requires 5 args'
+    sys.exit(1)
+  pp.pprint(client.replayToCsv(args[0],eval(args[1]),eval(args[2]),eval(args[3]),args[4],))
 
 elif cmd == 'shuffledReplay':
   if len(args) != 7:

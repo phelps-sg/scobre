@@ -9,15 +9,19 @@ import org.ccfea.tickdata.collector.MarketStateDataCollector
 trait MultivariateCsvDataCollator
     extends MarketStateDataCollector[(Option[SimulationTime], Map[String,Option[AnyVal]])] with PrintStreamOutputer {
 
-  def outputResult(data: Iterable[(Option[SimulationTime], Map[String,Option[AnyVal]])]) = {
+  def outputResult(data: Iterable[(Option[SimulationTime], Map[String, Option[AnyVal]])]) = {
     val out = openOutput()
     for ((t, bindings) <- data) {
       out.print(t.get.getTicks + "\t")
+      val n = bindings.size
+      var i = 1
       for ((variable, value) <- bindings) {
-        value match {
+        out.print(value match {
           case Some(p) => p.toString()
           case None => "NaN"
-        }
+        })
+        if (i < n) out.print('\t') else out.println()
+        i = i + 1
       }
     }
     out.close()

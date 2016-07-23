@@ -34,6 +34,17 @@ class Iface:
     """
     pass
 
+  def replayToCsv(self, assetId, variables, startDateTime, endDateTime, csvFileName):
+    """
+    Parameters:
+     - assetId
+     - variables
+     - startDateTime
+     - endDateTime
+     - csvFileName
+    """
+    pass
+
   def shuffledReplay(self, assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute):
     """
     Parameters:
@@ -111,6 +122,44 @@ class Client(Iface):
     if result.success is not None:
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "replay failed: unknown result");
+
+  def replayToCsv(self, assetId, variables, startDateTime, endDateTime, csvFileName):
+    """
+    Parameters:
+     - assetId
+     - variables
+     - startDateTime
+     - endDateTime
+     - csvFileName
+    """
+    self.send_replayToCsv(assetId, variables, startDateTime, endDateTime, csvFileName)
+    return self.recv_replayToCsv()
+
+  def send_replayToCsv(self, assetId, variables, startDateTime, endDateTime, csvFileName):
+    self._oprot.writeMessageBegin('replayToCsv', TMessageType.CALL, self._seqid)
+    args = replayToCsv_args()
+    args.assetId = assetId
+    args.variables = variables
+    args.startDateTime = startDateTime
+    args.endDateTime = endDateTime
+    args.csvFileName = csvFileName
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_replayToCsv(self):
+    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(self._iprot)
+      self._iprot.readMessageEnd()
+      raise x
+    result = replayToCsv_result()
+    result.read(self._iprot)
+    self._iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "replayToCsv failed: unknown result");
 
   def shuffledReplay(self, assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute):
     """
@@ -206,6 +255,7 @@ class Processor(Iface, TProcessor):
     self._handler = handler
     self._processMap = {}
     self._processMap["replay"] = Processor.process_replay
+    self._processMap["replayToCsv"] = Processor.process_replayToCsv
     self._processMap["shuffledReplay"] = Processor.process_shuffledReplay
     self._processMap["shuffledReplayDateRange"] = Processor.process_shuffledReplayDateRange
 
@@ -231,6 +281,17 @@ class Processor(Iface, TProcessor):
     result = replay_result()
     result.success = self._handler.replay(args.assetId, args.variables, args.startDateTime, args.endDateTime)
     oprot.writeMessageBegin("replay", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_replayToCsv(self, seqid, iprot, oprot):
+    args = replayToCsv_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = replayToCsv_result()
+    result.success = self._handler.replayToCsv(args.assetId, args.variables, args.startDateTime, args.endDateTime, args.csvFileName)
+    oprot.writeMessageBegin("replayToCsv", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -441,6 +502,181 @@ class replay_result:
   def __ne__(self, other):
     return not (self == other)
 
+class replayToCsv_args:
+  """
+  Attributes:
+   - assetId
+   - variables
+   - startDateTime
+   - endDateTime
+   - csvFileName
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'assetId', None, None, ), # 1
+    (2, TType.LIST, 'variables', (TType.STRING,None), None, ), # 2
+    (3, TType.I64, 'startDateTime', None, None, ), # 3
+    (4, TType.I64, 'endDateTime', None, None, ), # 4
+    (5, TType.STRING, 'csvFileName', None, None, ), # 5
+  )
+
+  def __init__(self, assetId=None, variables=None, startDateTime=None, endDateTime=None, csvFileName=None,):
+    self.assetId = assetId
+    self.variables = variables
+    self.startDateTime = startDateTime
+    self.endDateTime = endDateTime
+    self.csvFileName = csvFileName
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.assetId = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.LIST:
+          self.variables = []
+          (_etype26, _size23) = iprot.readListBegin()
+          for _i27 in xrange(_size23):
+            _elem28 = iprot.readString();
+            self.variables.append(_elem28)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.I64:
+          self.startDateTime = iprot.readI64();
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.I64:
+          self.endDateTime = iprot.readI64();
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.STRING:
+          self.csvFileName = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('replayToCsv_args')
+    if self.assetId is not None:
+      oprot.writeFieldBegin('assetId', TType.STRING, 1)
+      oprot.writeString(self.assetId)
+      oprot.writeFieldEnd()
+    if self.variables is not None:
+      oprot.writeFieldBegin('variables', TType.LIST, 2)
+      oprot.writeListBegin(TType.STRING, len(self.variables))
+      for iter29 in self.variables:
+        oprot.writeString(iter29)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.startDateTime is not None:
+      oprot.writeFieldBegin('startDateTime', TType.I64, 3)
+      oprot.writeI64(self.startDateTime)
+      oprot.writeFieldEnd()
+    if self.endDateTime is not None:
+      oprot.writeFieldBegin('endDateTime', TType.I64, 4)
+      oprot.writeI64(self.endDateTime)
+      oprot.writeFieldEnd()
+    if self.csvFileName is not None:
+      oprot.writeFieldBegin('csvFileName', TType.STRING, 5)
+      oprot.writeString(self.csvFileName)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class replayToCsv_result:
+  """
+  Attributes:
+   - success
+  """
+
+  thrift_spec = (
+    (0, TType.I64, 'success', None, None, ), # 0
+  )
+
+  def __init__(self, success=None,):
+    self.success = success
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 0:
+        if ftype == TType.I64:
+          self.success = iprot.readI64();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('replayToCsv_result')
+    if self.success is not None:
+      oprot.writeFieldBegin('success', TType.I64, 0)
+      oprot.writeI64(self.success)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
 class shuffledReplay_args:
   """
   Attributes:
@@ -490,10 +726,10 @@ class shuffledReplay_args:
       elif fid == 2:
         if ftype == TType.LIST:
           self.variables = []
-          (_etype26, _size23) = iprot.readListBegin()
-          for _i27 in xrange(_size23):
-            _elem28 = iprot.readString();
-            self.variables.append(_elem28)
+          (_etype33, _size30) = iprot.readListBegin()
+          for _i34 in xrange(_size30):
+            _elem35 = iprot.readString();
+            self.variables.append(_elem35)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -539,8 +775,8 @@ class shuffledReplay_args:
     if self.variables is not None:
       oprot.writeFieldBegin('variables', TType.LIST, 2)
       oprot.writeListBegin(TType.STRING, len(self.variables))
-      for iter29 in self.variables:
-        oprot.writeString(iter29)
+      for iter36 in self.variables:
+        oprot.writeString(iter36)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.proportionShuffling is not None:
@@ -606,16 +842,16 @@ class shuffledReplay_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype31, _vtype32, _size30 ) = iprot.readMapBegin()
-          for _i34 in xrange(_size30):
-            _key35 = iprot.readString();
-            _val36 = []
-            (_etype40, _size37) = iprot.readListBegin()
-            for _i41 in xrange(_size37):
-              _elem42 = iprot.readDouble();
-              _val36.append(_elem42)
+          (_ktype38, _vtype39, _size37 ) = iprot.readMapBegin()
+          for _i41 in xrange(_size37):
+            _key42 = iprot.readString();
+            _val43 = []
+            (_etype47, _size44) = iprot.readListBegin()
+            for _i48 in xrange(_size44):
+              _elem49 = iprot.readDouble();
+              _val43.append(_elem49)
             iprot.readListEnd()
-            self.success[_key35] = _val36
+            self.success[_key42] = _val43
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -632,11 +868,11 @@ class shuffledReplay_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter43,viter44 in self.success.items():
-        oprot.writeString(kiter43)
-        oprot.writeListBegin(TType.DOUBLE, len(viter44))
-        for iter45 in viter44:
-          oprot.writeDouble(iter45)
+      for kiter50,viter51 in self.success.items():
+        oprot.writeString(kiter50)
+        oprot.writeListBegin(TType.DOUBLE, len(viter51))
+        for iter52 in viter51:
+          oprot.writeDouble(iter52)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -713,10 +949,10 @@ class shuffledReplayDateRange_args:
       elif fid == 2:
         if ftype == TType.LIST:
           self.variables = []
-          (_etype49, _size46) = iprot.readListBegin()
-          for _i50 in xrange(_size46):
-            _elem51 = iprot.readString();
-            self.variables.append(_elem51)
+          (_etype56, _size53) = iprot.readListBegin()
+          for _i57 in xrange(_size53):
+            _elem58 = iprot.readString();
+            self.variables.append(_elem58)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -772,8 +1008,8 @@ class shuffledReplayDateRange_args:
     if self.variables is not None:
       oprot.writeFieldBegin('variables', TType.LIST, 2)
       oprot.writeListBegin(TType.STRING, len(self.variables))
-      for iter52 in self.variables:
-        oprot.writeString(iter52)
+      for iter59 in self.variables:
+        oprot.writeString(iter59)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.proportionShuffling is not None:
@@ -847,16 +1083,16 @@ class shuffledReplayDateRange_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype54, _vtype55, _size53 ) = iprot.readMapBegin()
-          for _i57 in xrange(_size53):
-            _key58 = iprot.readString();
-            _val59 = []
-            (_etype63, _size60) = iprot.readListBegin()
-            for _i64 in xrange(_size60):
-              _elem65 = iprot.readDouble();
-              _val59.append(_elem65)
+          (_ktype61, _vtype62, _size60 ) = iprot.readMapBegin()
+          for _i64 in xrange(_size60):
+            _key65 = iprot.readString();
+            _val66 = []
+            (_etype70, _size67) = iprot.readListBegin()
+            for _i71 in xrange(_size67):
+              _elem72 = iprot.readDouble();
+              _val66.append(_elem72)
             iprot.readListEnd()
-            self.success[_key58] = _val59
+            self.success[_key65] = _val66
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -873,11 +1109,11 @@ class shuffledReplayDateRange_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter66,viter67 in self.success.items():
-        oprot.writeString(kiter66)
-        oprot.writeListBegin(TType.DOUBLE, len(viter67))
-        for iter68 in viter67:
-          oprot.writeDouble(iter68)
+      for kiter73,viter74 in self.success.items():
+        oprot.writeString(kiter73)
+        oprot.writeListBegin(TType.DOUBLE, len(viter74))
+        for iter75 in viter74:
+          oprot.writeDouble(iter75)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()

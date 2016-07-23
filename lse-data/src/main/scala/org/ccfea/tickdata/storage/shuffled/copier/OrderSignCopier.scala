@@ -1,7 +1,7 @@
 package org.ccfea.tickdata.storage.shuffled.copier
 
-import org.ccfea.tickdata.event.{OrderRevisedEvent, OrderEvent, OrderSubmittedEvent, TickDataEvent}
-import org.ccfea.tickdata.order.{LimitOrder, OrderWithVolume, TradeDirection}
+import org.ccfea.tickdata.event.{OrderEvent, OrderRevisedEvent, OrderSubmittedEvent, TickDataEvent}
+import org.ccfea.tickdata.order.{LimitOrder, OrderWithVolume, TradeDirection, Trader}
 import org.ccfea.tickdata.storage.shuffled.RandomPermutation
 import grizzled.slf4j.Logger
 
@@ -23,7 +23,7 @@ class OrderSignCopier
       case OrderSubmittedEvent(timeStamp, messageSequenceNumber, tiCode,
                                 LimitOrder(orderCode, aggregateSize, tradeDirection, price, trader)) =>
         val revisedOrder =
-          new LimitOrder(orderCode, aggregateSize, x, price, trader)
+          new LimitOrder(orderCode, aggregateSize, x, price, new Trader())
         new OrderSubmittedEvent(timeStamp, messageSequenceNumber, tiCode, revisedOrder)
     }
 

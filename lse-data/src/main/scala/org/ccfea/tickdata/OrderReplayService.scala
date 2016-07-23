@@ -3,20 +3,19 @@ package org.ccfea.tickdata
 import java.util.Date
 import java.{lang, util}
 
-import org.ccfea.tickdata.order.{OrderWithVolume, LimitOrder}
-import org.ccfea.tickdata.order.offset.{OppositeSideOffsetOrder, SameSideOffsetOrder, MidPriceOffsetOrder, Offsetting}
-import org.ccfea.tickdata.storage.shuffled.copier.{PriceCopier, VolumeCopier, TickCopier, OrderSignCopier}
+import org.ccfea.tickdata.order.{LimitOrder, OrderWithVolume}
+import org.ccfea.tickdata.order.offset.{MidPriceOffsetOrder, Offsetting, OppositeSideOffsetOrder, SameSideOffsetOrder}
+import org.ccfea.tickdata.storage.shuffled.copier.{OrderSignCopier, PriceCopier, TickCopier, VolumeCopier}
 
 import scala.collection.parallel
-
 import grizzled.slf4j.Logger
 import org.apache.thrift.server.TThreadPoolServer
 import org.apache.thrift.transport.TServerSocket
 import org.ccfea.tickdata.collector.MultivariateTimeSeriesCollector
 import org.ccfea.tickdata.conf.{BuildInfo, ServerConf}
-
 import org.ccfea.tickdata.event.{OrderEvent, TickDataEvent}
-import org.ccfea.tickdata.simulator.{Quote, ClearingMarketState, MarketState}
+import org.ccfea.tickdata.simulator.{ClearingMarketState, MarketState, OrderReplayer, Quote}
+import org.ccfea.tickdata.storage.csv.MultivariateCsvDataCollator
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
 import org.ccfea.tickdata.storage.shuffled._
 import org.ccfea.tickdata.storage.thrift.MultivariateThriftCollator
@@ -36,6 +35,12 @@ object OrderReplayService extends ReplayApplication {
                  val dataCollectors: Map[String, MarketState => Option[AnyVal]],
                   val marketState: MarketState)
     extends MultivariateTimeSeriesCollector with MultivariateThriftCollator
+
+  class CsvReplayer(val eventSource: Iterable[TickDataEvent],
+                 val dataCollectors: Map[String, MarketState => Option[AnyVal]],
+                  val marketState: MarketState, val outFileName: Option[String])
+    extends MultivariateTimeSeriesCollector with MultivariateCsvDataCollator
+
 
   var tickCache = Map[(String, Offsetting.Value, Option[(Long, Long)]), Seq[TickDataEvent]]()
 
@@ -118,16 +123,29 @@ object OrderReplayService extends ReplayApplication {
         logger.info("between " + new Date(t0) + " and " + new Date(t1))
       case None =>
     }
-    logger.info("Starting simulation... ")
     val marketState = newMarketState(conf)
     val shuffledTicks =
       getShuffledData(assetId, proportionShuffling, windowSize, intraWindow,
                       Offsetting(offsetting), ShuffledAttribute(attribute), dateRange)
     val replayer =
       new Replayer(shuffledTicks, dataCollectors = Map() ++ collectors(variables), marketState)
+    runSimulation(replayer)
+    replayer.result
+  }
+
+  def getTicks(assetId: String, variables: java.util.List[String],
+               startDateTime: Long,
+               endDateTime: Long): HBaseRetriever = {
+    val startDate = new Date(startDateTime)
+    val endDate = new Date(endDateTime)
+    logger.info("Using data for " + assetId + " between " + startDate + " and " + endDate)
+    new HBaseRetriever(selectedAsset = assetId, startDate = Some(startDate), endDate = Some(endDate))
+  }
+
+  def runSimulation(replayer: MultivariateTimeSeriesCollector) = {
+    logger.info("Starting simulation... ")
     replayer.run()
     logger.info("done.")
-    replayer.result
   }
 
   def main(args: Array[String]): Unit = {
@@ -140,17 +158,23 @@ object OrderReplayService extends ReplayApplication {
       override def replay(assetId: String, variables: java.util.List[String],
                             startDateTime: Long,
                             endDateTime: Long): java.util.Map[String, java.util.List[java.lang.Double]] = {
-        val startDate = new Date(startDateTime)
-        val endDate = new Date(endDateTime)
-        logger.info("Using data for " + assetId + " between " + startDate + " and " + endDate)
-        logger.info("Starting simulation... ")
         val marketState = newMarketState(conf)
-        val ticks =
-          new HBaseRetriever(selectedAsset = assetId, startDate = Some(startDate), endDate = Some(endDate))
+        val ticks = getTicks(assetId, variables, startDateTime, endDateTime)
         val replayer = new Replayer(ticks, dataCollectors = Map() ++ collectors(variables), marketState)
-        replayer.run()
-        logger.info("done.")
+        runSimulation(replayer)
         replayer.result
+      }
+
+      override def replayToCsv(assetId: String, variables: java.util.List[String],
+                                startDateTime: Long, endDateTime: Long,
+                                csvFileName: String): Long = {
+        val marketState = newMarketState(conf)
+        val ticks = getTicks(assetId, variables, startDateTime, endDateTime)
+        val replayer =
+          new CsvReplayer(ticks, dataCollectors = Map() ++ collectors(variables),
+                           marketState, Some(csvFileName))
+        runSimulation(replayer)
+        return 0
       }
 
       override def shuffledReplayDateRange(assetId: String, variables: util.List[String],
@@ -160,6 +184,11 @@ object OrderReplayService extends ReplayApplication {
         executeShuffledReplay(assetId, variables, proportionShuffling, windowSize, intraWindow, offsetting, attribute,
                                 Some((startDateTime, endDateTime)))
       }
+  def runSimulation(replayer: MultivariateTimeSeriesCollector) = {
+    logger.info("Starting simulation... ")
+    replayer.run()
+    logger.info("done.")
+  }
 
       override def shuffledReplay(assetId: String, variables: util.List[String], proportionShuffling: Double,
                                     windowSize: Int, intraWindow: Boolean,

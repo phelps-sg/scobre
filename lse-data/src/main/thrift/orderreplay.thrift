@@ -31,6 +31,9 @@ service OrderReplay {
    map<string, list<double>> replay(1:string assetId, 2:list<string> variables,
                                                         3:i64 startDateTime, 4:i64 endDateTime),
 
+   i64 replayToCsv(1:string assetId, 2:list<string> variables, 3:i64 startDateTime, 4:i64 endDateTime,
+                    5:string csvFileName),
+
    map<string, list<double>> shuffledReplay(1:string assetId, 2:list<string> variables,
                                                         3:double proportionShuffling, 4:i32 windowSize,
                                                         5:bool intraWindow, 6:i32 offsetting, 7:i32 attribute)
