@@ -55,7 +55,7 @@ class MarketSimulator(val ticks: Iterable[TickDataEvent], val market: MarketStat
   }
 
   def step() = {
-    val tick = ticks.iterator.next()
+    val tick = realTicksIterator.next()
     process(tick)
   }
 

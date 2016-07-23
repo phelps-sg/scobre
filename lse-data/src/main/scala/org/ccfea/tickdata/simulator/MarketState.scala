@@ -159,11 +159,12 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
 //      val reinsert = (math.abs(ev.newPrice.doubleValue() - order.getPrice()) > 10e-4) ||
 //                        ev.newVolume.toInt > order.getQuantity()
       val reinsert = true
-      order.setPrice(ev.newPrice.doubleValue())
-      order.setQuantity(ev.newVolume.toInt)
-      order.setIsBid(ev.newDirection == TradeDirection.Buy)
+
       if (reinsert) {
         removeOrder(order)
+        order.setPrice(ev.newPrice.doubleValue())
+        order.setQuantity(ev.newVolume.toInt)
+        order.setIsBid(ev.newDirection == TradeDirection.Buy)
         insertOrder(order)
       }
     } else {
@@ -481,7 +482,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    */
   def removeOrder(jasaOrder: net.sourceforge.jasa.market.Order) = {
 //    book.removeAll(jasaOrder)
-    book.remove(jasaOrder)
+    book.removeUnmatchedOrder(jasaOrder)
   }
 
   /**
