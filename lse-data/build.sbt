@@ -20,7 +20,7 @@ name := "lse-data"
 
 organization := "net.sourceforge.jasa"
 
-version := "0.19-SNAPSHOT"
+version := "0.20-SNAPSHOT"
 
 scalaVersion := "2.11.7"
 
@@ -55,7 +55,7 @@ libraryDependencies ++= Seq(
   "org.apache.hadoop" % "hadoop-client" % "2.7.1",
   "org.apache.hadoop" % "hadoop-common" % "2.7.1",
   "org.apache.thrift" % "libthrift" % "0.9.2",
-  "net.sourceforge.jasa" % "jasa" % "1.2.6-SNAPSHOT",
+  "net.sourceforge.jasa" % "jasa" % "1.2.8-SNAPSHOT",
 //  "com.espertech" % "esper" % "4.11.0",
   "org.rogach" %% "scallop" % "0.9.5",
   "org.clapper" % "grizzled-slf4j_2.10" % "1.0.2",
