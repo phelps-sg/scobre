@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import datetime
 import time
 
-from orderreplay import *
+from orderreplay import OrderReplay
 from thrift.protocol import TBinaryProtocol
 from thrift.transport import TSocket
 
@@ -24,58 +24,66 @@ def date_to_time(d):
 def dict_to_df(data, variables):
     df = pd.DataFrame(data)
     df.index = pd.Series([datetime.datetime.fromtimestamp(t) for t in df.t])
-    return df         
+    return df
     
-def get_hf_data(asset, start_date, end_date, 
-                variables = ['midPrice', 'lastTransactionPrice', 'volume'], 
-                server = DEFAULT_SERVER, port = DEFAULT_PORT):
-    '''
-    Retrieve the specified data from the order-book reconstructor as a pandas DataFrame.
-    :param asset:           The ISIN of the asset
-    :param start_date:      The start date as a datetime object
-    :param end_date:        The end date as a a datetime object
-    :param variables:       The variables to retrieve
-    :param server:          The host-name of the server hosting the tick-data
-    :param port:            The port-number of the server
-    :return:                A pandas data frame containing time-series for all requested variables
-    '''
-    transport = TSocket.TSocket(server, port)
-    protocol = TBinaryProtocol.TBinaryProtocol(transport)
-    client = OrderReplay.Client(protocol)
-    transport.open()
-    t0 = date_to_time(start_date)
-    t1 = date_to_time(end_date)
-    raw_data = client.replay(asset, variables, t0, t1)
-    if len(raw_data) == 0:
-        raise Exception("No data available")
-    return dict_to_df(raw_data, variables)
     
-def write_hf_data_to_csv(asset, start_date, end_date, csv_file_name,
-                             variables = ['midPrice', 'lastTransactionPrice', 'volume'],
-                             server = DEFAULT_SERVER, port = DEFAULT_PORT):
-    '''
-    Retrieve the specified data from the order-book reconstructor and write it
-    to a CSV file.
-    :param asset:           The ISIN of the asset
-    :param start_date:      The start date as a datetime object
-    :param end_date:        The end date as a a datetime object
-    :param variables:       The variables to retrieve
-    :param csv_file_name:   The file name of the CSV file
-    :param server:          The host-name of the server hosting the tick-data
-    :param port:            The port-number of the server
-    :return:                A pandas data frame containing time-series for all requested variables
-    '''
-    transport = TSocket.TSocket(server, port)
-    protocol = TBinaryProtocol.TBinaryProtocol(transport)
-    client = OrderReplay.Client(protocol)
-    transport.open()
-    t0 = date_to_time(start_date)
-    t1 = date_to_time(end_date)
-    return client.replayToCsv(asset, variables, t0, t1, csv_file_name)    
+class ReplayClient(object):
+
+    def __init__(self, server = DEFAULT_SERVER, port = DEFAULT_PORT):
+        self.server = server
+        self.port = port
+                     
+        
+    def connect(self):
+        self.transport = TSocket.TSocket(self.server, self.port)
+        self.protocol = TBinaryProtocol.TBinaryProtocol(self.transport)
+        self.client = OrderReplay.Client(self.protocol)
+        self.transport.open()        
+            
+    def get_hf_data(self, asset, start_date, end_date, 
+                    variables = ['midPrice', 'lastTransactionPrice', 'volume']):
+                    
+        '''
+        Retrieve the specified data from the order-book reconstructor as a pandas DataFrame.
+        :param asset:           The ISIN of the asset
+        :param start_date:      The start date as a datetime object
+        :param end_date:        The end date as a a datetime object
+        :param variables:       The variables to retrieve
+        :param server:          The host-name of the server hosting the tick-data
+        :param port:            The port-number of the server
+        :return:                A pandas data frame containing time-series for all requested variables
+        '''    
+        t0 = date_to_time(start_date)
+        t1 = date_to_time(end_date)
+        raw_data = self.client.replay(asset, variables, t0, t1)
+        if len(raw_data) == 0:
+            raise Exception("No data available")
+        return dict_to_df(raw_data, variables)
+        
+    def write_hf_data_to_csv(self, asset, 
+                                 start_date, end_date, csv_file_name,
+                                 variables = ['midPrice', 'lastTransactionPrice', 'volume']):                                 
+        '''
+        Retrieve the specified data from the order-book reconstructor and write it
+        to a CSV file.
+        :param asset:           The ISIN of the asset
+        :param start_date:      The start date as a datetime object
+        :param end_date:        The end date as a a datetime object
+        :param variables:       The variables to retrieve
+        :param csv_file_name:   The file name of the CSV file
+        :param server:          The host-name of the server hosting the tick-data
+        :param port:            The port-number of the server
+        :return:                A pandas data frame containing time-series for all requested variables
+        '''        
+        t0 = date_to_time(start_date)
+        t1 = date_to_time(end_date)
+        return self.client.replayToCsv(asset, variables, t0, t1, csv_file_name)    
     
 def test():
 
-    dataset = get_hf_data('GB0009252882', datetime.datetime(2007, 3, 2), 
+    client = ReplayClient(server='localhost')
+    client.connect()
+    dataset = client.get_hf_data('GB0009252882', datetime.datetime(2007, 3, 2), 
                           datetime.datetime(2007, 3, 3), server='localhost')
 
     mid_price = dataset.midPrice['2007-03-02 08:00':'2007-03-02 16:00'].dropna(how='any')
