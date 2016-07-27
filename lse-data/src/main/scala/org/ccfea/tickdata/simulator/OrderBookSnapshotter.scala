@@ -23,13 +23,6 @@ class OrderBookSnapshotter(val eventSource: Iterable[TickDataEvent],
 
   val logger = Logger(classOf[OrderBookSnapshotter])
 
-//  val targetDate = new java.util.Date(t.getTicks)
-//  logger.debug("Snapshot target date = " + targetDate)
-
-//  override val simulator =
-//    new MarketSimulator(eventSource.takeWhile(_.timeStamp.compareTo(targetDate) >= 0).take(1), marketState)
-
-
   val out = openOutput()
 
   def replayEvents() {
