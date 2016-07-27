@@ -16,21 +16,29 @@ import org.ccfea.tickdata.event.TickDataEvent
  *
  * (C) Steve Phelps 2015
  */
-class OrderBookSnapshotter(val eventSource: Iterable[TickDataEvent], val t: SimulationTime,
-                            val outFileName: Option[String] = None, val withGui: Boolean = false,
-                            val marketState: MarketState = new MarketState())
-    extends OrderReplayer[Option[FourHeapOrderBook]] with PrintStreamOutputer {
+class OrderBookSnapshotter(val eventSource: Iterable[TickDataEvent],
+                            val outFileName: Option[String] = None,
+                            val marketState: MarketState, val maxLevels:Int = 100)
+  extends PrintStreamOutputer {
 
   val logger = Logger(classOf[OrderBookSnapshotter])
 
-  val targetDate = new java.util.Date(t.getTicks)
-  logger.debug("Snapshot target date = " + targetDate)
+//  val targetDate = new java.util.Date(t.getTicks)
+//  logger.debug("Snapshot target date = " + targetDate)
 
-  override val simulator =
-    new MarketSimulator(eventSource.takeWhile(_.timeStamp.compareTo(targetDate) >= 0).take(1), marketState)
+//  override val simulator =
+//    new MarketSimulator(eventSource.takeWhile(_.timeStamp.compareTo(targetDate) >= 0).take(1), marketState)
 
-  def replayEvents(): Iterable[Option[FourHeapOrderBook]] = {
-    for (state <- simulator) yield Some(state.book)
+
+  val out = openOutput()
+
+  def replayEvents() {
+    val simulator = new MarketSimulator(eventSource, marketState)
+    val it = simulator.tickIterator()
+    while (it.hasNext) {
+      simulator.step()
+      writeBook(marketState.book)
+    }
   }
 
   def qty(order: Option[net.sourceforge.jasa.market.Order]) = order match {
@@ -43,18 +51,19 @@ class OrderBookSnapshotter(val eventSource: Iterable[TickDataEvent], val t: Simu
     case None => Double.NaN
   }
 
-  def outputResult(result: Iterable[Option[FourHeapOrderBook]]) {
-    val out = openOutput()
-    logger.debug("book = " + result)
-    val book = result.iterator.next().get
+  def writeBook(book: FourHeapOrderBook) {
     val asks = book.getUnmatchedAsks
     val bids = book.getUnmatchedBids
-    val levels = Math.max(asks.size, bids.size)
-    for(i <- 0 to levels-1) {
+    val levels = Math.max(maxLevels, Math.max(asks.size, bids.size))
+    for (i <- 0 to levels - 1) {
       val ask = if (i < asks.size) Some(asks.get(i)) else None
       val bid = if (i < bids.size) Some(bids.get(i)) else None
       out.println(qty(ask) + "\t" + price(ask) + "\t" + qty(bid) + "\t" + price(bid))
     }
+  }
+
+  def run(): Unit = {
+    replayEvents()
     out.close()
   }
 
