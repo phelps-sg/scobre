@@ -48,7 +48,7 @@ class OrderBookSnapshotter(val eventSource: Iterable[TickDataEvent],
     val asks = book.getUnmatchedAsks
     val bids = book.getUnmatchedBids
     val levels = Math.max(maxLevels, Math.max(asks.size, bids.size))
-    for (i <- 0 to levels - 1) {
+    for (i <- 0 until levels) {
       val ask = if (i < asks.size) Some(asks.get(i)) else None
       val bid = if (i < bids.size) Some(bids.get(i)) else None
       out.println(qty(ask) + "\t" + price(ask) + "\t" + qty(bid) + "\t" + price(bid))
