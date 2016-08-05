@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import datetime
+import datetime as dt
 import time
 
 from orderreplay import OrderReplay
@@ -17,15 +17,26 @@ from scipy.stats.kde import gaussian_kde
 
 DEFAULT_SERVER = 'localhost'
 DEFAULT_PORT = 9090
+DEFAULT_VARIABLES = ['midPrice', 'lastTransactionPrice', 'volume']
 
 def date_to_time(d):
     return long(time.mktime(d.timetuple())) * 1000
  
 def dict_to_df(data, variables):
     df = pd.DataFrame(data)
-    df.index = pd.Series([datetime.datetime.fromtimestamp(t) for t in df.t])
+    df.index = pd.Series([dt.datetime.fromtimestamp(t) for t in df.t])
     return df
     
+def convert_timestamp_from_long(t):
+    seconds = t / 1000
+    milliseconds = (t % 1000)
+    return dt.datetime.fromtimestamp(seconds) + \
+            dt.timedelta(microseconds = milliseconds * 1000)
+    
+def load_csv_as_df(csv_file_name):
+    df = pd.read_csv(csv_file_name, sep='\t')    
+    df.index = pd.Series([convert_timestamp_from_long(t) for t in df.t])
+    return df    
     
 class ReplayClient(object):
 
@@ -41,7 +52,7 @@ class ReplayClient(object):
         self.transport.open()        
             
     def get_hf_data(self, asset, start_date, end_date, 
-                    variables = ['midPrice', 'lastTransactionPrice', 'volume']):
+                    variables = DEFAULT_VARIABLES):
                     
         '''
         Retrieve the specified data from the order-book reconstructor as a pandas DataFrame.
@@ -62,7 +73,7 @@ class ReplayClient(object):
         
     def write_hf_data_to_csv(self, asset, 
                                  start_date, end_date, csv_file_name,
-                                 variables = ['midPrice', 'lastTransactionPrice', 'volume']):                                 
+                                 variables = DEFAULT_VARIABLES):                                 
         '''
         Retrieve the specified data from the order-book reconstructor and write it
         to a CSV file.
@@ -71,20 +82,24 @@ class ReplayClient(object):
         :param end_date:        The end date as a a datetime object
         :param variables:       The variables to retrieve
         :param csv_file_name:   The file name of the CSV file
-        :param server:          The host-name of the server hosting the tick-data
-        :param port:            The port-number of the server
         :return:                A pandas data frame containing time-series for all requested variables
         '''        
         t0 = date_to_time(start_date)
         t1 = date_to_time(end_date)
-        return self.client.replayToCsv(asset, variables, t0, t1, csv_file_name)    
+        return self.client.replayToCsv(asset, variables, t0, t1, csv_file_name)
+        
+    def get_hf_data_with_csv(self, asset, 
+                                 start_date, end_date, csv_file_name,
+                                 variables = DEFAULT_VARIABLES):
+        self.write_hf_data_to_csv(asset, start_date, end_date, csv_file_name, variables)
+        return load_csv_as_df(csv_file_name)
     
 def test():
 
     client = ReplayClient(server='localhost')
     client.connect()
-    dataset = client.get_hf_data('GB0009252882', datetime.datetime(2007, 3, 2), 
-                          datetime.datetime(2007, 3, 3), server='localhost')
+    dataset = client.get_hf_data('GB0009252882', dt.datetime(2007, 3, 2), 
+                          dt.datetime(2007, 3, 3))
 
     mid_price = dataset.midPrice['2007-03-02 08:00':'2007-03-02 16:00'].dropna(how='any')
     

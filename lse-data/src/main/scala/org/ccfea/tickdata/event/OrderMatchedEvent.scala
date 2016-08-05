@@ -13,8 +13,8 @@ case class OrderMatchedEvent(
                               messageSequenceNumber: Long,
                               tiCode: String,
                               order: AbstractOrder,
-                              matchingOrder: AbstractOrder,
-                              resultingTradeCode: String,
-                              tradeSize: Long
+                              matchingOrder: AbstractOrder
+//                              resultingTradeCode: String,
+//                              tradeSize: Long
                              )
   extends OrderEvent

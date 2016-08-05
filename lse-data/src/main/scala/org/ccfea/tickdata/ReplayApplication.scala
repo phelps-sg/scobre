@@ -1,7 +1,12 @@
 package org.ccfea.tickdata
 
+import java.util
 import org.ccfea.tickdata.conf.ReplayConf
-import org.ccfea.tickdata.simulator.{MarketState, ClearingMarketState}
+import org.ccfea.tickdata.simulator.{ClearingMarketState, MarketState}
+
+import collection.JavaConversions._
+
+import scala.collection.immutable.ListMap
 
 /**
  * Common functionality for all applications which replay tick events and collate data
@@ -33,6 +38,18 @@ trait ReplayApplication extends ScobreApplication {
    */
   def newMarketState(implicit conf: ReplayConf) =
     if (conf.explicitClearing()) new ClearingMarketState() else new MarketState()
+
+  /**
+   *    Use reflection to find the method to retrieve the  data for each variable (a function of MarketState).
+   *
+   * @param variables  The variables to collect from the simulation.
+   * @return            a map of variables and methods, i.e. the collectors for the simulation.
+   */
+  def dataCollectors(variables: List[String]): Map[String, MarketState => Option[AnyVal]] = {
+    def collector(variable: String): MarketState => Option[AnyVal] =
+      classOf[MarketState].getMethod(variable) invoke _
+    ListMap() ++ variables.map(variable => (variable, collector(variable)))
+  }
 
   def main(args:Array[String])
 
