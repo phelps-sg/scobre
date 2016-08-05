@@ -26,8 +26,6 @@ case class Event(eventID: Option[Long], eventType: EventType.Value, messageSeque
   convertedPriceInd: Option[String]
 ) {
 
-//  val logger = Logger(classOf[Event])
-
   def tick: TickDataEvent = {
 
     this.eventType match {
@@ -56,12 +54,18 @@ case class Event(eventID: Option[Long], eventType: EventType.Value, messageSeque
         new OrderRemovedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode.get))
 
       case EventType.OrderFilled =>
-        new OrderFilledEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode.get),
-          new Order(matchingOrderCode.get))
+        filterMissingMatchingOrderCode{
+          () => new OrderFilledEvent(new Date(timeStamp), messageSequenceNumber, tiCode,
+                                        new Order(orderCode.get), new Order(matchingOrderCode.get))
+        }
 
       case EventType.OrderMatched =>
-        new OrderMatchedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode.get),
-          new Order(matchingOrderCode.get), resultingTradeCode.get, tradeSize.get)
+        filterMissingMatchingOrderCode{
+          () => new OrderMatchedEvent(new Date(timeStamp), messageSequenceNumber, tiCode,
+                                        new Order(orderCode.get), new Order(matchingOrderCode.get))
+//                                        resultingTradeCode.get, tradeSize.get)
+//                                        tradeSize.get)
+        }
 
       case EventType.Transaction =>
         new TransactionEvent(new Date(timeStamp), messageSequenceNumber, tiCode, tradeCode.get, price.get,
@@ -73,6 +77,22 @@ case class Event(eventID: Option[Long], eventType: EventType.Value, messageSeque
 
       case EventType.None =>
         new NoopEvent(new Date(timeStamp), messageSequenceNumber, tiCode)
+    }
+  }
+
+  /**
+    * If the matchingOrderCode is missing for OrderFilled or OrderMatchedEvents, then
+    *  return an OrderRemovedEvent, otherwise return the supplied argument intact.
+    *
+    * @param createMatchingEvent    A function to create the event to return
+    *                                  if the matchingOrderCode is present.
+    * @return                       Either the matching event, or an OrderRemovedEvent.
+    */
+  def filterMissingMatchingOrderCode(createMatchingEvent: () => TickDataEvent) = {
+    this.matchingOrderCode match {
+      case Some(orderCode) => createMatchingEvent()
+      case None =>
+        new OrderRemovedEvent(new Date(timeStamp), messageSequenceNumber, tiCode, new Order(orderCode.get))
     }
   }
 
