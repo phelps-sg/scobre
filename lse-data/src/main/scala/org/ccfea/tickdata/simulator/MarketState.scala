@@ -270,17 +270,17 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     //TODO Override in subclass
   }
 
-  def adjustQuantity(jasaOrder: net.sourceforge.jasa.market.Order,
-                      ev: OrderMatchedEvent): Unit = {
-    logger.debug("Adjusting qty for order based on partial match" + ev)
-    jasaOrder.setQuantity(jasaOrder.getQuantity - ev.tradeSize.toInt)
-    logger.debug("New order = " + jasaOrder)
-//    assert(jasaOrder.getQuantity >= 0)
-    if (jasaOrder.getQuantity <= 0) {
-      logger.warn("Removing order with zero or negative volume from book before full match: " + jasaOrder)
-      removeOrder(jasaOrder)
-    }
-  }
+//  def adjustQuantity(jasaOrder: net.sourceforge.jasa.market.Order,
+//                      ev: OrderMatchedEvent): Unit = {
+//    logger.debug("Adjusting qty for order based on partial match" + ev)
+//    jasaOrder.setQuantity(jasaOrder.getQuantity - ev.tradeSize.toInt)
+//    logger.debug("New order = " + jasaOrder)
+////    assert(jasaOrder.getQuantity >= 0)
+//    if (jasaOrder.getQuantity <= 0) {
+//      logger.warn("Removing order with zero or negative volume from book before full match: " + jasaOrder)
+//      removeOrder(jasaOrder)
+//    }
+//  }
 
   /**
    * Check the consistency of the market after processing the given event,
