@@ -1,26 +1,25 @@
 import AssemblyKeys._
 
-import sbtbuildinfo.Plugin._
-
 import com.typesafe.sbt.SbtNativePackager._
 
 import NativePackagerKeys._
 
 assemblySettings
 
-buildInfoSettings
-
-sourceGenerators in Compile <+= buildInfo
+lazy val root = (project in file(".")).
+  enablePlugins(BuildInfoPlugin).
+  settings(
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "org.ccfea.tickdata.conf"
+  )
 
 buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, buildInfoBuildNumber)
-
-buildInfoPackage := "org.ccfea.tickdata.conf"
 
 name := "lse-data"
 
 organization := "net.sourceforge.jasa"
 
-version := "0.20-SNAPSHOT"
+version := "0.21-SNAPSHOT"
 
 scalaVersion := "2.11.7"
 
