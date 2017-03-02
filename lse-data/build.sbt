@@ -21,7 +21,7 @@ organization := "net.sourceforge.jasa"
 
 version := "0.21-SNAPSHOT"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.1"
 
 packSettings
 
