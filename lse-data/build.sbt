@@ -57,7 +57,7 @@ libraryDependencies ++= Seq(
   "net.sourceforge.jasa" % "jasa" % "1.2.8-SNAPSHOT",
 //  "com.espertech" % "esper" % "4.11.0",
   "org.rogach" %% "scallop" % "2.1.1",
-  "org.clapper" % "grizzled-slf4j_2.10" % "1.0.2",
+  "org.clapper" %% "grizzled-slf4j" % "1.3.0",
   //  "org.apache.spark" %% "spark-core" % "1.5.2",
   "org.slf4j" % "slf4j-log4j12" % "1.7.7"
 )
