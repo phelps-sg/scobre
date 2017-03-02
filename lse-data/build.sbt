@@ -21,7 +21,7 @@ organization := "net.sourceforge.jasa"
 
 version := "0.21-SNAPSHOT"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
 packSettings
 
@@ -56,7 +56,7 @@ libraryDependencies ++= Seq(
   "org.apache.thrift" % "libthrift" % "0.9.2",
   "net.sourceforge.jasa" % "jasa" % "1.2.8-SNAPSHOT",
 //  "com.espertech" % "esper" % "4.11.0",
-  "org.rogach" %% "scallop" % "0.9.5",
+  "org.rogach" %% "scallop" % "2.1.1",
   "org.clapper" % "grizzled-slf4j_2.10" % "1.0.2",
   //  "org.apache.spark" %% "spark-core" % "1.5.2",
   "org.slf4j" % "slf4j-log4j12" % "1.7.7"

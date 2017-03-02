@@ -4,12 +4,15 @@ package org.ccfea.tickdata.conf
  * (C) Steve Phelps 2015
  */
 class ReplayerConf(args: Seq[String]) extends ReplayConf(args) {
+
   banner("""Usage: OrderReplay [OPTION]...
            |Replay tick data through an order-book simulator and collect data
            |on the state of the market.
            |Options:
            |""".stripMargin)
+
   footer("\nFor more details, consult the readme.")
+
   val withGui = opt[Boolean](default = Some(false), descr="Provide a graphical visualisation of the order-book")
   val maxNumEvents = opt[Int]()
   val tiCode = opt[String](required = true, descr = "The ISIN number of the asset to replay")
@@ -21,4 +24,6 @@ class ReplayerConf(args: Seq[String]) extends ReplayConf(args) {
   val offsetting = opt[String](default = Some("none"), descr="One of none, mid, same, opposite")
   val proportionShuffling = opt[Double](default = Some(1.0), descr="Proportion of the events to shuffle")
   val shuffleWindowSize = opt[Int](default = Some(1000), descr="Window size for shuffled replay")
+
+  verify()
 }

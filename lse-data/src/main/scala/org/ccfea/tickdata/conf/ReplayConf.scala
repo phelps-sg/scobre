@@ -10,7 +10,7 @@ import java.util.Date
  */
 class ReplayConf(args: Seq[String]) extends ScallopConf(args) {
 
-  version("org.ccfea.tickdata.OrderReplay " + BuildInfo.version + "-b" + BuildInfo.buildinfoBuildnumber
+  version("org.ccfea.tickdata.OrderReplay " + BuildInfo.version + "-b" + BuildInfo.buildInfoBuildNumber
              + " (c) 2015 Steve Phelps")
   val explicitClearing = opt[Boolean](default = Some(false), descr="Perform uncrossing explicitly by processing OrderMatchedEvent and OrderFilledEvent")
 }

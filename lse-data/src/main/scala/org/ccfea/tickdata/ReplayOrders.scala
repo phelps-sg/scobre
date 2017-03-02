@@ -41,8 +41,8 @@ object ReplayOrders extends ReplayApplication {
 
     val hbaseTicks: Iterable[TickDataEvent] =
       new HBaseRetriever(selectedAsset = conf.tiCode(),
-                          startDate =  parseDate(conf.startDate.get),
-                          endDate = parseDate(conf.endDate.get))
+                          startDate =  parseDate(conf.startDate.toOption),
+                          endDate = parseDate(conf.endDate.toOption))
 
     class Replayer(val eventSource: Iterable[TickDataEvent],
                     val outFileName: Option[String],
