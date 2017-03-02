@@ -48,9 +48,9 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.apache.hbase" % "hbase-client" % "1.1.4",
-  "org.apache.hbase" % "hbase-common" % "1.1.4" excludeAll ExclusionRule(organization = "javax.servlet"),
-  "org.apache.hbase" % "hbase-server" % "1.1.4" excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
+  "org.apache.hbase" % "hbase-client" % "1.2.4",
+  "org.apache.hbase" % "hbase-common" % "1.2.4" excludeAll ExclusionRule(organization = "javax.servlet"),
+  "org.apache.hbase" % "hbase-server" % "1.2.4" excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
   "org.apache.hadoop" % "hadoop-client" % "2.7.1",
   "org.apache.hadoop" % "hadoop-common" % "2.7.1",
   "org.apache.thrift" % "libthrift" % "0.9.2",
