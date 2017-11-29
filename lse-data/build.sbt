@@ -21,7 +21,9 @@ organization := "net.sourceforge.jasa"
 
 version := "0.21-SNAPSHOT"
 
-scalaVersion := "2.12.1"
+scalaVersion := "2.12.4"
+
+sbtVersion := "0.13.16"
 
 packSettings
 
@@ -33,7 +35,7 @@ packMain := Map(  "replay-orders"         -> "org.ccfea.tickdata.ReplayOrders",
 
 publishMavenStyle := true
 
-publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository")))
+//publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository")))
 
 //scalaSource in Compile := file("src/")
 javaSource in Compile := baseDirectory.value / "src/main/thrift/gen-java"
@@ -44,7 +46,8 @@ resolvers ++= Seq(
   "Local Maven Repository" at "file:///" + Path.userHome.absolutePath + "/.m2/repository",
   "Apache HBase" at "http://repository.apache.org/content/repositories/releases",
   "JASA" at "http://jasa.sourceforge.net/mvn-repo/jasa",
-  "JABM" at "http://jabm.sourceforge.net/mvn-repo/jabm"
+  "JABM" at "http://jabm.sourceforge.net/mvn-repo/jabm",
+  "Maven Central" at "http://repo1.maven.org/maven2"
 )
 
 libraryDependencies ++= Seq(
