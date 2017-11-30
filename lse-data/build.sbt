@@ -35,7 +35,7 @@ packMain := Map(  "replay-orders"         -> "org.ccfea.tickdata.ReplayOrders",
 
 publishMavenStyle := true
 
-//publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository")))
+publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository")))
 
 //scalaSource in Compile := file("src/")
 javaSource in Compile := baseDirectory.value / "src/main/thrift/gen-java"
@@ -69,3 +69,9 @@ unmanagedClasspath in Test += baseDirectory.value / "etc"
 
 unmanagedClasspath in (Compile, runMain) += baseDirectory.value / "etc"
 
+scalacOptions in (Compile, doc) ++= {
+      Seq("-skip-packages", "org.ccfea.tickdata.thrift") ++
+          (if (scalaBinaryVersion.value == "2.12") Seq("-no-java-comments") else Nil)
+      }
+
+//sources in (Compile, doc) ~= (_ filter (_.getName endsWith ".scala"))
