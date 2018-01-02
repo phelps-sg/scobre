@@ -57,7 +57,7 @@ libraryDependencies ++= Seq(
   "org.apache.hadoop" % "hadoop-client" % "2.7.1",
   "org.apache.hadoop" % "hadoop-common" % "2.7.1",
   "org.apache.thrift" % "libthrift" % "0.9.2",
-  "net.sourceforge.jasa" % "jasa" % "1.2.8-SNAPSHOT",
+  "net.sourceforge.jasa" % "jasa" % "1.2.9-SNAPSHOT",
 //  "com.espertech" % "esper" % "4.11.0",
   "org.rogach" %% "scallop" % "2.1.1",
   "org.clapper" %% "grizzled-slf4j" % "1.3.0",

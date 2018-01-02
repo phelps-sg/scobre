@@ -2,7 +2,7 @@ package org.ccfea.tickdata.simulator
 
 import net.sourceforge.jabm.SimulationTime
 import net.sourceforge.jasa.agent.SimpleTradingAgent
-import net.sourceforge.jasa.market.TickOrderBook
+import net.sourceforge.jasa.market.{Price, TickOrderBook}
 import grizzled.slf4j.Logger
 import java.util.GregorianCalendar
 
@@ -11,7 +11,7 @@ import org.ccfea.tickdata.order.offset.OffsetOrder
 import org.ccfea.tickdata.order._
 
 import scala.beans.BeanProperty
-import collection.JavaConversions._
+import collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.{Publisher, Subscriber}
 
@@ -77,7 +77,6 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   /**
     * The previous event.
     */
-
   var previousEvent: Option[TickDataEvent] = None
 
   /**
@@ -325,7 +324,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   }
 
   implicit def price(order: net.sourceforge.jasa.market.Order) =
-    if (order != null) Some(order.getPrice) else None
+    if (order != null) Some(order.getPriceAsDouble) else None
 
   def generateQuote() = new Quote(book.getHighestUnmatchedBid, book.getLowestUnmatchedAsk)
 
@@ -375,11 +374,15 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     case _ => None
   }
 
-  def askDepthTotal = book.getUnmatchedAsks.map(_.aggregateUnfilledVolume()).sum
-  def bidDepthTotal = book.getUnmatchedBids.map(_.aggregateUnfilledVolume()).sum
+  def askDepthTotal = book.getUnmatchedAsks.asScala.map(_.aggregateUnfilledVolume()).sum
 
-  def bestAskDepth = if (book.getLowestUnmatchedAsk != null) Some(book.getLowestUnmatchedAsk.aggregateUnfilledVolume()) else None
-  def bestBidDepth = if (book.getHighestUnmatchedBid != null) Some(book.getHighestUnmatchedBid.aggregateUnfilledVolume()) else None
+  def bidDepthTotal = book.getUnmatchedBids.asScala.map(_.aggregateUnfilledVolume()).sum
+
+  def bestAskDepth =
+    if (book.getLowestUnmatchedAsk != null) Some(book.getLowestUnmatchedAsk.aggregateUnfilledVolume()) else None
+
+  def bestBidDepth =
+      if (book.getHighestUnmatchedBid != null) Some(book.getHighestUnmatchedBid.aggregateUnfilledVolume()) else None
 
   def bookSize = book.size()
 
@@ -495,9 +498,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     val order = new net.sourceforge.jasa.market.Order()
     o match {
       case lo:LimitOrder =>
-//        val p = lo.price.toDouble
-//        val roundedPrice: Double = Math.round(p * 1000) / 1000.0
-        order.setPrice(lo.price.toDouble)
+        order.setPrice(new Price(lo.price.bigDecimal))
         order.setQuantity(lo.aggregateSize.toInt)
         order.setAgent(lo.trader)
         order.setIsBid(lo.tradeDirection == TradeDirection.Buy)
