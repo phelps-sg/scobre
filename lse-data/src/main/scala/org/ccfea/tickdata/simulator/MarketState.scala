@@ -2,7 +2,7 @@ package org.ccfea.tickdata.simulator
 
 import net.sourceforge.jabm.SimulationTime
 import net.sourceforge.jasa.agent.SimpleTradingAgent
-import net.sourceforge.jasa.market.{Price, TickOrderBook}
+import net.sourceforge.jasa.market.{FourHeapOrderBook, Price, TickOrderBook}
 import grizzled.slf4j.Logger
 import java.util.GregorianCalendar
 
@@ -30,7 +30,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    * The current state of the book.
    */
   @BeanProperty
-  val book = new TickOrderBook()
+  val book = new FourHeapOrderBook()
 
   /**
    * Lookup table mapping order-codes to Orders.
