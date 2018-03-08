@@ -3,15 +3,15 @@ package org.ccfea.tickdata
 import org.ccfea.tickdata.collector.UnivariateTimeSeriesCollector
 import org.ccfea.tickdata.event.TickDataEvent
 import org.ccfea.tickdata.order.LimitOrder
-import org.ccfea.tickdata.order.offset.{OppositeSideOffsetOrder, MidPriceOffsetOrder, SameSideOffsetOrder}
+import org.ccfea.tickdata.order.offset.{MidPriceOffsetOrder, OppositeSideOffsetOrder, SameSideOffsetOrder}
 import org.ccfea.tickdata.storage.csv.UnivariateCsvDataCollator
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
-import org.ccfea.tickdata.storage.shuffled.{RandomPermutation, OffsettedTicks}
-
+import org.ccfea.tickdata.storage.shuffled.{OffsettedTicks, RandomPermutation}
 import org.ccfea.tickdata.conf.ReplayerConf
 import org.ccfea.tickdata.simulator._
-
 import grizzled.slf4j.Logger
+
+import scala.swing.{Frame, SimpleSwingApplication}
 
 /**
  * The main application for running order-book reconstruction simulations.
@@ -51,7 +51,9 @@ object ReplayOrders extends ReplayApplication {
         extends UnivariateTimeSeriesCollector with UnivariateCsvDataCollator
 
     val marketState = newMarketState(conf)
-    if (conf.withGui()) new OrderBookView(marketState)
+    if (conf.withGui()) {
+      val view = new OrderBookView(marketState)
+    }
     val ticks = if (conf.shuffle()) shuffledTicks(hbaseTicks) else hbaseTicks
     val replayer = new Replayer(ticks, outFileName = conf.outFileName.get, dataCollector, marketState)
     replayer.run()

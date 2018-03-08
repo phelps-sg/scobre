@@ -2,7 +2,7 @@ package org.ccfea.tickdata.simulator
 
 import net.sourceforge.jabm.SimulationTime
 import net.sourceforge.jasa.agent.SimpleTradingAgent
-import net.sourceforge.jasa.market.{FourHeapOrderBook, Price, TickOrderBook}
+import net.sourceforge.jasa.market.{FourHeapOrderBook, Price}
 import grizzled.slf4j.Logger
 import java.util.GregorianCalendar
 

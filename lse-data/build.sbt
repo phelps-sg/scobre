@@ -64,8 +64,28 @@ libraryDependencies ++= Seq(
   "org.rogach" %% "scallop" % "2.1.1",
   "org.clapper" %% "grizzled-slf4j" % "1.3.0",
   //  "org.apache.spark" %% "spark-core" % "1.5.2",
-  "org.slf4j" % "slf4j-log4j12" % "1.7.7"
+  "org.slf4j" % "slf4j-log4j12" % "1.7.7",
+  "org.scalaz" %% "scalaz-core" % "7.2.20"
 )
+
+libraryDependencies := {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    // if Scala 2.12+ is used, use scala-swing 2.x
+    case Some((2, scalaMajor)) if scalaMajor >= 12 =>
+      libraryDependencies.value ++ Seq(
+        "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
+        "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
+        "org.scala-lang.modules" %% "scala-swing" % "2.0.0-M2")
+    case Some((2, scalaMajor)) if scalaMajor >= 11 =>
+      libraryDependencies.value ++ Seq(
+        "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
+        "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
+        "org.scala-lang.modules" %% "scala-swing" % "1.0.2")
+    case _ =>
+      // or just libraryDependencies.value if you don't depend on scala-swing
+      libraryDependencies.value :+ "org.scala-lang" % "scala-swing" % scalaVersion.value
+  }
+}
 
 unmanagedClasspath in Test += baseDirectory.value / "etc"
 

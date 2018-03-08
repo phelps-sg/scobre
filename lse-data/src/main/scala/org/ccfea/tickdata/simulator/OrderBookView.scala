@@ -1,6 +1,7 @@
 package org.ccfea.tickdata.simulator
 
-import javax.swing._
+//import javax.swing._
+import scala.swing._
 import java.text.SimpleDateFormat
 import net.sourceforge.jasa.market.auctioneer.ContinuousDoubleAuctioneer
 import java.awt.BorderLayout
@@ -14,34 +15,38 @@ import scala.collection.mutable.{Subscriber, Publisher}
  *
  * (c) Steve Phelps 2013
  */
-class OrderBookView(val market: MarketState, val maxLevels: Int = 12)
+class OrderBookView(val market: MarketState)
     extends Subscriber[TickDataEvent, Publisher[TickDataEvent]] {
 
   market.subscribe(this)
 
+  val priceLevelsModel = new PriceLevelsTableModel(new PriceLevels(market.book))
+  val levelsTable = new Table() {
+    model = priceLevelsModel
+  }
+
   val df = new SimpleDateFormat("HH:mm:ss:SSSS dd/MM yyyy")
-  val auctioneer = new ContinuousDoubleAuctioneer()
-  auctioneer.setOrderBook(market.book)
-  val orderBookView = new net.sourceforge.jasa.view.OrderBookView()
-  orderBookView.setAuctioneer(auctioneer)
-  orderBookView.setMaxDepth(maxLevels)
-  orderBookView.afterPropertiesSet()
-  val myFrame = new JFrame()
-  val timeLabel = new JLabel()
-  myFrame.setLayout(new BorderLayout())
-  myFrame.add(orderBookView, BorderLayout.CENTER)
-  myFrame.add(timeLabel, BorderLayout.NORTH)
-  myFrame.pack()
-  myFrame.setVisible(true)
+  val timeLabel = new Label()
+
+  val frame = new Frame() {
+    title = "Order book"
+    contents = new BoxPanel(Orientation.Vertical) {
+      contents += timeLabel
+      contents += levelsTable
+    }
+    size = new Dimension(800, 600)
+  }
+//  frame.pack()
+  frame.visible = true
+
+//  val timeLabel = new Label()
 
   def notify(pub: Publisher[TickDataEvent], ev: TickDataEvent) = {
-    SwingUtilities.invokeAndWait(new Runnable() {
-      def run() = {
-        orderBookView.update()
-        orderBookView.notifyTableChanged()
-        timeLabel.setText(df.format(new java.util.Date(market.time.get.getTicks)) + " / " + market.auctionState)
-      }
-    })
+    priceLevelsModel.levels = new PriceLevels(market.book)
+    priceLevelsModel.fireTableDataChanged()
+    timeLabel.text = df.format(new java.util.Date(market.time.get.getTicks))
   }
+
 }
+
 
