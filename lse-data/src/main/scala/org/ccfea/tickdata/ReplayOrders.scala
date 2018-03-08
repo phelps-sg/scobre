@@ -10,6 +10,7 @@ import org.ccfea.tickdata.storage.shuffled.{OffsettedTicks, RandomPermutation}
 import org.ccfea.tickdata.conf.ReplayerConf
 import org.ccfea.tickdata.simulator._
 import grizzled.slf4j.Logger
+import org.ccfea.tickdata.ui.OrderBookView
 
 import scala.swing.{Frame, SimpleSwingApplication}
 

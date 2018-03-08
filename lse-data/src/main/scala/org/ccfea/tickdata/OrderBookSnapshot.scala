@@ -8,6 +8,7 @@ import java.util.{Calendar, Date, GregorianCalendar}
 
 import grizzled.slf4j.Logger
 import net.sourceforge.jabm.SimulationTime
+import org.ccfea.tickdata.ui.OrderBookView
 
 import scala.Some
 

@@ -1,13 +1,12 @@
-package org.ccfea.tickdata.simulator
+package org.ccfea.tickdata.ui
 
-import javax.swing.event.TableModelListener
 import javax.swing.table.DefaultTableModel
 
-import math.max
+import org.ccfea.tickdata.simulator.PriceLevels
 
-import net.sourceforge.jasa.market.OrderBook
+import scala.math.max
 
-class PriceLevelsTableModel(levels:PriceLevels) extends DefaultTableModel {
+class PriceLevelsTableModel(var levels:PriceLevels) extends DefaultTableModel {
 
   override def getRowCount: Int = max(levels.numAskLevels, levels.numBidLevels)
 

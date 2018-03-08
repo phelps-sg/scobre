@@ -1,14 +1,12 @@
-package org.ccfea.tickdata.simulator
+package org.ccfea.tickdata.ui
 
-//import javax.swing._
-import scala.swing._
 import java.text.SimpleDateFormat
-import net.sourceforge.jasa.market.auctioneer.ContinuousDoubleAuctioneer
-import java.awt.BorderLayout
 
 import org.ccfea.tickdata.event.TickDataEvent
+import org.ccfea.tickdata.simulator.{MarketState, PriceLevels}
 
-import scala.collection.mutable.{Subscriber, Publisher}
+import scala.collection.mutable.{Publisher, Subscriber}
+import scala.swing._
 
 /**
  * A visualisation of the current state of the order book.
