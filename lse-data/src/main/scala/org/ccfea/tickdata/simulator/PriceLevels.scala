@@ -1,11 +1,8 @@
 package org.ccfea.tickdata.simulator
 
-import javax.swing.event.TableModelListener
-import javax.swing.table.TableModel
 
 import scala.collection.parallel.ParMap
-import scala.collection.{SortedMap, mutable}
-//import scalaz.Scalaz._
+import scala.collection.SortedMap
 
 import net.sourceforge.jasa.market.{Order, OrderBook, Price}
 
@@ -30,11 +27,11 @@ class PriceLevels(val book: OrderBook) {
   def signedPriceLevels =
       SortedMap[Price, Long]() ++ bidPriceLevels ++ negatedVolume(askPriceLevels)
 
-  val askVolumeAt = SortedMap[Price, Long]()(Ordering[Price].reverse) ++ askPriceLevels
-  val bidVolumeAt = SortedMap[Price, Long]() ++ bidPriceLevels
+  lazy val askVolumeAt = SortedMap[Price, Long]()(Ordering[Price].reverse) ++ askPriceLevels
+  lazy val bidVolumeAt = SortedMap[Price, Long]() ++ bidPriceLevels
 
-  val askPrice = List() ++ askVolumeAt.keys
-  val bidPrice = List() ++ bidVolumeAt.keys
+  lazy val askPrice = List() ++ askVolumeAt.keys
+  lazy val bidPrice = List() ++ bidVolumeAt.keys
 
   def bidVolume(i: Int) = bidVolumeAt(bidPrice(i))
   def askVolume(i: Int) = askVolumeAt(askPrice(i))
