@@ -1,16 +1,14 @@
 package org.ccfea.tickdata
 
-import org.ccfea.tickdata.conf.{ReplayConf, ReplayerConf}
+import org.ccfea.tickdata.conf.ReplayerConf
 import org.ccfea.tickdata.event.TickDataEvent
 import org.ccfea.tickdata.order.LimitOrder
 import org.ccfea.tickdata.order.offset.{MidPriceOffsetOrder, OppositeSideOffsetOrder, SameSideOffsetOrder}
-import org.ccfea.tickdata.simulator.{ClearingMarketState, MarketState, Quote}
+import org.ccfea.tickdata.replayer.{PriceLevelsCSVReplayer, UnivariateCSVReplayer}
+import org.ccfea.tickdata.simulator.{MarketState, Quote}
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
 import org.ccfea.tickdata.storage.shuffled.{OffsettedTicks, RandomPermutation}
 import org.ccfea.tickdata.ui.OrderBookView
-
-
-import scala.collection.immutable.ListMap
 
 /**
  * Common functionality for all applications which replay tick events and collate data

@@ -1,4 +1,4 @@
-package org.ccfea.tickdata
+package org.ccfea.tickdata.replayer
 
 import org.ccfea.tickdata.collector.UnivariateTimeSeriesCollector
 import org.ccfea.tickdata.event.TickDataEvent
