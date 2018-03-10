@@ -3,8 +3,9 @@ package org.ccfea.tickdata.simulator
 import javax.swing.event.TableModelListener
 import javax.swing.table.TableModel
 
-import scala.collection.SortedMap
-import scalaz.Scalaz._
+import scala.collection.parallel.ParMap
+import scala.collection.{SortedMap, mutable}
+//import scalaz.Scalaz._
 
 import net.sourceforge.jasa.market.{Order, OrderBook, Price}
 
@@ -12,7 +13,7 @@ import collection.JavaConverters._
 
 class PriceLevels(val book: OrderBook) {
 
-  def ordersByPrice(orders: Seq[Order]) = orders.groupBy(_.getPrice)
+  def ordersByPrice(orders: Seq[Order]) = orders.par.groupBy(_.getPrice)
 
   def priceLevels(orders: Seq[Order]) =
     for ((priceLevel, orders) <- ordersByPrice(orders))
@@ -23,11 +24,11 @@ class PriceLevels(val book: OrderBook) {
   def askPriceLevels = priceLevels(book.getUnmatchedAsks.asScala)
   def bidPriceLevels = priceLevels(book.getUnmatchedBids.asScala)
 
-  def negatePriceLevels(priceLevels: Map[Price, Long]) =
-    (for ((priceLevel, volume) <- priceLevels) yield (priceLevel, -volume))
+  def negatedVolume(levels: ParMap[Price, Long]) =
+    for ((priceLevel, volume) <- levels) yield (priceLevel, -volume)
 
-  val signedPriceLevels = SortedMap[Price, Long]() ++
-    (bidPriceLevels |+| negatePriceLevels(askPriceLevels))
+  def signedPriceLevels =
+      SortedMap[Price, Long]() ++ bidPriceLevels ++ negatedVolume(askPriceLevels)
 
   val askVolumeAt = SortedMap[Price, Long]()(Ordering[Price].reverse) ++ askPriceLevels
   val bidVolumeAt = SortedMap[Price, Long]() ++ bidPriceLevels

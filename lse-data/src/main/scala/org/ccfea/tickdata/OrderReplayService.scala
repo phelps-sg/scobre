@@ -31,7 +31,7 @@ import scala.collection.immutable.ListMap
  *
  * (C) Steve Phelps 2014
  */
-object OrderReplayService extends ReplayApplication {
+object OrderReplayService extends ScobreApplication {
 
   class ThriftReplayer(val eventSource: Iterable[TickDataEvent],
                  val dataCollectors: Map[String, MarketState => Option[AnyVal]],
@@ -49,7 +49,7 @@ object OrderReplayService extends ReplayApplication {
 
 
   def getOffsettedTicks(ticks: Seq[TickDataEvent], offsetting: Offsetting.Value)(implicit conf: ServerConf) = {
-    val marketState = newMarketState
+    val marketState = newMarketState(conf)
     offsetting match {
       case Offsetting.NoOffsetting =>
         ticks

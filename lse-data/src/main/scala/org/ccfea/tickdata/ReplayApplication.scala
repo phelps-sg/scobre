@@ -1,10 +1,14 @@
 package org.ccfea.tickdata
 
-import java.util
-import org.ccfea.tickdata.conf.ReplayConf
-import org.ccfea.tickdata.simulator.{ClearingMarketState, MarketState}
+import org.ccfea.tickdata.conf.{ReplayConf, ReplayerConf}
+import org.ccfea.tickdata.event.TickDataEvent
+import org.ccfea.tickdata.order.LimitOrder
+import org.ccfea.tickdata.order.offset.{MidPriceOffsetOrder, OppositeSideOffsetOrder, SameSideOffsetOrder}
+import org.ccfea.tickdata.simulator.{ClearingMarketState, MarketState, Quote}
+import org.ccfea.tickdata.storage.hbase.HBaseRetriever
+import org.ccfea.tickdata.storage.shuffled.{OffsettedTicks, RandomPermutation}
+import org.ccfea.tickdata.ui.OrderBookView
 
-import collection.JavaConversions._
 
 import scala.collection.immutable.ListMap
 
@@ -14,43 +18,41 @@ import scala.collection.immutable.ListMap
  *
  * (C) Steve Phelps 2015
  */
-trait ReplayApplication extends ScobreApplication {
+class ReplayApplication(val conf:ReplayerConf) extends ScobreApplication {
 
-  implicit def AnyRefToOptionAnyVal(x: AnyRef): Option[AnyVal] = x match {
-    case Some(double: Double) => Some(double)
-    case Some(long: Long) => Some(long)
-    case Some(int: Int) => Some(int)
-    case Some(bd: BigDecimal) => Some(bd.doubleValue())
-    case l: java.lang.Long => Some(l.longValue())
-    case d: java.lang.Double => Some(d.doubleValue())
-    case Some(ch: Char) => Some(ch)
-    case None => None
+  lazy val hbaseTicks: Iterable[TickDataEvent] =
+    new HBaseRetriever(selectedAsset = conf.tiCode(),
+      startDate =  parseDate(conf.startDate.toOption),
+      endDate = parseDate(conf.endDate.toOption))
+
+  val marketState = newMarketState()
+  val view = if (conf.withGui()) new Some(new OrderBookView(marketState)) else None
+
+  lazy val ticks = if (conf.shuffle()) shuffledTicks(hbaseTicks) else hbaseTicks
+
+  def newMarketState(): MarketState = newMarketState(conf)
+
+  def shuffledTicks(ticks: Iterable[TickDataEvent]) = {
+    val offsettedTicks = if (conf.offsetting() == "none")  ticks else {
+      val marketState = newMarketState() // This market-state is used to calculate price-offsets before shuffling
+      val offsetFn = conf.offsetting() match {
+        case "same" => (lo: LimitOrder, quote: Quote) => new SameSideOffsetOrder(lo, quote)
+        case "mid" => (lo: LimitOrder, quote: Quote) => new MidPriceOffsetOrder(lo, quote)
+        case "opp" => (lo: LimitOrder, quote: Quote) => new OppositeSideOffsetOrder(lo, quote)
+        case _ => throw new RuntimeException("Illegal option: " + conf.offsetting())
+      }
+      new OffsettedTicks(marketState, ticks, offsetFn)
+    }
+    new RandomPermutation(offsettedTicks.iterator.toList, conf.proportionShuffling(), conf.shuffleWindowSize())
   }
 
-  /**
-   * Construct an initial market state.  This is a factory method
-   * which will create an appropriate class of market-state depending
-   * on command-line options controlling the choice of clearing rules.
-   *
-   * @param conf   The command-line options
-   * @return  Either a MarketState or ClearingMarketState depending on the
-   *          command-line options.
-   */
-  def newMarketState(implicit conf: ReplayConf) =
-    if (conf.explicitClearing()) new ClearingMarketState() else new MarketState()
-
-  /**
-   *    Use reflection to find the method to retrieve the  data for each variable (a function of MarketState).
-   *
-   * @param variables  The variables to collect from the simulation.
-   * @return            a map of variables and methods, i.e. the collectors for the simulation.
-   */
-  def dataCollectors(variables: List[String]): Map[String, MarketState => Option[AnyVal]] = {
-    def collector(variable: String): MarketState => Option[AnyVal] =
-      classOf[MarketState].getMethod(variable) invoke _
-    ListMap() ++ variables.map(variable => (variable, collector(variable)))
+  def run() = {
+    val replayer =
+      if (conf.priceLevels())
+        new PriceLevelsCSVReplayer(ticks, conf.outFileName.toOption, marketState, conf.maxLevels())
+      else
+        new UnivariateCSVReplayer(ticks, conf.outFileName.toOption,
+                                            classOf[MarketState].getMethod(conf.property()) invoke _, marketState)
+    replayer.run()
   }
-
-  def main(args:Array[String])
-
 }

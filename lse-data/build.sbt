@@ -45,8 +45,6 @@ javaSource in Compile := baseDirectory.value / "src/main/thrift/gen-java"
 resolvers ++= Seq(
   "Local Maven Repository" at "file:///" + Path.userHome.absolutePath + "/.m2/repository",
   "Apache HBase" at "http://repository.apache.org/content/repositories/releases",
-//  "JASA" at "http://jasa.sourceforge.net/mvn-repo/jasa",
-//  "JABM" at "http://jabm.sourceforge.net/mvn-repo/jabm",
   "Maven Central" at "http://repo1.maven.org/maven2",
   "sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   "sonatype staging" at "https://oss.sonatype.org/service/local/staging/deploy/maven2"

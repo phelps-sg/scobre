@@ -13,6 +13,8 @@ class ReplayerConf(args: Seq[String]) extends ReplayConf(args) {
 
   footer("\nFor more details, consult the readme.")
 
+  val maxLevels = opt[Int](default = Some(100), descr="Maximum number of price levels to output per tick")
+  val priceLevels = opt[Boolean](default = Some(false), descr="Collect price levels")
   val withGui = opt[Boolean](default = Some(false), descr="Provide a graphical visualisation of the order-book")
   val maxNumEvents = opt[Int]()
   val tiCode = opt[String](required = true, descr = "The ISIN number of the asset to replay")

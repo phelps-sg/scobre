@@ -3,11 +3,13 @@ package org.ccfea.tickdata.storage.csv
 import net.sourceforge.jabm.SimulationTime
 import org.ccfea.tickdata.collector.MarketStateDataCollector
 
+import scala.collection.SortedMap
+
 /**
  * Created by sphelps on 04/09/14.
  */
 trait MultivariateCsvDataCollator
-    extends MarketStateDataCollector[(Option[SimulationTime], Map[String,Option[AnyVal]])] with PrintStreamOutputer {
+    extends MarketStateDataCollector[(Option[SimulationTime], SortedMap[String,Option[AnyVal]])] with PrintStreamOutputer {
 
   val out = openOutput()
   val seperator = '\t'
@@ -20,7 +22,7 @@ trait MultivariateCsvDataCollator
     }
   }
 
-  def outputResult(data: Iterable[(Option[SimulationTime], Map[String, Option[AnyVal]])]) = {
+  def outputResult(data: Iterable[(Option[SimulationTime], SortedMap[String, Option[AnyVal]])]) = {
     val (t, firstRow) = data.iterator.next()
     writeRow(List("t") ++ firstRow.keys)
     for ((t, bindings) <- data) {

@@ -3,13 +3,15 @@ package org.ccfea.tickdata.storage.thrift
 import net.sourceforge.jabm.SimulationTime
 import org.ccfea.tickdata.collector.MarketStateDataCollector
 import org.ccfea.tickdata.thrift.TimeSeriesDatum
+
 import collection.JavaConversions._
+import scala.collection.SortedMap
 
 /**
  * (C) Steve Phelps 2014
  */
 trait MultivariateThriftCollator
-    extends MarketStateDataCollector[(Option[SimulationTime], Map[String,Option[AnyVal]])] {
+    extends MarketStateDataCollector[(Option[SimulationTime], SortedMap[String,Option[AnyVal]])] {
 
   val result: java.util.Map[String, java.util.List[java.lang.Double]] = new java.util.HashMap()
 
@@ -28,7 +30,7 @@ trait MultivariateThriftCollator
     })
   }
 
-  def outputResult(data: Iterable[(Option[SimulationTime], Map[String, Option[AnyVal]])]) = {
+  def outputResult(data: Iterable[(Option[SimulationTime], SortedMap[String, Option[AnyVal]])]) = {
     for ((t, bindings) <- data) {
       for((variable, value) <- bindings) addDatum(variable, value)
       addDatum("t", Some(t.get.getTicks.toDouble / 1000))

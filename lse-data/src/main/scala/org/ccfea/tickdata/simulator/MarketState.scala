@@ -386,6 +386,8 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
 
   def bookSize = book.size()
 
+  def priceLevels = new PriceLevels(book)
+
   /**
    * Bean-compatible getter for Java clients.
    *
