@@ -28,10 +28,10 @@ class PriceLevelsTableModel(var levels:PriceLevels) extends DefaultTableModel {
 
   override def getValueAt(rowIndex: Int, columnIndex: Int): AnyRef =
     columnIndex match {
-      case 0 => levels.bidVolume(rowIndex).toString
-      case 1 => levels.bidPrice(rowIndex).toPrettyString()
-      case 2 => levels.askPrice(rowIndex).toPrettyString()
-      case 3 => levels.askVolume(rowIndex).toString
+      case 0 => if (rowIndex < levels.numBidLevels) levels.bidVolume(rowIndex).toString else ""
+      case 1 => if (rowIndex < levels.numBidLevels) levels.bidPrice(rowIndex).toPrettyString() else ""
+      case 2 => if (rowIndex < levels.numAskLevels) levels.askPrice(rowIndex).toPrettyString() else ""
+      case 3 => if (rowIndex < levels.numAskLevels) levels.askVolume(rowIndex).toString else ""
     }
 
 }
