@@ -20,7 +20,7 @@ DEFAULT_VARIABLES = ['midPrice', 'lastTransactionPrice', 'volume']
 
 
 def date_to_time(d):
-    return long(time.mktime(d.timetuple())) * 1000
+    return int(time.mktime(d.timetuple())) * 1000
 
 
 def dict_to_df(data, variables):
@@ -106,7 +106,7 @@ def test():
     mid_price = dataset.midPrice['2007-03-02 08:00':'2007-03-02 16:00'].dropna(how='any')
 
     # Plot 1 minute prices for 3/3/2007 between 8am and 4pm
-    prices_1min = mid_price.resample('3min')
+    prices_1min = mid_price.resample('3min').mean()
     # prices_1min = \
     #    dataset.midPrice['2007-02-03 08:00':'2007-02-03 16:00'].resample('1min')
     prices_1min.plot()
