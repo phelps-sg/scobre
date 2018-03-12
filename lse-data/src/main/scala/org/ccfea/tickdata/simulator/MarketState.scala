@@ -117,6 +117,8 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   def postProcessing(ev: TickDataEvent): Unit = {
     stateTransition(ev)
     this.quote = generateQuote()
+    lazy val newLevels = new PriceLevels(book)
+    this.priceLevels = { return newLevels }
     checkConsistency(ev)
   }
 
@@ -386,7 +388,14 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
 
   def bookSize = book.size()
 
-  def priceLevels = new PriceLevels(book)
+  private lazy val initialPriceLevels = new PriceLevels(book)
+  var priceLevels: () => PriceLevels =  () => initialPriceLevels
+
+  def bestAskPrice = quote.ask
+  def bestBidPrice = quote.bid
+
+  def bestAskVolume: Option[Long] = if (book.getUnmatchedAsks().size() > 0) Some(priceLevels().askVolume(0)) else None
+  def bestBidVolume: Option[Long] = if (book.getUnmatchedBids().size() > 0) Some(priceLevels().bidVolume(0)) else None
 
   /**
    * Bean-compatible getter for Java clients.
