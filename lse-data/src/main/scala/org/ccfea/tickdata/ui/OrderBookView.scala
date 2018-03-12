@@ -34,7 +34,7 @@ class OrderBookView(val market: MarketState)
         contents = levelsTable
       }
     }
-    size = new Dimension(800, 600)
+    size = new Dimension(640, 480)
   }
 
   frame.visible = true
