@@ -389,11 +389,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   def bookSize = book.size()
 
   val priceLevels = new LazyVar[PriceLevels](() => new PriceLevels(book))
-
   def bookChanged() { priceLevels.unvalidate() }
-
-//  private lazy val initialPriceLevels = new PriceLevels(book)
-//  var priceLevels: () => PriceLevels =  () => initialPriceLevels
 
   def bestAskPrice = quote.ask
   def bestBidPrice = quote.bid
