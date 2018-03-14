@@ -42,15 +42,15 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    */
   var time: Option[SimulationTime] = None
 
-  /**
-   * The most recent transaction price.
-   */
-  var lastTransactionPrice: Option[Double] = None
+//  /**
+//   * The most recent transaction price.
+//   */
+//  var lastTransactionPrice: Option[Double] = None
 
-  /**
-   * The current volume.
-   */
-  var volume: Option[Long] = None
+//  /**
+//   * The current volume.
+//   */
+//  var volume: Option[Long] = None
 
   /**
     * The current market quote.
@@ -109,7 +109,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
 //    assert(ev.timeStamp.getTime >= (time match { case None => 0; case Some(t) => t.getTicks}))
     val newTime = new SimulationTime(ev.timeStamp.getTime)
     this.time = Some(newTime)
-    this.volume = Some(0)
+//    this.volume = Some(0)
     this.previousEvent = this.mostRecentEvent
     this.mostRecentEvent = Some(ev)
   }
@@ -194,8 +194,8 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
 //  }
 
   def process(ev: TransactionEvent): Unit = {
-    this.lastTransactionPrice = Some(ev.transactionPrice.toDouble)
-    this.volume = Some(ev.tradeSize)
+//    this.lastTransactionPrice = Some(ev.transactionPrice.toDouble)
+//    this.volume = Some(ev.tradeSize)
   }
 
   def process(ev: OrderRemovedEvent): Unit = {
@@ -353,26 +353,36 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   def hour = calendar.get(java.util.Calendar.HOUR_OF_DAY)
   def minute = calendar.get(java.util.Calendar.MINUTE)
 
-  def lastOrderVolume: Option[Long] = mostRecentEvent match {
-    case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, vol, _, _, _))) => Some(vol)
-    case Some(OrderSubmittedEvent(_, _, _, MarketOrder(_, vol, _, _))) => Some(vol)
-    case _ => None
-  }
-
-  def lastOrderType: Option[Long] = mostRecentEvent match {
+  def orderType: Option[Long] = mostRecentEvent match {
     case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, _, _, _, _))) => Some(0L)
     case Some(OrderSubmittedEvent(_, _, _, MarketOrder(_, _, _, _))) => Some(1L)
     case _ => None
   }
 
-  def lastOrderDirection: Option[Long] = mostRecentEvent match {
+  def orderDirection: Option[Long] = mostRecentEvent match {
     case Some(OrderSubmittedEvent(_, _, _, order:OrderWithVolume)) =>
       if (order.tradeDirection == TradeDirection.Buy) Some(0) else Some(1)
     case _ => None
   }
 
-  def lastOrderPrice: Option[BigDecimal] = mostRecentEvent match {
+  def orderPrice: Option[BigDecimal] = mostRecentEvent match {
     case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, _, _, price, _))) => Some(price)
+    case _ => None
+  }
+
+  def orderVolume: Option[Long] = mostRecentEvent match {
+    case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, vol, _, _, _))) => Some(vol)
+    case Some(OrderSubmittedEvent(_, _, _, MarketOrder(_, vol, _, _))) => Some(vol)
+    case _ => None
+  }
+
+  def transactionPrice: Option[BigDecimal] = mostRecentEvent match {
+    case Some(TransactionEvent(_, _, _, _, transactionPrice, _, _, _)) => Some(transactionPrice)
+    case _ => None
+  }
+
+  def transactionVolume: Option[Long] = mostRecentEvent match {
+    case Some(TransactionEvent(_, _, _, _, _, transactionVolume, _, _)) => Some(transactionVolume)
     case _ => None
   }
 
@@ -397,17 +407,17 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   def bestAskVolume: Option[Long] = if (book.getUnmatchedAsks().size() > 0) Some(priceLevels().askVolume(0)) else None
   def bestBidVolume: Option[Long] = if (book.getUnmatchedBids().size() > 0) Some(priceLevels().bidVolume(0)) else None
 
-  /**
-   * Bean-compatible getter for Java clients.
-   *
-   * @return  The current state of the order-book.
-   */
-  def getLastTransactionPrice: Double = {
-    lastTransactionPrice match {
-      case Some(price)  => price
-      case None         => Double.NaN
-    }
-  }
+//  /**
+//   * Bean-compatible getter for Java clients.
+//   *
+//   * @return  The current state of the order-book.
+//   */
+//  def getLastTransactionPrice: Double = {
+//    lastTransactionPrice match {
+//      case Some(price)  => price
+//      case None         => Double.NaN
+//    }
+//  }
 
   /**
    * Update the auctionState in response to the new event.
