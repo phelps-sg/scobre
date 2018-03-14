@@ -2,13 +2,13 @@ package org.ccfea.tickdata.ui
 
 import javax.swing.table.DefaultTableModel
 
-import org.ccfea.tickdata.simulator.PriceLevels
+import org.ccfea.tickdata.simulator.{OldPriceLevels, OrderBook}
 
 import scala.math.max
 
-class PriceLevelsTableModel(var levels:PriceLevels) extends DefaultTableModel {
+class PriceLevelsTableModel(var book:OrderBook) extends DefaultTableModel {
 
-  override def getRowCount: Int = max(levels.numAskLevels, levels.numBidLevels)
+  override def getRowCount: Int = max(book.askPriceLevels.size, book.bidPriceLevels.size)
 
   override def getColumnName(columnIndex: Int): String =
     columnIndex match {
@@ -28,10 +28,10 @@ class PriceLevelsTableModel(var levels:PriceLevels) extends DefaultTableModel {
 
   override def getValueAt(rowIndex: Int, columnIndex: Int): AnyRef =
     columnIndex match {
-      case 0 => if (rowIndex < levels.numBidLevels) levels.bidVolume(rowIndex).toString else ""
-      case 1 => if (rowIndex < levels.numBidLevels) levels.bidPrice(rowIndex).toPrettyString() else ""
-      case 2 => if (rowIndex < levels.numAskLevels) levels.askPrice(rowIndex).toPrettyString() else ""
-      case 3 => if (rowIndex < levels.numAskLevels) levels.askVolume(rowIndex).toString else ""
+      case 0 => if (rowIndex < book.bidPriceLevels.size) book.bidVolume(rowIndex).toString else ""
+      case 1 => if (rowIndex < book.bidPriceLevels.size) book.bidPrice(rowIndex).toPrettyString() else ""
+      case 2 => if (rowIndex < book.askPriceLevels.size) book.askPrice(rowIndex).toPrettyString() else ""
+      case 3 => if (rowIndex < book.askPriceLevels.size) book.askVolume(rowIndex).toString else ""
     }
 
 }

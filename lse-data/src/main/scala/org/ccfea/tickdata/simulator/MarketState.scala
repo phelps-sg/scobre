@@ -31,7 +31,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    * The current state of the book.
    */
   @BeanProperty
-  val book = new FourHeapOrderBook()
+  val book = new OrderBook()
 
   /**
    * Lookup table mapping order-codes to Orders.
@@ -118,7 +118,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   def postProcessing(ev: TickDataEvent): Unit = {
     stateTransition(ev)
     this.quote = generateQuote()
-    bookChanged()
+//    bookChanged()
     checkConsistency(ev)
   }
 
@@ -290,26 +290,26 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    * @param ev  The event that has just been processed.
    */
   def checkConsistency(ev: TickDataEvent): Unit = {
-    if (this.auctionState == AuctionState.continuous) {
-      logger.debug("quote = " + quote)
-      if (hour > 8) {
-        var consistent = false
-        do {
-          quote match {
-            case Quote(Some(bid), Some(ask)) =>
-              if (bid > ask) {
-                logger.warn("Artificially clearing book to maintain consistency following event " + ev)
-                book.remove(book.getHighestUnmatchedBid)
-                book.remove(book.getLowestUnmatchedAsk)
-              } else {
-                consistent = true
-              }
-            case _ => consistent = true
-          }
-          this.quote = generateQuote()
-        } while (!consistent)
-      }
-    }
+//    if (this.auctionState == AuctionState.continuous) {
+//      logger.debug("quote = " + quote)
+//      if (hour > 8) {
+//        var consistent = false
+//        do {
+//          quote match {
+//            case Quote(Some(bid), Some(ask)) =>
+//              if (bid > ask) {
+//                logger.warn("Artificially clearing book to maintain consistency following event " + ev)
+//                book.remove(book.getHighestUnmatchedBid)
+//                book.remove(book.getLowestUnmatchedAsk)
+//              } else {
+//                consistent = true
+//              }
+//            case _ => consistent = true
+//          }
+//          this.quote = generateQuote()
+//        } while (!consistent)
+//      }
+//    }
   }
 
   def insertOrder(order: net.sourceforge.jasa.market.Order) = {
@@ -322,13 +322,13 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   }
 
   def printState() = {
-    book.printState()
+//    book.printState()
   }
 
   implicit def price(order: net.sourceforge.jasa.market.Order) =
     if (order != null) Some(order.getPriceAsDouble) else None
 
-  def generateQuote() = new Quote(book.getHighestUnmatchedBid, book.getLowestUnmatchedAsk)
+  def generateQuote() = new Quote(book.bestBidPrice, book.bestAskPrice)
 
   /**
    * When replaying ticks the simulator may inject "virtual" ticks
@@ -339,6 +339,10 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    */
   def virtualTicks: Seq[TickDataEvent] = List()
 
+
+  implicit def priceToOptionDouble(p: Option[Price]) = p match {
+    case Some(price) => Some(price.doubleValue)
+    case _ => None }
 
   def midPrice: Option[Double] = quote.midPrice
   def quoteAsk(): Option[Double] = quote.ask
@@ -376,9 +380,9 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     case _ => None
   }
 
-  def askDepthTotal = book.getUnmatchedAsks.asScala.map(_.aggregateUnfilledVolume()).sum
+  def askDepthTotal = book.asks.map(_.aggregateUnfilledVolume()).sum
 
-  def bidDepthTotal = book.getUnmatchedBids.asScala.map(_.aggregateUnfilledVolume()).sum
+  def bidDepthTotal = book.bids.map(_.aggregateUnfilledVolume()).sum
 
   def bestAskDepth =
     if (book.getLowestUnmatchedAsk != null) Some(book.getLowestUnmatchedAsk.aggregateUnfilledVolume()) else None
@@ -386,16 +390,16 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   def bestBidDepth =
       if (book.getHighestUnmatchedBid != null) Some(book.getHighestUnmatchedBid.aggregateUnfilledVolume()) else None
 
-  def bookSize = book.size()
+  def bookSize = book.size
 
-  val priceLevels = new LazyVar[PriceLevels](() => new PriceLevels(book))
-  def bookChanged() { priceLevels.unvalidate() }
+//  val priceLevels = new LazyVar[PriceLevels](() => new PriceLevels(book))
+//  def bookChanged() { priceLevels.unvalidate() }
 
   def bestAskPrice = quote.ask
   def bestBidPrice = quote.bid
 
-  def bestAskVolume: Option[Long] = if (book.getUnmatchedAsks().size() > 0) Some(priceLevels().askVolume(0)) else None
-  def bestBidVolume: Option[Long] = if (book.getUnmatchedBids().size() > 0) Some(priceLevels().bidVolume(0)) else None
+  def bestAskVolume: Option[Long] = if (book.asks.size > 0) Some(book.askVolume(0)) else None
+  def bestBidVolume: Option[Long] = if (book.bids.size > 0) Some(book.bidVolume(0)) else None
 
   /**
    * Bean-compatible getter for Java clients.
@@ -496,7 +500,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    */
   def removeOrder(jasaOrder: net.sourceforge.jasa.market.Order) = {
 //    book.removeAll(jasaOrder)
-    book.removeUnmatchedOrder(jasaOrder)
+    book.remove(jasaOrder)
   }
 
   /**

@@ -3,7 +3,7 @@ package org.ccfea.tickdata.ui
 import java.text.SimpleDateFormat
 
 import org.ccfea.tickdata.event.TickDataEvent
-import org.ccfea.tickdata.simulator.{MarketState, PriceLevels}
+import org.ccfea.tickdata.simulator.{MarketState, OldPriceLevels}
 
 import scala.collection.mutable.{Publisher, Subscriber}
 import scala.swing._
@@ -16,7 +16,7 @@ import scala.swing._
 class OrderBookView(val market: MarketState)
     extends Subscriber[TickDataEvent, Publisher[TickDataEvent]] {
 
-  val priceLevelsModel = new PriceLevelsTableModel(new PriceLevels(market.book))
+  val priceLevelsModel = new PriceLevelsTableModel(market.book)
 
   val levelsTable = new Table() {
     model = priceLevelsModel
@@ -43,7 +43,7 @@ class OrderBookView(val market: MarketState)
 
   def notify(pub: Publisher[TickDataEvent], ev: TickDataEvent) = {
     Swing.onEDTWait {
-      priceLevelsModel.levels = new PriceLevels(market.book)
+//      priceLevelsModel.levels = new PriceLevels(market.book)
       timeLabel.text = df.format(new java.util.Date(market.time.get.getTicks))
     }
     priceLevelsModel.fireTableDataChanged()

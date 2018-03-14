@@ -13,7 +13,7 @@ import org.ccfea.tickdata.order.{Trader, TradeDirection, LimitOrder, MarketOrder
 class ClearingMarketState extends MarketState {
 
   override def postProcessing(ev: TickDataEvent): Unit = {
-    book.matchOrders()
+    book.uncross()
     super.postProcessing(ev)
     //TODO optionally record most recent transaction price as a result of clearing
   }
@@ -45,7 +45,8 @@ class ClearingMarketState extends MarketState {
     val bestPrice = if (order.tradeDirection == TradeDirection.Buy) quote.ask else quote.bid
     bestPrice match {
       case Some(p) =>
-        val lo = new LimitOrder(order.orderCode, order.aggregateSize, order.tradeDirection, p, order.trader)
+        //TODO add big decimal conversion in Price
+        val lo = new LimitOrder(order.orderCode, order.aggregateSize, order.tradeDirection, BigDecimal(p.doubleValue()), order.trader)
         processLimitOrder(lo)
       case None =>
         logger.warn("Ignoring market order because there is no best price: " + order)

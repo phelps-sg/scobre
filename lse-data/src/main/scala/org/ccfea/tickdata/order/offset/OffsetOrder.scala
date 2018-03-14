@@ -1,6 +1,7 @@
 package org.ccfea.tickdata.order.offset
 
-import org.ccfea.tickdata.order.{Trader, LimitOrder, OrderWithVolume}
+import net.sourceforge.jasa.market.Price
+import org.ccfea.tickdata.order.{LimitOrder, OrderWithVolume, Trader}
 import org.ccfea.tickdata.simulator.Quote
 
 /**
@@ -21,21 +22,23 @@ abstract class OffsetOrder(val limitOrder: LimitOrder, val initialQuote: Quote) 
   val trader = limitOrder.trader
 
   val offset: Double = bestPrice(initialQuote) match {
-    case Some(best) => round((limitOrder.price - round(best)).toDouble)
+      //TODO
+    case Some(best) => round((limitOrder.price - round(best.doubleValue())).toDouble)
     case None => 0.0
   }
 
   def price(quote: Quote): BigDecimal =
     bestPrice(quote) match {
       case None => originalPrice
-      case Some(p) => round(p) + offset
+        //TODO
+      case Some(p) => round(p.doubleValue()) + offset
     }
 
   def round(p: Double): Double = {
     (p * 1000.0) / 1000.0
   }
 
-  def bestPrice(quote: Quote): Option[Double]
+  def bestPrice(quote: Quote): Option[Price]
 
   def toLimitOrder(quote: Quote) = {
     new LimitOrder(orderCode, aggregateSize, tradeDirection, price(quote), new Trader())

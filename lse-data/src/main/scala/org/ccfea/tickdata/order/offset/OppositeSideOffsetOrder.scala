@@ -1,5 +1,6 @@
 package org.ccfea.tickdata.order.offset
 
+import net.sourceforge.jasa.market.Price
 import org.ccfea.tickdata.order.{LimitOrder, TradeDirection}
 import org.ccfea.tickdata.simulator.Quote
 
@@ -9,7 +10,7 @@ import org.ccfea.tickdata.simulator.Quote
 class OppositeSideOffsetOrder(limitOrder: LimitOrder, initialQuote: Quote)
     extends OffsetOrder(limitOrder, initialQuote) {
 
-  override def bestPrice(quote: Quote): Option[Double] =
+  override def bestPrice(quote: Quote): Option[Price] =
     if (this.tradeDirection == TradeDirection.Buy) quote.ask else quote.bid
 
   override def toString() =

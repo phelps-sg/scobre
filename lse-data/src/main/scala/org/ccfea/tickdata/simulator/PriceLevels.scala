@@ -1,42 +1,26 @@
 package org.ccfea.tickdata.simulator
 
+import net.sourceforge.jasa.market.{Order, Price}
 
-import scala.collection.parallel.ParMap
-import scala.collection.SortedMap
+import scala.collection.mutable
 
-import net.sourceforge.jasa.market.{Order, OrderBook, Price}
+class PriceLevels(implicit val ordering: Ordering[Price]) {
 
-import collection.JavaConverters._
+  val levels = new mutable.TreeMap[Price, Long]()(ordering)
 
-class PriceLevels(val book: OrderBook) {
+  def increment(price: Price, volDelta: Long): Unit = {
+    if (!levels.contains(price)) levels(price) = 0
+    levels(price) = levels(price) + volDelta
+  }
 
-  def ordersByPrice(orders: Seq[Order]) = orders.par.groupBy(_.getPrice)
+  def size: Int = levels.size
 
-  def priceLevels(orders: Seq[Order]) =
-    for ((priceLevel, orders) <- ordersByPrice(orders))
-      yield (priceLevel, orders.foldLeft(0L) {
-        _ + _.aggregateVolume()
-      })
+  def apply(p: Price): Long = {
+    levels(p)
+  }
 
-  def askPriceLevels = priceLevels(book.getUnmatchedAsks.asScala)
-  def bidPriceLevels = priceLevels(book.getUnmatchedBids.asScala)
-
-  def negatedVolume(levels: ParMap[Price, Long]) =
-    for ((priceLevel, volume) <- levels) yield (priceLevel, -volume)
-
-  def signedPriceLevels =
-      SortedMap[Price, Long]() ++ bidPriceLevels ++ negatedVolume(askPriceLevels)
-
-  lazy val askVolumeAt = SortedMap[Price, Long]()(Ordering[Price].reverse) ++ askPriceLevels
-  lazy val bidVolumeAt = SortedMap[Price, Long]() ++ bidPriceLevels
-
-  lazy val askPrice = List() ++ askVolumeAt.keys
-  lazy val bidPrice = List() ++ bidVolumeAt.keys
-
-  def bidVolume(i: Int) = bidVolumeAt(bidPrice(i))
-  def askVolume(i: Int) = askVolumeAt(askPrice(i))
-
-  def numAskLevels = askPrice.size
-  def numBidLevels = bidPrice.size
+  def prices: Seq[Price] = {
+    List[Price]() ++ levels.keys
+  }
 
 }
