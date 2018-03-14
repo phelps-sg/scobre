@@ -9,6 +9,7 @@ import java.util.GregorianCalendar
 import org.ccfea.tickdata.event._
 import org.ccfea.tickdata.order.offset.OffsetOrder
 import org.ccfea.tickdata.order._
+import org.ccfea.tickdata.util.LazyVar
 
 import scala.beans.BeanProperty
 import collection.JavaConverters._
@@ -117,8 +118,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   def postProcessing(ev: TickDataEvent): Unit = {
     stateTransition(ev)
     this.quote = generateQuote()
-    lazy val newLevels = new PriceLevels(book)
-    this.priceLevels = { return newLevels }
+    bookChanged()
     checkConsistency(ev)
   }
 
@@ -398,8 +398,8 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
 
   def bookSize = book.size()
 
-  private lazy val initialPriceLevels = new PriceLevels(book)
-  var priceLevels: () => PriceLevels =  () => initialPriceLevels
+  val priceLevels = new LazyVar[PriceLevels](() => new PriceLevels(book))
+  def bookChanged() { priceLevels.unvalidate() }
 
   def bestAskPrice = quote.ask
   def bestBidPrice = quote.bid
