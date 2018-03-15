@@ -268,7 +268,6 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
 
   def processMarketOrder(order: MarketOrder) = {
     logger.debug("No action required for market order without explicit clearing: " + order)
-    //TODO Override in subclass
   }
 
 //  def adjustQuantity(jasaOrder: net.sourceforge.jasa.market.Order,
@@ -340,13 +339,13 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   def virtualTicks: Seq[TickDataEvent] = List()
 
 
-  implicit def priceToOptionDouble(p: Option[Price]) = p match {
-    case Some(price) => Some(price.doubleValue)
-    case _ => None }
+//  implicit def priceToOptionDouble(p: Option[Price]) = p match {
+//    case Some(price) => Some(price.doubleValue)
+//    case _ => None }
 
-  def midPrice: Option[Double] = quote.midPrice
-  def quoteAsk(): Option[Double] = quote.ask
-  def quoteBid(): Option[Double] = quote.bid
+  def midPrice: Option[Price] = quote.midPrice
+  def quoteAsk(): Option[Price] = quote.ask
+  def quoteBid(): Option[Price] = quote.bid
 
   def calendar = {
     val cal = new GregorianCalendar()
@@ -374,7 +373,6 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     case _ => None
   }
 
-  def askDepthTotal = book.asks.map(_.aggregateUnfilledVolume()).sum
   def orderVolume: Option[Long] = mostRecentEvent match {
     case Some(OrderSubmittedEvent(_, _, _, LimitOrder(_, vol, _, _, _))) => Some(vol)
     case Some(OrderSubmittedEvent(_, _, _, MarketOrder(_, vol, _, _))) => Some(vol)
@@ -391,9 +389,9 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     case _ => None
   }
 
-  def askDepthTotal = book.getUnmatchedAsks.asScala.map(_.aggregateUnfilledVolume()).sum
+  def askDepthTotal = book.asks.asScala.map(_.aggregateUnfilledVolume()).sum
 
-  def bidDepthTotal = book.bids.map(_.aggregateUnfilledVolume()).sum
+  def bidDepthTotal = book.bids.asScala.map(_.aggregateUnfilledVolume()).sum
 
   def bestAskDepth =
     if (book.getLowestUnmatchedAsk != null) Some(book.getLowestUnmatchedAsk.aggregateUnfilledVolume()) else None
@@ -491,7 +489,7 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
             AuctionState.endOfDay
 
         // Transition from uncrossing to continuous
-        //   i.f.f. we recieve a TransactionEvent.
+        //   i.f.f. we receive a TransactionEvent.
         case AuctionState.uncrossing =>
           ev match {
             case _: TransactionEvent => AuctionState.uncrossing

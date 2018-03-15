@@ -3,6 +3,7 @@ package org.ccfea.tickdata
 import java.text.DateFormat
 import java.util.Date
 
+import net.sourceforge.jasa.market.Price
 import org.ccfea.tickdata.conf.ReplayConf
 import org.ccfea.tickdata.simulator.{ClearingMarketState, MarketState}
 
@@ -26,6 +27,7 @@ trait ScobreApplication {
   }
 
   implicit def AnyRefToOptionAnyVal(x: AnyRef): Option[AnyVal] = x match {
+    case Some(price: Price) => Some(price.doubleValue)
     case Some(double: Double) => Some(double)
     case Some(long: Long) => Some(long)
     case Some(int: Int) => Some(int)

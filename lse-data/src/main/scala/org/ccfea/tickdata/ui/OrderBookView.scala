@@ -3,7 +3,7 @@ package org.ccfea.tickdata.ui
 import java.text.SimpleDateFormat
 
 import org.ccfea.tickdata.event.TickDataEvent
-import org.ccfea.tickdata.simulator.{MarketState, OldPriceLevels}
+import org.ccfea.tickdata.simulator.MarketState
 
 import scala.collection.mutable.{Publisher, Subscriber}
 import scala.swing._

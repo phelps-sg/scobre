@@ -13,7 +13,7 @@ import org.ccfea.tickdata.order.{Trader, TradeDirection, LimitOrder, MarketOrder
 class ClearingMarketState extends MarketState {
 
   override def postProcessing(ev: TickDataEvent): Unit = {
-    book.uncross()
+//    book.uncross()
     super.postProcessing(ev)
     //TODO optionally record most recent transaction price as a result of clearing
   }
@@ -23,6 +23,7 @@ class ClearingMarketState extends MarketState {
 
   override def insertOrder(order: Order): Unit = {
     book.add(order)
+    book.uncross()
   }
 
   override def process(ev: OrderFilledEvent): Unit = {
@@ -41,13 +42,19 @@ class ClearingMarketState extends MarketState {
   }
 
   override def processMarketOrder(order: MarketOrder) = {
-//    val quote: Quote = this.quote()
+    val quote: Quote = this.quote
     val bestPrice = if (order.tradeDirection == TradeDirection.Buy) quote.ask else quote.bid
     bestPrice match {
       case Some(p) =>
         //TODO add big decimal conversion in Price
-        val lo = new LimitOrder(order.orderCode, order.aggregateSize, order.tradeDirection, BigDecimal(p.doubleValue()), order.trader)
-        processLimitOrder(lo)
+        val effectiveLimitOrder = new net.sourceforge.jasa.market.Order()
+        effectiveLimitOrder.setPrice(p)
+        effectiveLimitOrder.setQuantity(order.aggregateSize.intValue())
+        effectiveLimitOrder.setIsBid(order.tradeDirection == TradeDirection.Buy)
+//        orderMap(order.orderCode) = effectiveLimitOrder
+        insertOrder(effectiveLimitOrder)
+      //        val lo = new LimitOrder(order.orderCode, order.aggregateSize, order.tradeDirection, BigDecimal(p.doubleValue()), order.trader)
+//        processLimitOrder(lo)
       case None =>
         logger.warn("Ignoring market order because there is no best price: " + order)
         auctionState = AuctionState.undefined

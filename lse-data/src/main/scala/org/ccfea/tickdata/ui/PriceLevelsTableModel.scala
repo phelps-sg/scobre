@@ -2,7 +2,7 @@ package org.ccfea.tickdata.ui
 
 import javax.swing.table.DefaultTableModel
 
-import org.ccfea.tickdata.simulator.{OldPriceLevels, OrderBook}
+import org.ccfea.tickdata.simulator.OrderBook
 
 import scala.math.max
 

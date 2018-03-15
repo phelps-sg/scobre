@@ -19,7 +19,7 @@ name := "lse-data"
 
 organization := "net.sourceforge.jasa"
 
-version := "0.21-SNAPSHOT"
+version := "0.22-SNAPSHOT"
 
 scalaVersion := "2.12.4"
 
@@ -45,8 +45,7 @@ resolvers ++= Seq(
   "Local Maven Repository" at "file:///" + Path.userHome.absolutePath + "/.m2/repository",
   "Apache HBase" at "http://repository.apache.org/content/repositories/releases",
   "Maven Central" at "http://repo1.maven.org/maven2",
-  "sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-  "sonatype staging" at "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+  "sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 )
 
 libraryDependencies ++= Seq(
@@ -56,7 +55,7 @@ libraryDependencies ++= Seq(
   "org.apache.hadoop" % "hadoop-client" % "2.7.1",
   "org.apache.hadoop" % "hadoop-common" % "2.7.1",
   "org.apache.thrift" % "libthrift" % "0.10.0",
-  "net.sourceforge.jasa" % "jasa" % "1.2.9-SNAPSHOT",
+  "net.sourceforge.jasa" % "jasa" % "1.3.1",
 //  "com.espertech" % "esper" % "4.11.0",
   "org.rogach" %% "scallop" % "2.1.1",
   "org.clapper" %% "grizzled-slf4j" % "1.3.0",

@@ -1,28 +1,25 @@
 package org.ccfea.tickdata.simulator
 
 
-import java.util.Comparator
+import java.util.{Comparator, PriorityQueue}
 
 import net.sourceforge.jasa.market.{AscendingOrderComparator, DescendingOrderComparator, Order, Price}
 
 import scala.collection.{SortedMap, mutable}
-import scala.collection.parallel.ParMap
 
 class OrderBook {
 
-  def comparatorToOrdering(cmp: Comparator[Order]): Ordering[Order] =
-    new Ordering[Order] { def compare(x: Order, y: Order) = cmp.compare(x, y) }
+  val bids = new PriorityQueue[Order](new DescendingOrderComparator())
+  val asks = new PriorityQueue[Order](new AscendingOrderComparator())
 
-  val bidOrdering = comparatorToOrdering(new DescendingOrderComparator())
-  val askOrdering = comparatorToOrdering(new AscendingOrderComparator())
-
-  val bids = new mutable.TreeSet[Order]()(bidOrdering)
-  val asks = new mutable.TreeSet[Order]()(askOrdering)
   def orders(implicit order: Order) = if (order.isBid) bids else asks
 
   val bidPriceLevels = new PriceLevels()
   val askPriceLevels = new PriceLevels()(Ordering[Price].reverse)
+
   def levels(implicit order: Order) = if (order.isBid) bidPriceLevels else askPriceLevels
+
+  def size: Int = math.max(askPriceLevels.size, bidPriceLevels.size)
 
   def negatedVolume(levels: mutable.TreeMap[Price, Long]) =
     for ((priceLevel, volume) <- levels) yield (priceLevel, -volume)
@@ -30,14 +27,14 @@ class OrderBook {
   def signedPriceLevels =
     SortedMap[Price, Long]() ++ bidPriceLevels.levels ++ negatedVolume(askPriceLevels.levels)
 
-  def getHighestUnmatchedBid: Order = bids.head
-  def getLowestUnmatchedAsk: Order = asks.head
+  def getHighestUnmatchedBid: Order = bids.peek()
+  def getLowestUnmatchedAsk: Order = asks.peek()
 
   def bestBidPrice: Option[Price] = if (bids.isEmpty) None else Some(getHighestUnmatchedBid.getPrice)
   def bestAskPrice: Option[Price] = if (asks.isEmpty) None else Some(getLowestUnmatchedAsk.getPrice)
 
-  def askPrice = askPriceLevels.prices
-  def bidPrice = bidPriceLevels.prices
+  def askPrice = askPriceLevels.prices()
+  def bidPrice = bidPriceLevels.prices()
 
   def bidVolume(i: Int) = bidPriceLevels(bidPrice(i))
   def askVolume(i: Int) = askPriceLevels(askPrice(i))
@@ -48,15 +45,36 @@ class OrderBook {
   }
 
   def remove(implicit order: Order): Unit = {
-    orders.remove(order)
-    levels.increment(order.getPrice, -order.aggregateUnfilledVolume())
+    if (orders.remove(order)) levels.increment(order.getPrice, -order.getQuantity)
   }
 
+  def removeBest(implicit order: Order): Unit = {
+    orders.poll()
+    levels.increment(order.getPrice, -order.getQuantity)
+  }
+
+  def crossed: Boolean = bids.peek.getPrice.longValue >= asks.peek.getPrice.longValue
+
+  def isEmpty: Boolean = asks.isEmpty || bids.isEmpty
 
   def uncross(): Unit = {
-    //TODO
+    while (!isEmpty && crossed)  {
+      val bb = bids.peek()
+      val ba = asks.peek()
+      if (bb.getQuantity == ba.getQuantity) {
+        removeBest(ba)
+        removeBest(bb)
+      } else if (bb.getQuantity > ba.getQuantity) {
+        bb.setQuantity(bb.getQuantity - ba.getQuantity)
+        bidPriceLevels.increment(bb.getPrice, -ba.getQuantity)
+        removeBest(ba)
+      } else {
+        ba.setQuantity(ba.getQuantity - bb.getQuantity)
+        askPriceLevels.increment(ba.getPrice, -bb.getQuantity)
+        removeBest(bb)
+      }
+    }
+    assert(isEmpty || !crossed)
   }
-
-  def size: Int = math.max(askPriceLevels.size, bidPriceLevels.size)
 
 }
