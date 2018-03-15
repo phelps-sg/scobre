@@ -42,7 +42,7 @@ class OrderBookView(val market: MarketState)
   market.subscribe(this)
 
   def notify(pub: Publisher[TickDataEvent], ev: TickDataEvent) = {
-    Swing.onEDTWait {
+    Swing.onEDT {
 //      priceLevelsModel.levels = new PriceLevels(market.book)
       timeLabel.text = df.format(new java.util.Date(market.time.get.getTicks))
     }
