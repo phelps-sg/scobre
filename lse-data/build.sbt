@@ -45,7 +45,8 @@ resolvers ++= Seq(
   "Local Maven Repository" at "file:///" + Path.userHome.absolutePath + "/.m2/repository",
   "Apache HBase" at "http://repository.apache.org/content/repositories/releases",
   "Maven Central" at "http://repo1.maven.org/maven2",
-  "sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+  "sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots" ,
+  "sonatype releases" at "https://oss.sonatype.org/content/repositories/releases"
 )
 
 libraryDependencies ++= Seq(
