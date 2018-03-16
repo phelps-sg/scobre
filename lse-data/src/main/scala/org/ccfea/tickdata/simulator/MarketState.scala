@@ -43,16 +43,6 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    */
   var time: Option[SimulationTime] = None
 
-//  /**
-//   * The most recent transaction price.
-//   */
-//  var lastTransactionPrice: Option[Double] = None
-
-//  /**
-//   * The current volume.
-//   */
-//  var volume: Option[Long] = None
-
   /**
     * The current market quote.
     */
@@ -110,7 +100,6 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
 //    assert(ev.timeStamp.getTime >= (time match { case None => 0; case Some(t) => t.getTicks}))
     val newTime = new SimulationTime(ev.timeStamp.getTime)
     this.time = Some(newTime)
-//    this.volume = Some(0)
     this.previousEvent = this.mostRecentEvent
     this.mostRecentEvent = Some(ev)
   }
@@ -118,7 +107,6 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   def postProcessing(ev: TickDataEvent): Unit = {
     stateTransition(ev)
     this.quote = generateQuote()
-//    bookChanged()
     checkConsistency(ev)
   }
 
@@ -175,27 +163,8 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
       process(new OrderSubmittedEvent(ev.timeStamp, ev.messageSequenceNumber, ev.tiCode, newOrder))
     }
   }
-//
-//  def process(ev: OrderRevisedEvent): Unit = {
-//    val orderCode = ev.order.orderCode
-//    if (orderMap.contains(orderCode)) {
-//      val order = orderMap(orderCode)
-//      removeOrder(order)
-//      order.setPrice(ev.newPrice.doubleValue())
-//      order.setQuantity(ev.newVolume.toInt)
-//      order.setIsBid(ev.newDirection == TradeDirection.Buy)
-//      insertOrder(order)
-//    } else {
-//      logger.warn("Unknown order code when amending existing order: " + ev.order.orderCode)
-//      logger.warn("Converting OrderRevisedEvent to OrderSubmittedEvent")
-//      val newOrder = new LimitOrder(ev.order.orderCode, ev.newVolume, ev.newDirection, ev.newPrice, new Trader())
-//      process(new OrderSubmittedEvent(ev.timeStamp, ev.messageSequenceNumber, ev.tiCode, newOrder))
-//    }
-//  }
 
   def process(ev: TransactionEvent): Unit = {
-//    this.lastTransactionPrice = Some(ev.transactionPrice.toDouble)
-//    this.volume = Some(ev.tradeSize)
   }
 
   def process(ev: OrderRemovedEvent): Unit = {
@@ -224,7 +193,6 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     val orderCode = ev.order.orderCode
     if (orderMap.contains(orderCode)) {
       val order = orderMap(orderCode)
-//      adjustQuantity(order, ev)
       logger.debug("partially filled order " + order)
       val matchedOrder =
           if (orderMap.contains(ev.matchingOrder.orderCode))
@@ -270,18 +238,6 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     logger.debug("No action required for market order without explicit clearing: " + order)
   }
 
-//  def adjustQuantity(jasaOrder: net.sourceforge.jasa.market.Order,
-//                      ev: OrderMatchedEvent): Unit = {
-//    logger.debug("Adjusting qty for order based on partial match" + ev)
-//    jasaOrder.setQuantity(jasaOrder.getQuantity - ev.tradeSize.toInt)
-//    logger.debug("New order = " + jasaOrder)
-////    assert(jasaOrder.getQuantity >= 0)
-//    if (jasaOrder.getQuantity <= 0) {
-//      logger.warn("Removing order with zero or negative volume from book before full match: " + jasaOrder)
-//      removeOrder(jasaOrder)
-//    }
-//  }
-
   /**
    * Check the consistency of the market after processing the given event,
    * and take any remedial action if the state is inconsistent.
@@ -289,34 +245,9 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
    * @param ev  The event that has just been processed.
    */
   def checkConsistency(ev: TickDataEvent): Unit = {
-//    if (this.auctionState == AuctionState.continuous) {
-//      logger.debug("quote = " + quote)
-//      if (hour > 8) {
-//        var consistent = false
-//        do {
-//          quote match {
-//            case Quote(Some(bid), Some(ask)) =>
-//              if (bid > ask) {
-//                logger.warn("Artificially clearing book to maintain consistency following event " + ev)
-//                book.remove(book.getHighestUnmatchedBid)
-//                book.remove(book.getLowestUnmatchedAsk)
-//              } else {
-//                consistent = true
-//              }
-//            case _ => consistent = true
-//          }
-//          this.quote = generateQuote()
-//        } while (!consistent)
-//      }
-//    }
   }
 
   def insertOrder(order: net.sourceforge.jasa.market.Order) = {
-//    if (order.isBid) {
-//      book.insertUnmatchedBid(order)
-//    } else {
-//      book.insertUnmatchedAsk(order)
-//    }
     book.add(order)
   }
 
@@ -389,9 +320,9 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
     case _ => None
   }
 
-  def askDepthTotal = book.asks.asScala.map(_.aggregateUnfilledVolume()).sum
+  def totalAskVolume = book.asks.asScala.map(_.aggregateUnfilledVolume()).sum
 
-  def bidDepthTotal = book.bids.asScala.map(_.aggregateUnfilledVolume()).sum
+  def totalBidVolume = book.bids.asScala.map(_.aggregateUnfilledVolume()).sum
 
   def bestAskDepth =
     if (book.getLowestUnmatchedAsk != null) Some(book.getLowestUnmatchedAsk.aggregateUnfilledVolume()) else None
@@ -401,26 +332,11 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
 
   def bookSize = book.size
 
-//  val priceLevels = new LazyVar[PriceLevels](() => new PriceLevels(book))
-//  def bookChanged() { priceLevels.unvalidate() }
-
   def bestAskPrice = quote.ask
   def bestBidPrice = quote.bid
 
   def bestAskVolume: Option[Long] = if (book.asks.size > 0) Some(book.askVolume(0)) else None
   def bestBidVolume: Option[Long] = if (book.bids.size > 0) Some(book.bidVolume(0)) else None
-
-//  /**
-//   * Bean-compatible getter for Java clients.
-//   *
-//   * @return  The current state of the order-book.
-//   */
-//  def getLastTransactionPrice: Double = {
-//    lastTransactionPrice match {
-//      case Some(price)  => price
-//      case None         => Double.NaN
-//    }
-//  }
 
   /**
    * Update the auctionState in response to the new event.
