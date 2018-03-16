@@ -13,7 +13,7 @@ trait PriceLevelsCollector extends
   def maxLevels: Int
 
   def collectData(state: MarketState): (Option[SimulationTime], SortedMap[String, Option[AnyVal]]) = {
-    val levels = state.book.signedPriceLevels
+    val levels = state.book.signedPriceLevels()
     val tuples =
       for(((price, volume), i) <- levels.zipWithIndex)
         yield ("L%07d".format(i), if (i < levels.size) Some(volume) else None)

@@ -1,9 +1,10 @@
 package org.ccfea.tickdata.simulator
 
 
-import java.util.{Comparator, PriorityQueue}
+import java.util.PriorityQueue
 
 import net.sourceforge.jasa.market.{AscendingOrderComparator, DescendingOrderComparator, Order, Price}
+import org.ccfea.tickdata.util.LazyVar
 
 import scala.collection.{SortedMap, mutable}
 
@@ -21,11 +22,8 @@ class OrderBook {
 
   def size: Int = math.max(askPriceLevels.size, bidPriceLevels.size)
 
-  def negatedVolume(levels: mutable.TreeMap[Price, Long]) =
-    for ((priceLevel, volume) <- levels) yield (priceLevel, -volume)
-
-  def signedPriceLevels =
-    SortedMap[Price, Long]() ++ bidPriceLevels.levels ++ negatedVolume(askPriceLevels.levels)
+  val signedPriceLevels = new LazyVar[SortedMap[Price, Long]](() =>
+    SortedMap[Price, Long]() ++ bidPriceLevels.levels ++ askPriceLevels.negatedVolume)
 
   def getHighestUnmatchedBid: Order = bids.peek()
   def getLowestUnmatchedAsk: Order = asks.peek()
@@ -39,18 +37,23 @@ class OrderBook {
   def bidVolume(i: Int) = bidPriceLevels(bidPrice(i))
   def askVolume(i: Int) = askPriceLevels(askPrice(i))
 
+  def incrementLevel(volDelta: Long)(implicit order: Order): Unit = {
+    levels.increment(order.getPrice, volDelta)
+    signedPriceLevels.unvalidate()
+  }
+
   def add(implicit order: Order): Unit = {
     orders.add(order)
-    levels.increment(order.getPrice, order.aggregateUnfilledVolume())
+    incrementLevel(order.aggregateUnfilledVolume())
   }
 
   def remove(implicit order: Order): Unit = {
-    if (orders.remove(order)) levels.increment(order.getPrice, -order.getQuantity)
+    if (orders.remove(order)) incrementLevel(-order.getQuantity)
   }
 
   def removeBest(implicit order: Order): Unit = {
     orders.poll()
-    levels.increment(order.getPrice, -order.getQuantity)
+    incrementLevel(-order.getQuantity)
   }
 
   def crossed: Boolean = bids.peek.getPrice.longValue >= asks.peek.getPrice.longValue
@@ -66,11 +69,11 @@ class OrderBook {
         removeBest(bb)
       } else if (bb.getQuantity > ba.getQuantity) {
         bb.setQuantity(bb.getQuantity - ba.getQuantity)
-        bidPriceLevels.increment(bb.getPrice, -ba.getQuantity)
+        incrementLevel(-ba.getQuantity)(bb)
         removeBest(ba)
       } else {
         ba.setQuantity(ba.getQuantity - bb.getQuantity)
-        askPriceLevels.increment(ba.getPrice, -bb.getQuantity)
+        incrementLevel(-bb.getQuantity)(ba)
         removeBest(bb)
       }
     }

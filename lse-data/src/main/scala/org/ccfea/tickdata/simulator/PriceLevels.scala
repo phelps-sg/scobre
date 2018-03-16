@@ -17,6 +17,8 @@ class PriceLevels(implicit val ordering: Ordering[Price]) {
     levels(p)
   }
 
+  def negatedVolume = for ((priceLevel, volume) <- levels) yield (priceLevel, -volume)
+
   def increment(price: Price, volDelta: Long): Unit = {
     if (!levels.contains(price)) levels(price) = 0
     levels(price) = levels(price) + volDelta
