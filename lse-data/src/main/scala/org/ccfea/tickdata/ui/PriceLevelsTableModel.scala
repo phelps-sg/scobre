@@ -8,7 +8,7 @@ import scala.math.max
 
 class PriceLevelsTableModel(var book:OrderBook) extends DefaultTableModel {
 
-  override def getRowCount: Int = max(book.askPriceLevels.size, book.bidPriceLevels.size)
+  override def getRowCount: Int = book.size
 
   override def getColumnName(columnIndex: Int): String =
     columnIndex match {
