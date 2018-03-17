@@ -16,16 +16,16 @@ from scipy.stats.kde import gaussian_kde
 
 DEFAULT_SERVER = 'localhost'
 DEFAULT_PORT = 9090
-DEFAULT_VARIABLES = ['midPrice', 'lastTransactionPrice', 'volume']
+DEFAULT_VARIABLES = ['midPrice', 'transactionPrice', 'transactionVolume']
 
 
 def date_to_time(d):
     return int(time.mktime(d.timetuple())) * 1000
 
 
-def dict_to_df(data, variables):
+def dict_to_df(data, timestamps):
     df = pd.DataFrame(data)
-    df.index = pd.Series([dt.datetime.fromtimestamp(t) for t in df.t])
+    df.index = pd.Series([pd.to_datetime(t, unit='ms') for t in timestamps])
     return df
 
 
@@ -71,7 +71,7 @@ class ReplayClient(object):
         raw_data = self.client.replay(asset, variables, t0, t1)
         if len(raw_data) == 0:
             raise Exception("No data available")
-        return dict_to_df(raw_data, variables)
+        return dict_to_df(raw_data, self.client.replayedTimestamps())
 
     def write_hf_data_to_csv(self, asset,
                              start_date, end_date, csv_file_name,

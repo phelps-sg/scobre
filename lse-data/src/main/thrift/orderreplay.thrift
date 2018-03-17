@@ -31,6 +31,8 @@ service OrderReplay {
    map<string, list<double>> replay(1:string assetId, 2:list<string> variables,
                                                         3:i64 startDateTime, 4:i64 endDateTime),
 
+   list<i64> replayedTimestamps(),
+
    i64 replayToCsv(1:string assetId, 2:list<string> variables, 3:i64 startDateTime, 4:i64 endDateTime,
                     5:string csvFileName),
 
