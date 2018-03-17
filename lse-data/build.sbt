@@ -28,7 +28,7 @@ sbtVersion := "0.13.16"
 packSettings
 
 packMain := Map(  "replay-orders"         -> "org.ccfea.tickdata.ReplayOrders",
-                  "order-replay-service"  -> "org.ccfea.tickdata.OrderReplayService",
+                  "order-replay-service"  -> "org.ccfea.tickdata.StartOrderReplayService",
                   "import-data"           -> "org.ccfea.tickdata.ImportData"
 )
 
