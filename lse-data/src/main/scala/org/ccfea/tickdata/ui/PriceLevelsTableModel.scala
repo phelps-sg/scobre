@@ -4,8 +4,6 @@ import javax.swing.table.DefaultTableModel
 
 import org.ccfea.tickdata.simulator.OrderBook
 
-import scala.math.max
-
 class PriceLevelsTableModel(var book:OrderBook) extends DefaultTableModel {
 
   override def getRowCount: Int = book.size

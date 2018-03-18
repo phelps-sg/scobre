@@ -1,11 +1,8 @@
 package org.ccfea.tickdata.storage
 
-import org.ccfea.tickdata.storage.dao.Event
-import rawdata._
 import grizzled.slf4j.Logger
 import org.ccfea.tickdata.storage.dao.Event
-import org.ccfea.tickdata.storage.rawdata.lse.dao.OrderDetailRaw
-import org.ccfea.tickdata.order.{MarketMechanismType, TradeDirection}
+import org.ccfea.tickdata.storage.rawdata._
 
 /**
  * Parse the raw data and convert it to a sequence of tick Events.

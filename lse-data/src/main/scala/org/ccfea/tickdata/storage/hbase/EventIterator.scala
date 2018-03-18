@@ -1,11 +1,10 @@
 package org.ccfea.tickdata.storage.hbase
 
+import org.apache.hadoop.hbase.client.{Result, ResultScanner}
+import org.ccfea.tickdata.event.TickDataEvent
 import org.ccfea.tickdata.storage.dao.Event
-import org.ccfea.tickdata.event.{OrderMatchedEvent, TickDataEvent}
 
-import org.apache.hadoop.hbase.client.{Result, ResultScanner, Get}
-
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
  * This class can be used to replay orders from an HBase database.
@@ -17,7 +16,7 @@ import collection.JavaConversions._
  */
 class EventIterator(val scanner: ResultScanner) extends Iterator[TickDataEvent] with HBaseEventConverter {
 
-  val resultIterator: Iterator[Result] = scanner.iterator()
+  val resultIterator: Iterator[Result] = scanner.iterator().asScala
 
   def hasNext: Boolean = {
     val result = resultIterator.hasNext

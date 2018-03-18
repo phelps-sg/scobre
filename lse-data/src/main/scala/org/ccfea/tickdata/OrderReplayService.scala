@@ -3,20 +3,19 @@ package org.ccfea.tickdata
 import java.util.Date
 
 import grizzled.slf4j.Logger
-import org.ccfea.tickdata.order.LimitOrder
-import org.ccfea.tickdata.order.offset.{MidPriceOffsetOrder, Offsetting, OppositeSideOffsetOrder, SameSideOffsetOrder}
 import org.ccfea.tickdata.collector.MultivariateTimeSeriesCollector
 import org.ccfea.tickdata.conf.ServerConf
 import org.ccfea.tickdata.event.TickDataEvent
-import org.ccfea.tickdata.replayer.MultivariateCSVReplayer
-import org.ccfea.tickdata.replayer.ThriftReplayer
+import org.ccfea.tickdata.order.LimitOrder
+import org.ccfea.tickdata.order.offset.{MidPriceOffsetOrder, Offsetting, OppositeSideOffsetOrder, SameSideOffsetOrder}
+import org.ccfea.tickdata.replayer.{MultivariateCSVReplayer, ThriftReplayer}
 import org.ccfea.tickdata.simulator.Quote
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
 import org.ccfea.tickdata.storage.shuffled._
 import org.ccfea.tickdata.storage.shuffled.copier.{OrderSignCopier, PriceCopier, TickCopier, VolumeCopier}
 import org.ccfea.tickdata.thrift.OrderReplay
 
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
  * A server that provides order-replay simulation results over the network.
@@ -136,7 +135,7 @@ class OrderReplayService(val conf: ServerConf) extends ScobreApplication with Or
                         endDateTime: Long): java.util.Map[String, java.util.List[java.lang.Double]] = {
     val marketState = newMarketState(conf)
     val ticks = getTicks(assetId, variables, startDateTime, endDateTime)
-    val replayer = new ThriftReplayer(ticks, dataCollectors(List() ++ variables), marketState)
+    val replayer = new ThriftReplayer(ticks, dataCollectors(List() ++ variables.asScala), marketState)
     runSimulation(replayer)
     replayer.result
   }
@@ -147,7 +146,7 @@ class OrderReplayService(val conf: ServerConf) extends ScobreApplication with Or
     val marketState = newMarketState(conf)
     val ticks = getTicks(assetId, variables, startDateTime, endDateTime)
     val replayer =
-      new MultivariateCSVReplayer(ticks, dataCollectors(List() ++ variables), marketState, Some(csvFileName))
+      new MultivariateCSVReplayer(ticks, dataCollectors(List() ++ variables.asScala), marketState, Some(csvFileName))
     runSimulation(replayer)
     return 0
   }
@@ -156,7 +155,7 @@ class OrderReplayService(val conf: ServerConf) extends ScobreApplication with Or
                                 proportionShuffling: Double, windowSize: Int, intraWindow: Boolean,
                                   offsetting: Int, attribute: Int, startDateTime: Long, endDateTime: Long):
                                             java.util.Map[String, java.util.List[java.lang.Double]] = {
-    executeShuffledReplay(assetId, List() ++ variables, proportionShuffling, windowSize,
+    executeShuffledReplay(assetId, List() ++ variables.asScala, proportionShuffling, windowSize,
                             intraWindow, offsetting, attribute, Some((startDateTime, endDateTime)))
   }
 
@@ -164,7 +163,7 @@ class OrderReplayService(val conf: ServerConf) extends ScobreApplication with Or
                                 windowSize: Int, intraWindow: Boolean,
                                 offsetting: Int,
                               attribute: Int): java.util.Map[String, java.util.List[java.lang.Double]] = {
-    executeShuffledReplay(assetId, List() ++ variables, proportionShuffling, windowSize, intraWindow,
+    executeShuffledReplay(assetId, List() ++ variables.asScala, proportionShuffling, windowSize, intraWindow,
                                 offsetting, attribute, None)
   }
 
