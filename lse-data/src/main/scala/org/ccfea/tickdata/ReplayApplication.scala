@@ -4,11 +4,13 @@ import org.ccfea.tickdata.conf.ReplayerConf
 import org.ccfea.tickdata.event.TickDataEvent
 import org.ccfea.tickdata.order.LimitOrder
 import org.ccfea.tickdata.order.offset.{MidPriceOffsetOrder, OppositeSideOffsetOrder, SameSideOffsetOrder}
-import org.ccfea.tickdata.replayer.{PriceLevelsCSVReplayer, UnivariateCSVReplayer}
+import org.ccfea.tickdata.replayer.{MultivariateCSVReplayer, PriceLevelsCSVReplayer, UnivariateCSVReplayer}
 import org.ccfea.tickdata.simulator.{MarketState, Quote}
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
 import org.ccfea.tickdata.storage.shuffled.{OffsettedTicks, RandomPermutation}
 import org.ccfea.tickdata.ui.OrderBookView
+
+import scala.collection.SortedMap
 
 /**
  * Common functionality for all applications which replay tick events and collate data
@@ -44,13 +46,14 @@ class ReplayApplication(val conf:ReplayerConf) extends ScobreApplication {
     new RandomPermutation(offsettedTicks.iterator.toList, conf.proportionShuffling(), conf.shuffleWindowSize())
   }
 
+  def properties = List[String]() ++ conf.property().split(',')
+
   def run() = {
     val replayer =
       if (conf.priceLevels())
         new PriceLevelsCSVReplayer(ticks, conf.outFileName.toOption, marketState, conf.maxLevels())
       else
-        new UnivariateCSVReplayer(ticks, conf.outFileName.toOption,
-                                            classOf[MarketState].getMethod(conf.property()) invoke _, marketState)
+        new MultivariateCSVReplayer(ticks, dataCollectors(properties), marketState, conf.outFileName.toOption)
     replayer.run()
   }
 }

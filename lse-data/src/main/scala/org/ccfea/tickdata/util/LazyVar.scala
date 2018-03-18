@@ -4,7 +4,7 @@ class LazyVar[A](val f: () => A) {
 
   var value: Option[A] = None
 
-  def apply(): A = {
+  def apply(): A = this.synchronized {
     value match {
       case Some(v) => v
       case _ =>
@@ -14,5 +14,5 @@ class LazyVar[A](val f: () => A) {
     }
   }
 
-  def unvalidate() = { this.value = None }
+  def unvalidate() = this.synchronized { this.value = None }
 }

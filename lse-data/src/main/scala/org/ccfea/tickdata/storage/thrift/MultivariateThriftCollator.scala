@@ -38,7 +38,6 @@ trait MultivariateThriftCollator
     for ((t, bindings) <- data) {
       for((variable, value) <- bindings) addDatum(variable, value)
       timestamps.add(t.get.getTicks.longValue())
-//      addDatum("t", Some(t.get.getTicks.toDouble / 1000))  //TODO Rounding issues here beware
     }
   }
 
