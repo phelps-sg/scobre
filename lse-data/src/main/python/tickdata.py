@@ -68,10 +68,10 @@ class ReplayClient(object):
         '''
         t0 = date_to_time(start_date)
         t1 = date_to_time(end_date)
-        raw_data = self.client.replay(asset, variables, t0, t1)
-        if len(raw_data) == 0:
+        raw_df = self.client.replay(asset, variables, t0, t1)
+        if len(raw_df.columns) == 0:
             raise Exception("No data available")
-        return dict_to_df(raw_data, self.client.replayedTimestamps())
+        return dict_to_df(raw_df.columns, raw_df.timeStamps)
 
     def write_hf_data_to_csv(self, asset,
                              start_date, end_date, csv_file_name,
