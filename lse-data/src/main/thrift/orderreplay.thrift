@@ -20,6 +20,11 @@
 namespace java org.ccfea.tickdata.thrift
 namespace py orderreplay
 
+struct DataFrame {
+    1: list<i64> timeStamps,
+    2: map<string, list<double>> columns
+}
+
 /**
  * Order-book replay service
  */
@@ -28,19 +33,17 @@ service OrderReplay {
    /**
     * Replay tick events
     **/
-   map<string, list<double>> replay(1:string assetId, 2:list<string> variables,
+   DataFrame replay(1:string assetId, 2:list<string> variables,
                                                         3:i64 startDateTime, 4:i64 endDateTime),
-
-   list<i64> replayedTimestamps(),
 
    i64 replayToCsv(1:string assetId, 2:list<string> variables, 3:i64 startDateTime, 4:i64 endDateTime,
                     5:string csvFileName),
 
-   map<string, list<double>> shuffledReplay(1:string assetId, 2:list<string> variables,
+   DataFrame shuffledReplay(1:string assetId, 2:list<string> variables,
                                                         3:double proportionShuffling, 4:i32 windowSize,
                                                         5:bool intraWindow, 6:i32 offsetting, 7:i32 attribute)
 
-   map<string, list<double>> shuffledReplayDateRange(1:string assetId, 2:list<string> variables,
+   DataFrame shuffledReplayDateRange(1:string assetId, 2:list<string> variables,
                                                         3:double proportionShuffling, 4:i32 windowSize,
                                                         5:bool intraWindow, 6:i32 offsetting, 7:i32 attribute,
                                                         8:i64 startDateTime, 9:i64 endDateTime)

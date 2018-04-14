@@ -57,7 +57,7 @@ libraryDependencies ++= Seq(
   "org.apache.hbase" % "hbase-server" % "1.2.4" excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
   "org.apache.hadoop" % "hadoop-client" % "2.7.1",
   "org.apache.hadoop" % "hadoop-common" % "2.7.1",
-  "org.apache.thrift" % "libthrift" % "0.10.0",
+  "org.apache.thrift" % "libthrift" % "0.11.0",
   "net.sourceforge.jasa" % "jasa" % "1.3.3",
 //  "com.espertech" % "esper" % "4.11.0",
   "org.rogach" %% "scallop" % "2.1.1",

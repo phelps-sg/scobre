@@ -13,7 +13,7 @@ import org.ccfea.tickdata.simulator.Quote
 import org.ccfea.tickdata.storage.hbase.HBaseRetriever
 import org.ccfea.tickdata.storage.shuffled._
 import org.ccfea.tickdata.storage.shuffled.copier.{OrderSignCopier, PriceCopier, TickCopier, VolumeCopier}
-import org.ccfea.tickdata.thrift.OrderReplay
+import org.ccfea.tickdata.thrift.{DataFrame, OrderReplay}
 
 import scala.collection.JavaConverters._
 
@@ -89,8 +89,7 @@ class OrderReplayService(val conf: ServerConf) extends ScobreApplication with Or
   def executeShuffledReplay(assetId: String, variables: List[String],
                                       proportionShuffling: Double, windowSize: Int, intraWindow: Boolean,
                                       offsetting: Int, attribute: Int,
-                                      dateRange: Option[(Long, Long)]):
-                                                java.util.Map[String, java.util.List[java.lang.Double]] = {
+                                      dateRange: Option[(Long, Long)]): DataFrame = {
     logger.info("Shuffled replay for " + assetId + " with windowSize " + windowSize +
                       ", offsetting " + offsetting + " and percentage " + proportionShuffling)
     dateRange match {
@@ -105,7 +104,7 @@ class OrderReplayService(val conf: ServerConf) extends ScobreApplication with Or
     val replayer =
       new ThriftReplayer(shuffledTicks, dataCollectors(variables), marketState)
     runSimulation(replayer)
-    replayer.result
+    new DataFrame(replayer.timestamps, replayer.result)
   }
 
   def getTicks(assetId: String, variables: java.util.List[String],
@@ -128,16 +127,16 @@ class OrderReplayService(val conf: ServerConf) extends ScobreApplication with Or
     logger.info("done.")
   }
 
-  override def replayedTimestamps(): java.util.List[java.lang.Long] = timestamps().get
+//  override def replayedTimestamps(): java.util.List[java.lang.Long] = timestamps().get
 
   override def replay(assetId: String, variables: java.util.List[String],
                         startDateTime: Long,
-                        endDateTime: Long): java.util.Map[String, java.util.List[java.lang.Double]] = {
+                        endDateTime: Long): DataFrame = {
     val marketState = newMarketState(conf)
     val ticks = getTicks(assetId, variables, startDateTime, endDateTime)
     val replayer = new ThriftReplayer(ticks, dataCollectors(List() ++ variables.asScala), marketState)
     runSimulation(replayer)
-    replayer.result
+    new DataFrame(replayer.timestamps, replayer.result)
   }
 
   override def replayToCsv(assetId: String, variables: java.util.List[String],
@@ -153,8 +152,7 @@ class OrderReplayService(val conf: ServerConf) extends ScobreApplication with Or
 
   override def shuffledReplayDateRange(assetId: String, variables: java.util.List[String],
                                 proportionShuffling: Double, windowSize: Int, intraWindow: Boolean,
-                                  offsetting: Int, attribute: Int, startDateTime: Long, endDateTime: Long):
-                                            java.util.Map[String, java.util.List[java.lang.Double]] = {
+                                  offsetting: Int, attribute: Int, startDateTime: Long, endDateTime: Long): DataFrame = {
     executeShuffledReplay(assetId, List() ++ variables.asScala, proportionShuffling, windowSize,
                             intraWindow, offsetting, attribute, Some((startDateTime, endDateTime)))
   }
@@ -162,7 +160,7 @@ class OrderReplayService(val conf: ServerConf) extends ScobreApplication with Or
   override def shuffledReplay(assetId: String, variables: java.util.List[String], proportionShuffling: Double,
                                 windowSize: Int, intraWindow: Boolean,
                                 offsetting: Int,
-                              attribute: Int): java.util.Map[String, java.util.List[java.lang.Double]] = {
+                              attribute: Int): DataFrame = {
     executeShuffledReplay(assetId, List() ++ variables.asScala, proportionShuffling, windowSize, intraWindow,
                                 offsetting, attribute, None)
   }
