@@ -42,20 +42,14 @@ class ClearingMarketState extends MarketState {
   }
 
   override def processMarketOrder(order: MarketOrder) = {
-    val quote: Quote = this.quote
-    val bestPrice = if (order.tradeDirection == TradeDirection.Buy) quote.ask else quote.bid
-    bestPrice match {
-      case Some(p) =>
-        //TODO add big decimal conversion in Price
+    bestPrice(order) match {
+      case Some(price) =>
         val effectiveLimitOrder = new net.sourceforge.jasa.market.Order()
-        effectiveLimitOrder.setPrice(p)
+        effectiveLimitOrder.setPrice(price)
         effectiveLimitOrder.setQuantity(order.aggregateSize.intValue())
         effectiveLimitOrder.setIsBid(order.tradeDirection == TradeDirection.Buy)
         effectiveLimitOrder.setTimeStamp(time.get)
-//        orderMap(order.orderCode) = effectiveLimitOrder
         insertOrder(effectiveLimitOrder)
-      //        val lo = new LimitOrder(order.orderCode, order.aggregateSize, order.tradeDirection, BigDecimal(p.doubleValue()), order.trader)
-//        processLimitOrder(lo)
       case None =>
         logger.warn("Ignoring market order because there is no best price: " + order)
         auctionState = AuctionState.undefined

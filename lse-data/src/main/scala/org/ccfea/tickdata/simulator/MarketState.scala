@@ -335,6 +335,9 @@ class MarketState extends Subscriber[TickDataEvent, Publisher[TickDataEvent]]
   def bestAskPrice = quote.ask
   def bestBidPrice = quote.bid
 
+  def bestPrice(implicit order: OrderWithVolume) =
+    if (order.tradeDirection == TradeDirection.Buy) bestAskPrice else bestBidPrice
+
   def bestAskVolume: Option[Long] = if (book.asks.size > 0) Some(book.askVolume(0)) else None
   def bestBidVolume: Option[Long] = if (book.bids.size > 0) Some(book.bidVolume(0)) else None
 
