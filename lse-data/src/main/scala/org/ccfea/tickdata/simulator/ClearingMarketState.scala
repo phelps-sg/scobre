@@ -51,6 +51,7 @@ class ClearingMarketState extends MarketState {
         effectiveLimitOrder.setPrice(p)
         effectiveLimitOrder.setQuantity(order.aggregateSize.intValue())
         effectiveLimitOrder.setIsBid(order.tradeDirection == TradeDirection.Buy)
+        effectiveLimitOrder.setTimeStamp(time.get)
 //        orderMap(order.orderCode) = effectiveLimitOrder
         insertOrder(effectiveLimitOrder)
       //        val lo = new LimitOrder(order.orderCode, order.aggregateSize, order.tradeDirection, BigDecimal(p.doubleValue()), order.trader)
