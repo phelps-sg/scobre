@@ -1,7 +1,6 @@
 package org.ccfea.tickdata.storage.hbase
 
-import org.apache.hadoop.hbase.mapreduce.TableInputFormat
-import org.apache.hadoop.hbase.{Cell, CellUtil, HBaseConfiguration, TableName}
+import org.apache.hadoop.hbase.{Cell, CellUtil}
 import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.util.Bytes
 import org.ccfea.tickdata.storage.dao.{Event, EventType}
@@ -17,21 +16,6 @@ import java.util.Date
 trait HBaseEventConverter extends java.io.Serializable {
 
   val TI_LEN = 12
-
-  @scala.transient val conf = HBaseConfiguration.create()
-  conf.set(TableInputFormat.INPUT_TABLE, "events")
-
-//  val admin = new HBaseAdmin(conf)
-
-
-  @scala.transient val connection = ConnectionFactory.createConnection()
-
-  val eventsTableName = TableName.valueOf("events")
-
-  /**
-   * The table containing the time-series of tick events.
-   */
-  @scala.transient val eventsTable = connection.getTable(eventsTableName)
 
   /**
    * Each table contains a single column-family called 'data'.

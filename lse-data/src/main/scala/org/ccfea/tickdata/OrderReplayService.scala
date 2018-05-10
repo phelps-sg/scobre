@@ -136,6 +136,7 @@ class OrderReplayService(val conf: ServerConf) extends ScobreApplication with Or
     val ticks = getTicks(assetId, variables, startDateTime, endDateTime)
     val replayer = new ThriftReplayer(ticks, dataCollectors(List() ++ variables.asScala), marketState)
     runSimulation(replayer)
+    ticks.closeConnection()
     new DataFrame(replayer.timestamps, replayer.result)
   }
 
@@ -147,6 +148,7 @@ class OrderReplayService(val conf: ServerConf) extends ScobreApplication with Or
     val replayer =
       new MultivariateCSVReplayer(ticks, dataCollectors(List() ++ variables.asScala), marketState, Some(csvFileName))
     runSimulation(replayer)
+    ticks.closeConnection()
     return 0
   }
 

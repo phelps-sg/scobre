@@ -13,7 +13,7 @@ import grizzled.slf4j.Logger
  */
 class HBaseRetriever(val selectedAsset: String,
                       val startDate: Option[Date] = None, val endDate: Option[Date] = None, val cacheSize: Int = 1000)
-    extends HBaseEventConverter with Iterable[TickDataEvent] {
+    extends HBaseEventConverter with HBaseEventsTable with Iterable[TickDataEvent] {
 
   val partialKeyScan = new DateKeyRange(selectedAsset, startDate, endDate, cacheSize)
 

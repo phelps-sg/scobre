@@ -12,7 +12,7 @@ import org.apache.hadoop.hbase.util.Bytes
  *
  * (c) Steve Phelps 2015
  */
-trait HBaseInserter extends HBaseEventConverter {
+trait HBaseInserter extends HBaseEventConverter with HBaseEventsTable {
 
   /**
    * An internal message-sequence number (MSN) which is appended to time-stamps to
