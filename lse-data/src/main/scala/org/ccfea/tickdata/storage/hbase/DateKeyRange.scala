@@ -8,7 +8,7 @@ import org.apache.hadoop.hbase.client.Scan
  * (C) Steve Phelps 2013
  */
 class DateKeyRange(val tiCode: String, val startDate: Option[Date], val endDate: Option[Date], val cacheSize: Int)
-    extends HBaseEventConverter {
+    extends HBaseEventConverter with HBaseEventsTable {
 
   val keyStart = generateScanKey(startDate, true)
   val keyEnd = generateScanKey(endDate, false)
