@@ -31,8 +31,6 @@ class OrderReplayService(val conf: ServerConf) extends ScobreApplication with Or
 
   val logger = Logger("org.ccfea.tickdata.OrderReplayService")
 
-  var timestamps: () => Option[java.util.List[java.lang.Long]] = () => None
-
   def getOffsettedTicks(ticks: Seq[TickDataEvent], offsetting: Offsetting.Value) = {
     val marketState = newMarketState(conf)
     offsetting match {
@@ -119,15 +117,8 @@ class OrderReplayService(val conf: ServerConf) extends ScobreApplication with Or
   def runSimulation(replayer: MultivariateTimeSeriesCollector) = {
     logger.info("Starting simulation... ")
     replayer.run()
-    replayer match {
-      case r: ThriftReplayer =>
-        this.timestamps = { () => Some(r.timestamps) }
-      case _ =>
-    }
     logger.info("done.")
   }
-
-//  override def replayedTimestamps(): java.util.List[java.lang.Long] = timestamps().get
 
   override def replay(assetId: String, variables: java.util.List[String],
                         startDateTime: Long,
@@ -137,7 +128,7 @@ class OrderReplayService(val conf: ServerConf) extends ScobreApplication with Or
     val replayer = new ThriftReplayer(ticks, dataCollectors(List() ++ variables.asScala), marketState)
     runSimulation(replayer)
     ticks.closeConnection()
-    new DataFrame(replayer.timestamps, replayer.result)
+    return new DataFrame(replayer.timestamps, replayer.result)
   }
 
   override def replayToCsv(assetId: String, variables: java.util.List[String],
